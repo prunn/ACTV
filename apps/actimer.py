@@ -203,14 +203,14 @@ class ACTimer:
 			self.replay_initialised=True
 			
 			self.lbl_session_single.setColor(rgb([self.replay_rgb,self.replay_rgb,self.replay_rgb]))
-			if self.replay_asc:
+			if self.replay_asc and sim_info.graphics.replayTimeMultiplier > 0:
 				self.replay_rgb += 2
-			else:
+			elif sim_info.graphics.replayTimeMultiplier > 0:
 				self.replay_rgb -= 2
 			if self.replay_rgb < 100:
 				self.replay_asc=True
-			elif self.replay_rgb >= 255:
-				self.replay_rgb=255
+			elif self.replay_rgb >= 246:
+				self.replay_rgb=246
 				self.replay_asc=False
 			self.lbl_session_single.setText("REPLAY")
 		

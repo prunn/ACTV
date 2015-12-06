@@ -246,12 +246,12 @@ class ACInfo:
                 #lapInvalidated = bool(ac.getCarState(0, acsys.CS.LapInvalidated))
                 lapInvalidated = bool(self.lastLapInvalidated==LapCount)
                 # live ou passif                
-                if (self.lastLapStart < 0 and self.minLapCount > 0) or (self.minLapCount == 0 and lapInvalidated):                    
+                if ((self.lastLapStart < 0 and self.minLapCount > 0) or (self.minLapCount == 0 and lapInvalidated)) and sim_info.graphics.session != 0:                    
                     self.lbl_driver_name_visible.setValue(0)
                     self.lbl_timing_visible.setValue(0)  
                     self.lbl_split.setVisible(0)  
                     self.info_position.setVisible(0)
-                    self.info_position_lead.setVisible(0)              
+                    self.info_position_lead.setVisible(0)          
                 elif (self.lastLapInPit < LapCount or self.minLapCount==0) and not lapInvalidated and (self.lastTimeInPit==0 or self.lastTimeInPit > self.lastLapStart) :
                     
                     sector_delay = 5000
@@ -373,7 +373,7 @@ class ACInfo:
                         self.lbl_driver_name_visible.setValue(0)
                         self.lbl_timing_visible.setValue(0)  
                         self.lbl_split.setVisible(0)  
-                        self.info_position.setVisible(0)
+                        self.info_position.setVisible(0)  
                     elif bestlap > 0 :                
                         self.lbl_driver_name_visible.setValue(1)
                         self.lbl_timing_visible.setValue(1)  
@@ -401,7 +401,7 @@ class ACInfo:
                         self.lbl_driver_name_visible.setValue(0)
                         self.lbl_timing_visible.setValue(0)  
                         self.lbl_split.setVisible(0)  
-                        self.info_position.setVisible(0) 
+                        self.info_position.setVisible(0)
                     else :  
                         self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                         self.lbl_driver_name_visible.setValue(1)
@@ -434,8 +434,7 @@ class ACInfo:
                     self.lbl_driver_name.setText(self.lbl_driver_name_text.value)   
                 if self.lbl_timing_text.hasChanged() and self.lbl_timing_final_height == self.lbl_timing_height:
                     self.lbl_timing.setText(self.lbl_timing_text.value) 
-            else:                
-                
+            else:
                 self.info_position_lead.setVisible(0) 
                 self.lbl_split.setVisible(0)
                 #fastest lap
