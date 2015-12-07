@@ -40,6 +40,9 @@ class ACInfo:
         if track.find("ks_nordschleife")>=0 and config.find("touristenfahrten")>=0:
             self.minLapCount=0
             self.lastLapInvalidated = -1
+        elif track.find("drag1000")>=0 or track.find("drag400")>=0:
+            self.minLapCount=0
+            self.lastLapInvalidated = -1
         self.fastestLapSectors = [0,0,0,0,0,0]
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.session=Value()

@@ -201,7 +201,6 @@ class ACTimer:
 			self.lbl_session_border.setVisible(1)
 			self.lbl_session_single.setVisible(1)
 			self.replay_initialised=True
-			
 			self.lbl_session_single.setColor(rgb([self.replay_rgb,self.replay_rgb,self.replay_rgb]))
 			if self.replay_asc and sim_info.graphics.replayTimeMultiplier > 0:
 				self.replay_rgb += 2

@@ -41,6 +41,7 @@ class Driver:
         self.position = Value()
         self.position_offset = Value()
         self.gapToFirst=0
+        self.showingFullNames=False
         if isLapLabel:            
             self.lbl_name = Label(app,strOffset+name).setSize(218, 38).setPos(0, 0).setFontSize(26).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
         else:    
@@ -50,7 +51,9 @@ class Driver:
         self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, 38).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(0)
         self.setName()
     
-    def show(self,start):
+    def show(self,start,needsTLC=True):
+        if self.showingFullNames and needsTLC:
+            self.setName()
         if not self.isDisplayed: 
             self.lbl_name.setVisible(1)
             if self.isLapLabel:
@@ -98,6 +101,8 @@ class Driver:
     
     def showFullName(self):
         strOffset = " "
+        self.showingFullNames=True   
+        self.lbl_time.setText("")
         self.lbl_name.setText(strOffset+self.format_last_name(self.fullName.value))
             
     def setTime(self,time,leader,session_time):
@@ -263,11 +268,14 @@ class ACTower:
         self.curLapCount=Value()
         self.curDriverLaps=[]
         self.lastLapInvalidated=-1
-        self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(218, 34).setPos(0, 80).setFontSize(24).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
+        self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(218, 34).setPos(0, 118).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
+        self.lbl_tire_stint = Label(self.window.app,"").setSize(218, 38).setPos(0, 38).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
         
         track=ac.getTrackName(0)
         config=ac.getTrackConfiguration(0)
         if track.find("ks_nordschleife")>=0 and config.find("touristenfahrten")>=0:
+            self.minLapCount=0
+        elif track.find("drag1000")>=0 or track.find("drag400")>=0:
             self.minLapCount=0
         
     # PUBLIC METHODS
@@ -278,6 +286,14 @@ class ACTower:
         for lbl in self.stintLabels:
             lbl.animate(sessionTimeLeft)
             
+    def format_tire(self,name):
+        space = name.find("(")
+        if space > 0:
+            name = name[:space]
+        name=name.strip()
+        if len(name) > 12:
+            return name[:13]
+        return name
     
     def init_drivers(self):
         if self.numCars.value > self.numCars.old:
@@ -299,14 +315,16 @@ class ACTower:
             self.init_drivers()
         minlap_stint = 3
         if len(self.standings) <= 1:
-            minlap_stint = 2
+            minlap_stint = 2        
+        if bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn):
+            self.curDriverLaps=[]
+        
         if (sim_info.graphics.sessionTimeLeft > 90000 or sim_info.graphics.session == 0) and len(self.curDriverLaps) > minlap_stint:
             #visible end
             for driver in self.drivers: 
                 if driver.identifier == 0:
-                    driver.show(0)
+                    driver.show(0,False)
                     driver.final_y = 0
-                    driver.lbl_time.setText("")
                     driver.showFullName()
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                        
                     if len(p) > 0:
@@ -317,17 +335,24 @@ class ACTower:
                             self.stintLabels.append(Driver(self.window.app,0,"Lap " + str(i+1),i+2,True))
                     i=0
                     self.lbl_title_stint.setVisible(1)
+                    self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
+                    self.lbl_tire_stint.setVisible(1)
                     #for lbl in self.stintLabels:
                     for l in self.curDriverLaps:
                         #lbl.final_y = 38 * (i+3)
                         self.stintLabels[i].setTime(l.time,0,0)
-                        self.stintLabels[i].setPosition(i+4,1,0,True) 
-                        self.stintLabels[i].show(i)
+                        self.stintLabels[i].setPosition(i+5,1,0,True) 
+                        self.stintLabels[i].show(i+5,False)
                         i+=1              
                 
                 else:
                     driver.hide()
-        else:
+        else:            
+            if self.lbl_title_stint.visible != 0:
+                self.lbl_title_stint.setVisible(0)
+                self.lbl_tire_stint.setVisible(0)
+                for l in self.stintLabels:
+                    l.hide()
             for driver in self.drivers: 
                 c = ac.getCarState(driver.identifier,acsys.CS.BestLap)
                 l = ac.getCarState(driver.identifier,acsys.CS.LapCount)
@@ -402,7 +427,11 @@ class ACTower:
         return True                  
                 
     def update_drivers_race(self,sim_info): 
-        
+        if self.lbl_title_stint.visible != 0:
+            self.lbl_title_stint.setVisible(0)
+            self.lbl_tire_stint.setVisible(0)
+            for l in self.stintLabels:
+                l.hide()
         if self.numCars.hasChanged():
             self.init_drivers()        
         self.driver_shown=0
@@ -420,6 +449,7 @@ class ACTower:
             if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit:
                 driver.race_current_sector.setValue(0)
                 driver.race_gaps = []
+                self.curDriverLaps=[]
             else:                    
                 bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
                 if bl <= sim_info.graphics.numberOfLaps and self.sectorIsValid(bl,driver):
@@ -434,6 +464,9 @@ class ACTower:
         driverShown=0
         driverShownMaxGap=0
         maxGap=2500
+        needsTLC=True
+        if self.lapsCompleted.value >= sim_info.graphics.numberOfLaps:
+            needsTLC=False
         #memsize=0
         for driver in self.drivers: 
             #memsize += sys.getsizeof(driver.race_gaps)
@@ -449,8 +482,11 @@ class ACTower:
             maxGap=5000
         if not driverShown > 1:
             if self.lapsCompleted.hasChanged():  
-                self.leader_time = sim_info.graphics.sessionTimeLeft          
-                self.race_show_end = sim_info.graphics.sessionTimeLeft - 12000
+                self.leader_time = sim_info.graphics.sessionTimeLeft     
+                if self.lapsCompleted.value >= sim_info.graphics.numberOfLaps:
+                    self.race_show_end = sim_info.graphics.sessionTimeLeft - 360000                    
+                else:     
+                    self.race_show_end = sim_info.graphics.sessionTimeLeft - 12000
         if driverShown > 1 and (self.race_show_end > sim_info.graphics.sessionTimeLeft or self.race_show_end == 0):
             self.lapsCompleted.hasChanged()
             #if self.tick % 60 == 0:  
@@ -488,8 +524,10 @@ class ACTower:
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
                     if len(p) > 0 and driver.completedLaps.hasChanged():
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False) 
-                        driver.setTimeRace(c,self.leader_time,sim_info.graphics.sessionTimeLeft)                    
-                    driver.show(self.driver_shown)
+                        driver.setTimeRace(c,self.leader_time,sim_info.graphics.sessionTimeLeft)  
+                    if self.lapsCompleted.value == sim_info.graphics.numberOfLaps:
+                        driver.showFullName()                  
+                    driver.show(self.driver_shown,needsTLC)
         else:   
             for driver in self.drivers: 
                 driver.hide()   
@@ -510,8 +548,10 @@ class ACTower:
             self.cursor.setValue(True)
         else:
             self.cursor.setValue(False)
-        
-        if self.cursor.hasChanged() or self.session.hasChanged():
+        sessionChanged = self.session.hasChanged() 
+        if sessionChanged:
+            self.curDriverLaps=[]
+        if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
