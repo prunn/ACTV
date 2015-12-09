@@ -30,7 +30,11 @@ class ACTimer:
 		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
 		self.lbl_session_border=Label(self.window.app,"").setSize(190, 1).setPos(0, 39).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(1)
 		
-		trackFilePath = "content/tracks/"+ ac.getTrackName(0) + "/ui/ui_track.json"
+		trackFilePath = "content/tracks/"+ ac.getTrackName(0) + "/ui/"
+		if ac.getTrackConfiguration(0) != "":
+			trackFilePath += ac.getTrackConfiguration(0) + "/ui_track.json"
+		else:			
+			trackFilePath += "ui_track.json"
 		if os.path.exists(trackFilePath):
 			with open(trackFilePath) as data_file:    
 				data = json.load(data_file)			

@@ -313,7 +313,7 @@ class ACTower:
     def update_drivers(self,sim_info):
         if self.numCars.hasChanged():
             self.init_drivers()
-        minlap_stint = 3
+        minlap_stint = 4
         if len(self.standings) <= 1:
             minlap_stint = 2        
         if bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn):
@@ -443,7 +443,7 @@ class ACTower:
             if driver.isDisplayed:
                 self.driver_shown+=1
                 p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
-                if best_pos == 0 or best_pos > p[0]+1:
+                if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1
                 
             if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit:
