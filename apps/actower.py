@@ -110,15 +110,25 @@ class Driver:
         self.gap.setValue(time-leader)
         time_changed=self.time.hasChanged()
         if time_changed or self.gap.hasChanged():
-            if time_changed and not self.isLapLabel:
+            if time_changed:
                 self.time_highlight_end = session_time - 5000
             #self.highlight.setValue(True)
-            if self.isLapLabel:
-                self.lbl_time.setText(self.format_time(self.time.value))
-            elif self.position.value==1:
+            if self.position.value==1:
                 self.lbl_time.setText(self.format_time(self.time.value))
             else:
                 self.lbl_time.setText("+"+self.format_time(self.gap.value))
+                
+    def setTimeStint(self,time,valid):
+        self.time.setValue(time)
+        self.gap.setValue(time)
+        time_changed=self.time.hasChanged()
+        if time_changed or self.gap.hasChanged():            
+            if self.isLapLabel:
+                self.lbl_time.setText(self.format_time(self.time.value))
+        if valid:            
+            self.lbl_time.setColor(rgb([255,255,255]))
+        else:
+            self.lbl_time.setColor(rgb([192,0,0]))
                 
     def setTimeRace(self,time,leader,session_time):
         if self.position.value==1:
@@ -191,8 +201,8 @@ class Driver:
         if space > 0:
             name = name[space:]
         name=name.strip().upper()
-        if len(name) > 12:
-            return name[:13]
+        if len(name) > 10:
+            return name[:11]
         return name
         
             
@@ -260,14 +270,18 @@ class ACTower:
         self.drivers_inited=False
         self.leader_time=0
         self.tick=0  
+        self.pinHack=True
         self.cursor=Value()
         self.cursor.setValue(False)      
         self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.minLapCount=1
         self.curLapCount=Value()
+        self.stint_visible_end=0
         self.curDriverLaps=[]
         self.lastLapInvalidated=-1
+        self.minlap_stint = 5
+        self.iLastTime=Value()
         self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(218, 34).setPos(0, 118).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
         self.lbl_tire_stint = Label(self.window.app,"").setSize(218, 38).setPos(0, 38).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
         
@@ -291,8 +305,8 @@ class ACTower:
         if space > 0:
             name = name[:space]
         name=name.strip()
-        if len(name) > 12:
-            return name[:13]
+        if len(name) > 16:
+            return name[:17]
         return name
     
     def init_drivers(self):
@@ -313,13 +327,18 @@ class ACTower:
     def update_drivers(self,sim_info):
         if self.numCars.hasChanged():
             self.init_drivers()
-        minlap_stint = 4
+        self.minlap_stint = 5
+        show_stint_always = False
         if len(self.standings) <= 1:
-            minlap_stint = 2        
-        if bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn):
+            self.minlap_stint = 3  
+            show_stint_always = True
+        elif self.minLapCount == 0:
+            self.minlap_stint = 3           
+        if self.minLapCount > 0 and (bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn)):
             self.curDriverLaps=[]
         
-        if (sim_info.graphics.sessionTimeLeft > 90000 or sim_info.graphics.session == 0) and len(self.curDriverLaps) > minlap_stint:
+        if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and sim_info.graphics.sessionTimeLeft >= self.stint_visible_end):
+            #if (sim_info.graphics.sessionTimeLeft > 90000 or sim_info.graphics.session == 0) and len(self.curDriverLaps) >= minlap_stint:
             #visible end
             for driver in self.drivers: 
                 if driver.identifier == 0:
@@ -340,7 +359,7 @@ class ACTower:
                     #for lbl in self.stintLabels:
                     for l in self.curDriverLaps:
                         #lbl.final_y = 38 * (i+3)
-                        self.stintLabels[i].setTime(l.time,0,0)
+                        self.stintLabels[i].setTimeStint(l.time,l.valid)
                         self.stintLabels[i].setPosition(i+5,1,0,True) 
                         self.stintLabels[i].show(i+5,False)
                         i+=1              
@@ -555,12 +574,14 @@ class ACTower:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+                if self.pinHack:
+                    ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                ac.setSize(self.window.app, self.screenWidth*2, 0) 
+                if self.pinHack:
+                    ac.setSize(self.window.app, self.screenWidth*2, 0) 
                     
     def onUpdate(self, deltaT, sim_info):       
         self.session.setValue(sim_info.graphics.session)
@@ -575,7 +596,18 @@ class ACTower:
         if sim_info.physics.numberOfTyresOut >= 4 :
             self.lastLapInvalidated = LapCount
         if self.curLapCount.hasChanged():
-            self.curDriverLaps.append(Laps(self.curLapCount.value-1, self.lastLapInvalidated==self.curLapCount.value-1, sim_info.graphics.iLastTime))        
+            self.iLastTime.setValue(sim_info.graphics.iLastTime)
+            if self.iLastTime.hasChanged():
+                self.curDriverLaps.append(Laps(self.curLapCount.value-1, ac.getCarState(0,acsys.CS.LastLap)==sim_info.graphics.iLastTime, sim_info.graphics.iLastTime))  
+                if len(self.curDriverLaps) >= self.minlap_stint:
+                    self.stint_visible_end = sessionTimeLeft - 30000 
+                    if self.stint_visible_end > 0 and self.stint_visible_end < 90000:                        
+                        if sessionTimeLeft - 90000 < 5000:
+                            self.stint_visible_end=0
+                        else:
+                            self.stint_visible_end=90000   
+            else: 
+                self.curLapCount.changed = True 
         
         if sim_info.graphics.status == 2:
             #LIVE             

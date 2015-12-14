@@ -19,6 +19,7 @@ class ACSpeedTrap:
         self.SpeedKMH=Value()
         self.SpeedMPH=Value()
         self.topSpeed=Value()
+        self.userTopSpeed=Value()
         self.curTopSpeed=Value()
         self.curTopSpeedMPH=Value()
         self.currentVehicule=Value()
@@ -27,7 +28,10 @@ class ACSpeedTrap:
         self.session.setValue(-1)
         self.speedText=""
         self.trap=0
+        self.userTrap=0
         self.time_end=0
+        self.pinHack=True
+        self.relyOnEveryOne=True
         self.widget_visible=Value()
         self.cursor=Value()
         self.cursor.setValue(False)
@@ -99,12 +103,14 @@ class ACSpeedTrap:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+                if self.pinHack:
+                    ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                ac.setSize(self.window.app, self.screenWidth*2, 0) 
+                if self.pinHack:
+                    ac.setSize(self.window.app, self.screenWidth*2, 0) 
                     
     def onUpdate(self, deltaT, sim_info):   
         self.session.setValue(sim_info.graphics.session)    
@@ -114,7 +120,22 @@ class ACSpeedTrap:
             if(ac.isCameraOnBoard(x)):
                 self.currentVehicule.setValue(x)  
             c = ac.getCarState(x,acsys.CS.SpeedKMH)
-            if self.topSpeed.value < c:
+            if x==0 and self.topSpeed.value < c:
+                self.userTopSpeed.setValue(c)
+                self.userTrap = ac.getCarState(x,acsys.CS.NormalizedSplinePosition)
+                
+            if self.relyOnEveryOne and self.topSpeed.value < c and ac.getCarState(x,acsys.CS.DriveTrainSpeed) > c/10 and ac.getCarState(x,acsys.CS.Gas) > 0.9 and ac.getCarState(x,acsys.CS.RPM) > 2000:
+                if c > 500:
+                    self.relyOnEveryOne=False
+                    self.topSpeed.setValue(self.userTopSpeed.value)
+                    self.trap = self.userTrap 
+                    #ac.console("stop rely")
+                    #ac.log("stop rely")
+                else:
+                    self.topSpeed.setValue(c)
+                    #ac.console(str(c) + "-"+str(x)+"-rpm:"+str(ac.getCarState(x,acsys.CS.RPM))+"-Gas:"+str(ac.getCarState(x,acsys.CS.Gas))+"-Gear:"+str(ac.getCarState(x,acsys.CS.Gear))+"-DriveTrainSpeed:"+str(ac.getCarState(x,acsys.CS.DriveTrainSpeed))) 
+                    self.trap = ac.getCarState(x,acsys.CS.NormalizedSplinePosition) 
+            elif not self.relyOnEveryOne and x == 0 and self.topSpeed.value < c:
                 self.topSpeed.setValue(c)
                 self.trap = ac.getCarState(x,acsys.CS.NormalizedSplinePosition)      
             
@@ -137,7 +158,7 @@ class ACSpeedTrap:
                 if isInPit :
                     self.lastLapInPit = LapCount
                 
-                if self.lastLapInPit < LapCount and self.lastLapShown < LapCount and self.lastLapInvalidated < LapCount and self.widget_visible.value == 0 and self.trap < ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) + 0.06 and self.trap > ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) - 0.08 and self.SpeedKMH.value < self.SpeedKMH.old - 0.3:
+                if self.lastLapInPit < LapCount and self.curTopSpeed.value < 500 and self.lastLapShown < LapCount and self.lastLapInvalidated < LapCount and self.widget_visible.value == 0 and self.trap < ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) + 0.06 and self.trap > ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) - 0.08 and self.SpeedKMH.value < self.SpeedKMH.old - 0.3:
                     #show and set timer 
                     self.lastLapShown=LapCount
                     self.widget_visible.setValue(1)

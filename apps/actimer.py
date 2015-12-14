@@ -19,6 +19,7 @@ class ACTimer:
 		self.replay_rgb=255
 		self.session=Value()
 		self.cursor=Value()
+		self.pinHack=True
 		self.cursor.setValue(False)
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
@@ -116,11 +117,13 @@ class ACTimer:
 		if self.cursor.hasChanged() or self.session_draw.hasChanged():
 			if self.cursor.value:
 				self.window.setBgOpacity(0.4).border(0)
-				ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+				if self.pinHack:
+					ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
 			else:   
 				#pin outside
 				self.window.setBgOpacity(0).border(0)
-				ac.setSize(self.window.app, self.screenWidth*2, 0) 
+				if self.pinHack:
+					ac.setSize(self.window.app, self.screenWidth*2, 0) 
 		
 	def onUpdate(self, deltaT, sim_info):		
 		self.session_draw.setValue(sim_info.graphics.session)

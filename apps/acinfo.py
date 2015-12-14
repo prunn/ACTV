@@ -32,6 +32,7 @@ class ACInfo:
         self.lastTimeInPit=0
         self.visible_end = 0
         self.lastLapTime = 0
+        self.pinHack=True
         self.fastestLapBorderActive = False
         self.firstLapStarted=False
         self.minLapCount=1
@@ -75,7 +76,16 @@ class ACInfo:
         if space > 0:
             return name[:space].capitalize() + name[space:].upper()
         return name.upper()
-        
+     
+            
+    def format_tire(self,name):
+        space = name.find("(")
+        if space > 0:
+            name = name[:space]
+        name=name.strip()
+        if len(name) > 16:
+            return name[:17]
+        return name   
     #---------------------------------------------------------------------------------------------------------------------------------------------                                        
     def time_splitting(self, ms, full = "no"):        
         s=ms/1000 
@@ -181,21 +191,24 @@ class ACInfo:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+                if self.pinHack:
+                    ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                ac.setSize(self.window.app, self.screenWidth*2, 0) 
+                if self.pinHack:
+                    ac.setSize(self.window.app, self.screenWidth*2, 0) 
         
     def onUpdate(self, deltaT, sim_info):
         self.session.setValue(sim_info.graphics.session)
         self.manageWindow()
         self.animate()
-        
-        for x in range(ac.getCarsCount()):
+        carsCount=ac.getCarsCount()
+        for x in range(carsCount):
             if(ac.isCameraOnBoard(x)):
                 self.currentVehicule.setValue(x)
+                break                        
         currentVehiculeChanged=self.currentVehicule.hasChanged()
         if currentVehiculeChanged or (self.fastestLapBorderActive and sim_info.graphics.sessionTimeLeft < self.visible_end):
             self.fastestLapBorderActive = False
@@ -236,7 +249,7 @@ class ACInfo:
                 #save fastest lap as it comes - online need to be there
                 online_fast_test=0
                 online_fast_sect = [0,0,0,0,0,0]
-                for x in range(ac.getCarsCount()): 
+                for x in range(carsCount): 
                     c = ac.getCarState(x,acsys.CS.BestLap)
                     if online_fast_test == 0 or (c > 0 and c < online_fast_test):
                         online_fast_test=c
@@ -409,7 +422,10 @@ class ACInfo:
                         self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                         self.lbl_driver_name_visible.setValue(1)
                         self.lbl_timing_visible.setValue(1)
-                        self.lbl_timing_text.setValue(strOffset + "Out Lap")
+                        if self.currentVehicule.value==0:
+                            self.lbl_timing_text.setValue(strOffset + self.format_tire(sim_info.graphics.tyreCompound))
+                        else:
+                            self.lbl_timing_text.setValue(strOffset + "Out Lap")
                         self.lbl_split.setVisible(0)
                         self.info_position.setVisible(0)  
                 
@@ -442,19 +458,20 @@ class ACInfo:
                 self.lbl_split.setVisible(0)
                 #fastest lap
                 completed=0
-                for x in range(ac.getCarsCount()): 
+                for x in range(carsCount): 
                     c = ac.getCarState(x,acsys.CS.LapCount)
                     if c > completed:
                         completed=c
                 if completed <=1:
                     self.race_fastest_lap.setValue(0)
                 else:
-                    for i in range(ac.getCarsCount()): 
+                    for i in range(carsCount): 
                         bl=ac.getCarState(i,acsys.CS.BestLap)
                         l = ac.getCarState(i,acsys.CS.LapCount)
                         if bl > 0 and l > self.minLapCount and (self.race_fastest_lap.value == 0 or bl < self.race_fastest_lap.value):
                             self.race_fastest_lap.setValue(bl)
                             self.race_fastest_lap_driver.setValue(i)
+                        
                 if self.race_fastest_lap.hasChanged() and self.race_fastest_lap.value > 0:
                     self.fastestLapBorderActive = True
                     car = ac.getCarName(self.race_fastest_lap_driver.value)        
@@ -464,6 +481,7 @@ class ACInfo:
                     self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.race_fastest_lap_driver.value)))
                     self.lbl_timing_text.setValue(strOffset + "Fastest Lap")
                     self.lbl_timing_visible.setValue(1)
+                    self.info_position.setVisible(0) 
                     self.lbl_fastest_split.setText(self.time_splitting(self.race_fastest_lap.value,"yes"),hidden=bool(self.lbl_timing_height < 30)).setVisible(1)
                     
                 elif currentVehiculeChanged:  
