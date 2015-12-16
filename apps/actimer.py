@@ -40,14 +40,20 @@ class ACTimer:
 			with open(trackFilePath) as data_file:    
 				data = json.load(data_file)			
 			self.trackName = data["name"]
-			if len(self.trackName) > 12:
-				#cut multiword
-				space = self.trackName.find(" ")
-				dash = self.trackName.find("-")
-				if space > 0:
-					self.trackName = self.trackName[:space]
-				elif dash > 0:
-					self.trackName = self.trackName[:dash]
+			
+			if len(self.trackName) > 12:	
+				if self.trackName[12] == " " or self.trackName[12] == "-":
+					self.trackName = self.trackName[:12]
+				else:
+					self.trackName = self.trackName[:12]
+					#cut multiword
+					space = self.trackName.rfind(" ")
+					dash = self.trackName.rfind("-")
+					if space > 0:
+						self.trackName = self.trackName[:space]
+					elif dash > 0:
+						self.trackName = self.trackName[:dash]
+			
 		else:
 			self.trackName = ac.getTrackName(0)
 		if len(self.trackName) > 12:

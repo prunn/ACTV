@@ -596,9 +596,10 @@ class ACTower:
         if sim_info.physics.numberOfTyresOut >= 4 :
             self.lastLapInvalidated = LapCount
         if self.curLapCount.hasChanged():
-            self.iLastTime.setValue(sim_info.graphics.iLastTime)
-            if self.iLastTime.hasChanged():
-                self.curDriverLaps.append(Laps(self.curLapCount.value-1, ac.getCarState(0,acsys.CS.LastLap)==sim_info.graphics.iLastTime, sim_info.graphics.iLastTime))  
+            self.iLastTime.setValue(ac.getCarState(0,acsys.CS.LastLap))
+            if self.iLastTime.hasChanged():                
+                #self.curDriverLaps.append(Laps(self.curLapCount.value-1, ac.getCarState(0,acsys.CS.LastLap)==sim_info.graphics.iLastTime, sim_info.graphics.iLastTime))  
+                self.curDriverLaps.append(Laps(self.curLapCount.value-1, self.lastLapInvalidated!=LapCount-1, sim_info.graphics.iLastTime))  
                 if len(self.curDriverLaps) >= self.minlap_stint:
                     self.stint_visible_end = sessionTimeLeft - 30000 
                     if self.stint_visible_end > 0 and self.stint_visible_end < 90000:                        

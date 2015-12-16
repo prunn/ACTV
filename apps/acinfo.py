@@ -21,6 +21,7 @@ class ACInfo:
         self.lbl_position_final_height = 0
         self.lbl_position_height = 0
         self.lbl_position_text=Value()
+        self.lbl_position_text.setValue("")
         self.currentVehicule=Value()
         self.currentVehicule.setValue(0)
         self.cursor=Value()
@@ -136,8 +137,16 @@ class ACInfo:
                 self.lbl_driver_name.setText(self.lbl_driver_name_text.value)
         elif self.lbl_name_final_height == 0 and self.lbl_name_height == 0 :
             self.lbl_driver_name.setVisible(0)
-            self.lbl_border.setVisible(0)
-         
+            self.lbl_border.setVisible(0)     
+        
+        if self.lbl_position_final_height > 0 and self.lbl_position_text.value == "":            
+            pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicule.value) + 1
+            if pos > 1:
+                self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([112, 112, 112], bg = True)).setBgOpacity(1)
+            else:
+                self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(1)                    
+            self.lbl_position_text.setValue(str(pos))
+            
         if self.lbl_position_final_height != self.lbl_position_height :     
             if self.lbl_position_final_height < self.lbl_position_height :
                 self.lbl_position_height-=multiplier        
@@ -146,8 +155,8 @@ class ACInfo:
                 
             self.info_position.setSize(38, self.lbl_position_height)
             if self.lbl_position_height < 30:
-                self.info_position.setText("")
-            else:
+                self.info_position.hideText()
+            else:                 
                 self.info_position.setText(self.lbl_position_text.value)
                 
         elif self.lbl_position_final_height == 0 and self.lbl_position_height == 0 :
