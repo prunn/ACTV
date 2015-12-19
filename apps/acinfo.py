@@ -177,7 +177,15 @@ class ACInfo:
                 self.lbl_fastest_split.showText()
         elif self.lbl_timing_final_height == 0 and self.lbl_timing_height == 0 :
             self.lbl_timing.setVisible(0)
-            
+     
+    def resetVisibility(self):        
+        self.lbl_driver_name.setVisible(0)
+        self.lbl_fastest_split.setVisible(0)
+        self.lbl_border.setVisible(0)
+        self.lbl_timing.setVisible(0)
+        self.lbl_split.setVisible(0)
+        self.info_position_lead.setVisible(0) 
+        self.info_position.setVisible(0)       
     
     def manageWindow(self):
         pt=POINT()
@@ -196,7 +204,10 @@ class ACInfo:
         else:
             self.cursor.setValue(False)
         
-        if self.cursor.hasChanged() or self.session.hasChanged():
+        sessionChanged = self.session.hasChanged()
+        if sessionChanged:
+            self.resetVisibility()
+        if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
@@ -536,13 +547,7 @@ class ACInfo:
                     
         else:
             #REPLAY
-            self.lbl_driver_name.setVisible(0)
-            self.lbl_fastest_split.setVisible(0)
-            self.lbl_border.setVisible(0)
-            self.lbl_timing.setVisible(0)
-            self.lbl_split.setVisible(0)
-            self.info_position_lead.setVisible(0) 
-            self.info_position.setVisible(0)
+            self.resetVisibility()
         
     
     

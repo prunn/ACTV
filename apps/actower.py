@@ -336,8 +336,10 @@ class ACTower:
             self.minlap_stint = 3           
         if self.minLapCount > 0 and (bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn)):
             self.curDriverLaps=[]
+            self.stint_visible_end=0
         
         if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and sim_info.graphics.sessionTimeLeft >= self.stint_visible_end):
+            #ac.console(str(show_stint_always) + " and " + str(len(self.curDriverLaps)) + " >= " + str(self.minlap_stint) + " or " + str(self.stint_visible_end != 0) + " and " + str(sim_info.graphics.sessionTimeLeft) + " >= " + str(self.stint_visible_end))
             #if (sim_info.graphics.sessionTimeLeft > 90000 or sim_info.graphics.session == 0) and len(self.curDriverLaps) >= minlap_stint:
             #visible end
             for driver in self.drivers: 
@@ -353,16 +355,22 @@ class ACTower:
                         for i in range(len(self.stintLabels),len(self.curDriverLaps)): 
                             self.stintLabels.append(Driver(self.window.app,0,"Lap " + str(i+1),i+2,True))
                     i=0
+                    j=0
                     self.lbl_title_stint.setVisible(1)
                     self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
                     self.lbl_tire_stint.setVisible(1)
                     #for lbl in self.stintLabels:
+                    lapOffset=len(self.curDriverLaps)-8
                     for l in self.curDriverLaps:
-                        #lbl.final_y = 38 * (i+3)
-                        self.stintLabels[i].setTimeStint(l.time,l.valid)
-                        self.stintLabels[i].setPosition(i+5,1,0,True) 
-                        self.stintLabels[i].show(i+5,False)
-                        i+=1              
+                        if j < lapOffset:
+                            self.stintLabels[j].hide()
+                        else:
+                            #lbl.final_y = 38 * (i+3)
+                            self.stintLabels[j].setTimeStint(l.time,l.valid)
+                            self.stintLabels[j].setPosition(i+5,1,0,True) 
+                            self.stintLabels[j].show(i+5,False)
+                            i+=1    
+                        j+=1          
                 
                 else:
                     driver.hide()
@@ -399,9 +407,9 @@ class ACTower:
                 if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos < 19:
                     driver.show(self.driver_shown)
                     
-                    if len(p) > 0:
+                    if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False) 
-                    driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft)                           
+                        driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft)                           
                 else:
                     driver.hide() 
                 
@@ -469,6 +477,7 @@ class ACTower:
                 driver.race_current_sector.setValue(0)
                 driver.race_gaps = []
                 self.curDriverLaps=[]
+                self.stint_visible_end=0
             else:                    
                 bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
                 if bl <= sim_info.graphics.numberOfLaps and self.sectorIsValid(bl,driver):
@@ -570,6 +579,7 @@ class ACTower:
         sessionChanged = self.session.hasChanged() 
         if sessionChanged:
             self.curDriverLaps=[]
+            self.stint_visible_end=0
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
