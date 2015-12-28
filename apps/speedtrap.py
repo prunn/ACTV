@@ -97,9 +97,13 @@ class ACSpeedTrap:
         if result and pt.x > win_x and pt.x < win_x + self.window.width and pt.y > win_y and pt.y < win_y + self.window.height:   
             self.cursor.setValue(True)
         else:
-            self.cursor.setValue(False)
-        
-        if self.cursor.hasChanged() or self.session.hasChanged():
+            self.cursor.setValue(False)        
+        sessionChanged = self.session.hasChanged() 
+        if sessionChanged:
+            self.lbl_time.setVisible(0)           
+            self.lbl_border.setVisible(0)           
+            self.lbl_title.setVisible(0)
+        if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)

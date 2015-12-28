@@ -24,17 +24,16 @@ class Driver:
         self.gas=Value()
         self.wheelSpeed=Value()
         self.race_gaps = []
-        #self.aliveMissed=0
         self.keepAlive=0
-        self.fullName = Value()
-        self.fullName.setValue(name)
+        self.fullName = Value(name)
+        #self.fullName.setValue()
         self.shortName = name #todo format
         self.driver_shown=0
         self.time = Value()
         self.gap = Value()
         self.race_current_sector = Value()
-        self.race_standings_sector = Value()
-        self.race_standings_sector.setValue(0)
+        self.race_standings_sector = Value(0)
+        #self.race_standings_sector.setValue(0)
         self.completedLaps = Value()
         self.time_highlight_end = 0
         self.highlight = Value()
@@ -261,18 +260,18 @@ class ACTower:
         self.stintLabels = []
         self.standings = []
         self.numCars = Value()
-        self.session=Value()
-        self.session.setValue(-1)
+        self.session=Value(-1)
+        #self.session.setValue(-1)
         self.lapsCompleted=Value()
-        self.currentVehicule=Value()
-        self.currentVehicule.setValue(0)
+        self.currentVehicule=Value(0)
+        #self.currentVehicule.setValue(0)
         self.race_show_end = 0
         self.drivers_inited=False
         self.leader_time=0
         self.tick=0  
         self.pinHack=True
-        self.cursor=Value()
-        self.cursor.setValue(False)      
+        self.cursor=Value(False)
+        #self.cursor.setValue(False)      
         self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.minLapCount=1
@@ -580,6 +579,10 @@ class ACTower:
         if sessionChanged:
             self.curDriverLaps=[]
             self.stint_visible_end=0
+            for driver in self.drivers:
+                driver.hide()
+                driver.race_standings_sector.setValue(0)
+                driver.race_gaps = []
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
@@ -664,7 +667,13 @@ class ACTower:
                     self.standings = sorted(standings, key=lambda student: student[1], reverse=True)
                 else:       
                     self.standings = sorted(standings2, key=lambda student: student[1], reverse=True)
-                
+                '''Debug code
+                o=1
+                for i,s in self.standings:
+                    ac.console("standings:" + str(o) + "-" + ac.getDriverName(i) + " id:" + str(i) + " sector:" + str(s))
+                    o=o+1
+                ac.console("---------------------------------") 
+                '''   
                 self.update_drivers_race(sim_info)
                     
         elif sim_info.graphics.status == 1:
