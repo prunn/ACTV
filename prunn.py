@@ -1,7 +1,7 @@
 '''###########################################################################
 #
 # Project ACTV
-# Version Beta 0.9.4
+# Version Beta 0.9.5
 #
 ******************************************************************************
 *** .--. .-. ..- -. -. .--. .-. ..- -. -. .--. .-. ..- -. -. .--. .-. ..-  ***
@@ -36,6 +36,7 @@ try:
     from apps.acinfo import ACInfo
     from apps.actower import ACTower
     from apps.speedtrap import ACSpeedTrap
+    from apps.configuration import Configuration
     from apps.util.classes import Log
     sim_info = SimInfo()
 except:
@@ -48,14 +49,21 @@ timer=0
 info=0
 tower=0
 speed=0
+config=0
 
 timerInit=False
 infoInit=False
 towerInit=False
 speedInit=False
+configInit=False
 
 def acMain(ac_version):
-    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit
+    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit
+    try:
+        config=Configuration()
+        configInit=True
+    except:
+        Log.w("Error init config") 
     try:
         timer=ACTimer()
         timerInit=True
@@ -81,7 +89,22 @@ def acMain(ac_version):
 
 
 def acUpdate(deltaT):
-    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit
+    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit
+    configChanged=False
+    if configInit:     
+        try:
+            configChanged = config.onUpdate(deltaT,sim_info)
+            if configChanged:
+                if timerInit:
+                    timer.loadCFG()
+                if infoInit:
+                    info.loadCFG()
+                if towerInit:
+                    tower.loadCFG()
+                if speedInit:    
+                    speed.loadCFG()
+        except:
+            Log.w("Error config")
     if timerInit:
         try:
             timer.onUpdate(deltaT,sim_info)

@@ -30,7 +30,8 @@ class ACSpeedTrap:
         self.trap=0
         self.userTrap=0
         self.time_end=0
-        self.pinHack=True
+        self.pinHack=Value(True)
+        self.lapCanBeInvalidated=True
         self.relyOnEveryOne=True
         self.widget_visible=Value()
         self.cursor=Value()
@@ -49,10 +50,22 @@ class ACSpeedTrap:
             user_path = "cfg"
             if os.path.exists(user_path + "/gameplay.ini"):
                 self.checkMPH(user_path)
-    
+        self.loadCFG()
     # PUBLIC METHODS
     
-    #---------------------------------------------------------------------------------------------------------------------------------------------                                        
+    #--------------------------------------------------------------------------------------------------------------------------------------------- 
+    def loadCFG(self):        
+        cfg = Config("apps/python/prunn/cfg/", "config.ini")
+        if cfg.get("SETTINGS", "hide_pins", "int") == 1:
+            self.pinHack.setValue(True)
+        else:
+            self.pinHack.setValue(False)
+        if cfg.get("SETTINGS", "lap_can_be_invalidated", "int") == 1:
+            self.lapCanBeInvalidated = True
+        else:
+            self.lapCanBeInvalidated = False
+            
+                                                   
     def checkMPH(self,cfg_path):
         conf  = Config(cfg_path, "/gameplay.ini")
         opt_mph = conf.get("OPTIONS", "USE_MPH",type = "int")
@@ -103,17 +116,22 @@ class ACSpeedTrap:
             self.lbl_time.setVisible(0)           
             self.lbl_border.setVisible(0)           
             self.lbl_title.setVisible(0)
+        if self.pinHack.hasChanged():
+            if self.pinHack.value:
+                ac.setSize(self.window.app, self.screenWidth*2, 0)  
+            else:   
+                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-                if self.pinHack:
+                if self.pinHack.value:
                     ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                if self.pinHack:
+                if self.pinHack.value:
                     ac.setSize(self.window.app, self.screenWidth*2, 0) 
                     
     def onUpdate(self, deltaT, sim_info):   
@@ -150,7 +168,7 @@ class ACSpeedTrap:
         if self.curTopSpeed.value < self.SpeedKMH.value:
             self.curTopSpeed.setValue(self.SpeedKMH.value) 
             self.curTopSpeedMPH.setValue(self.SpeedMPH.value)         
-        if self.currentVehicule.value==0 and sim_info.physics.numberOfTyresOut >= 4 :
+        if self.currentVehicule.value==0 and sim_info.physics.numberOfTyresOut >= 4 and self.lapCanBeInvalidated:
             self.lastLapInvalidated = LapCount
         self.animate()
         

@@ -4,7 +4,7 @@ import ctypes
 import math
 
 from apps.util.func import rgb
-from apps.util.classes import Window, Label, Value, POINT, Colors
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config
        
 class ACInfo:
 
@@ -33,7 +33,8 @@ class ACInfo:
         self.lastTimeInPit=0
         self.visible_end = 0
         self.lastLapTime = 0
-        self.pinHack=True
+        self.pinHack=Value(True)
+        self.lapCanBeInvalidated=True
         self.fastestLapBorderActive = False
         self.firstLapStarted=False
         self.minLapCount=1
@@ -68,10 +69,22 @@ class ACInfo:
         self.info_position_lead=Label(self.window.app,"1").setSize(38, 38).setPos(246, 76).setFontSize(26).setAlign("center").setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(1).setVisible(0)
         car = ac.getCarName(0)        
         self.lbl_border=Label(self.window.app,"").setSize(284, 1).setPos(0, 75).setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7).setVisible(0)
+        self.loadCFG()
                 
         
     # PUBLIC METHODS
-        
+    #---------------------------------------------------------------------------------------------------------------------------------------------       
+    def loadCFG(self):        
+        cfg = Config("apps/python/prunn/cfg/", "config.ini")        
+        if cfg.get("SETTINGS", "hide_pins", "int") == 1:
+            self.pinHack.setValue(True)
+        else:
+            self.pinHack.setValue(False)            
+        if cfg.get("SETTINGS", "lap_can_be_invalidated", "int") == 1:
+            self.lapCanBeInvalidated = True
+        else:
+            self.lapCanBeInvalidated = False
+           
     def format_name(self,name):
         space = name.find(" ")
         if space > 0:
@@ -87,7 +100,7 @@ class ACInfo:
         if len(name) > 16:
             return name[:17]
         return name   
-    #---------------------------------------------------------------------------------------------------------------------------------------------                                        
+                                          
     def time_splitting(self, ms, full = "no"):        
         s=ms/1000 
         m,s=divmod(s,60) 
@@ -132,7 +145,7 @@ class ACInfo:
             self.lbl_driver_name.setSize(284, self.lbl_name_height)
             self.lbl_border.setPos(0, self.lbl_name_height+38)
             if self.lbl_name_height < 30:
-                self.lbl_driver_name.setText("")
+                self.lbl_driver_name.hideText()
             else:
                 self.lbl_driver_name.setText(self.lbl_driver_name_text.value)
         elif self.lbl_name_final_height == 0 and self.lbl_name_height == 0 :
@@ -170,7 +183,7 @@ class ACInfo:
                 self.lbl_timing_height+=multiplier 
             self.lbl_timing.setSize(284, self.lbl_timing_height)
             if self.lbl_timing_height < 30:
-                self.lbl_timing.setText("")
+                self.lbl_timing.hideText()
                 self.lbl_fastest_split.hideText()
             else:
                 self.lbl_timing.setText(self.lbl_timing_text.value)
@@ -207,17 +220,22 @@ class ACInfo:
         sessionChanged = self.session.hasChanged()
         if sessionChanged:
             self.resetVisibility()
+        if self.pinHack.hasChanged():
+            if self.pinHack.value:
+                ac.setSize(self.window.app, self.screenWidth*2, 0)  
+            else:   
+                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))         
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-                if self.pinHack:
+                if self.pinHack.value:
                     ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                if self.pinHack:
+                if self.pinHack.value:
                     ac.setSize(self.window.app, self.screenWidth*2, 0) 
         
     def onUpdate(self, deltaT, sim_info):
@@ -260,7 +278,7 @@ class ACInfo:
                 if isInPit :
                     self.lastLapInPit = LapCount
                     self.lastTimeInPit = sim_info.graphics.sessionTimeLeft
-                if self.currentVehicule.value==0 and sim_info.physics.numberOfTyresOut >= 4 :
+                if self.currentVehicule.value==0 and sim_info.physics.numberOfTyresOut >= 4 and self.lapCanBeInvalidated:
                     self.lastLapInvalidated = LapCount
                 if isInPit and self.minLapCount == 0:
                     self.lastLapInvalidated = -1
@@ -268,12 +286,12 @@ class ACInfo:
                 sectorCount = sim_info.static.sectorCount    
                 #save fastest lap as it comes - online need to be there
                 online_fast_test=0
-                online_fast_sect = [0,0,0,0,0,0]
+                #online_fast_sect = [0,0,0,0,0,0]
                 for x in range(carsCount): 
                     c = ac.getCarState(x,acsys.CS.BestLap)
                     if online_fast_test == 0 or (c > 0 and c < online_fast_test):
                         online_fast_test=c
-                        online_fast_sect=ac.getCarState(x,acsys.CS.BestLap)
+                        #online_fast_sect=ac.getCarState(x,acsys.CS.BestLap)
                     if self.fastestLap.value == 0 or (c > 0 and c < self.fastestLap.value): #and  self.fastestLapSectors[sectorCount - 1] > 0 :               
                         self.fastestLap.setValue(c)
                         self.fastestLapSectors = ac.getLastSplits(x)
@@ -541,7 +559,10 @@ class ACInfo:
                         self.lbl_timing.setVisible(self.lbl_timing_visible.value)
                         
                 if self.lbl_driver_name_text.hasChanged():
-                    self.lbl_driver_name.setText(self.lbl_driver_name_text.value)   
+                    if self.lbl_name_height < 30:
+                        self.lbl_driver_name.setText(self.lbl_driver_name_text.value,True)
+                    else:
+                        self.lbl_driver_name.setText(self.lbl_driver_name_text.value)  
                 if self.lbl_timing_text.hasChanged():
                     self.lbl_timing.setText(self.lbl_timing_text.value,hidden=bool(self.lbl_timing_height < 30)) 
                     

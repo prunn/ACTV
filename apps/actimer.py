@@ -5,7 +5,7 @@ import json
 import ctypes
 import math
 from apps.util.func import rgb
-from apps.util.classes import Window, Label, Value, POINT
+from apps.util.classes import Window, Label, Value, POINT, Config
 
 class ACTimer:
 
@@ -19,7 +19,7 @@ class ACTimer:
 		self.replay_rgb=255
 		self.session=Value()
 		self.cursor=Value()
-		self.pinHack=True
+		self.pinHack=Value(True)
 		self.cursor.setValue(False)
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
@@ -60,12 +60,18 @@ class ACTimer:
 			self.trackName = self.trackName[:12]
 			
 		self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
+		self.loadCFG()
 			
 		
 	# PUBLIC METHODS
-	
-	
-	#---------------------------------------------------------------------------------------------------------------------------------------------                                        
+	#---------------------------------------------------------------------------------------------------------------------------------------------    
+	def loadCFG(self):        
+		cfg = Config("apps/python/prunn/cfg/", "config.ini")
+		if cfg.get("SETTINGS", "hide_pins", "int") == 1:
+			self.pinHack.setValue(True)
+		else:
+			self.pinHack.setValue(False)  
+
 	def time_splitting(self, ms):
 		s=ms/1000 
 		m,s=divmod(s,60) 
@@ -120,15 +126,20 @@ class ACTimer:
 		else:
 			self.cursor.setValue(False)
 		
+		if self.pinHack.hasChanged():
+			if self.pinHack.value:
+				ac.setSize(self.window.app, self.screenWidth*2, 0)  
+			else:   
+				ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))
 		if self.cursor.hasChanged() or self.session_draw.hasChanged():
 			if self.cursor.value:
 				self.window.setBgOpacity(0.4).border(0)
-				if self.pinHack:
+				if self.pinHack.value:
 					ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
 			else:   
 				#pin outside
 				self.window.setBgOpacity(0).border(0)
-				if self.pinHack:
+				if self.pinHack.value:
 					ac.setSize(self.window.app, self.screenWidth*2, 0) 
 		
 	def onUpdate(self, deltaT, sim_info):		
@@ -169,7 +180,7 @@ class ACTimer:
 						completed=c     
 				completed+=1    
 				total=sim_info.graphics.numberOfLaps
-				if sessionTimeLeft > 1800000:
+				if sessionTimeLeft > 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
 					if self.finish_initialised:
 						self.destoy_finish()
 					self.lbl_session_info.setVisible(0)

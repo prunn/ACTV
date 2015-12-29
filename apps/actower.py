@@ -4,7 +4,7 @@ import math
 import sys
 import ctypes
 from apps.util.func import rgb
-from apps.util.classes import Window, Label, Value, POINT, Colors
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config
 
 class Laps:
     def __init__(self,lap,valid,time):
@@ -269,8 +269,10 @@ class ACTower:
         self.drivers_inited=False
         self.leader_time=0
         self.tick=0  
-        self.pinHack=True
+        self.pinHack=Value(True)
         self.cursor=Value(False)
+        self.max_num_cars = 18
+        self.max_num_laps_stint = 8
         #self.cursor.setValue(False)      
         self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
@@ -290,8 +292,18 @@ class ACTower:
             self.minLapCount=0
         elif track.find("drag1000")>=0 or track.find("drag400")>=0:
             self.minLapCount=0
+        self.loadCFG()
         
     # PUBLIC METHODS
+    def loadCFG(self):        
+        cfg = Config("apps/python/prunn/cfg/", "config.ini")
+        if cfg.get("SETTINGS", "hide_pins", "int") == 1:
+            self.pinHack.setValue(True)
+        else:
+            self.pinHack.setValue(False)  
+        self.max_num_cars = cfg.get("SETTINGS", "num_cars_tower", "int") 
+        self.max_num_laps_stint = cfg.get("SETTINGS", "num_laps_stint", "int") 
+     
     def animate(self,sessionTimeLeft):
         for driver in self.drivers:
             #if driver.final_y != driver.y :
@@ -359,7 +371,7 @@ class ACTower:
                     self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
                     self.lbl_tire_stint.setVisible(1)
                     #for lbl in self.stintLabels:
-                    lapOffset=len(self.curDriverLaps)-8
+                    lapOffset=len(self.curDriverLaps)-self.max_num_laps_stint
                     for l in self.curDriverLaps:
                         if j < lapOffset:
                             self.stintLabels[j].hide()
@@ -403,7 +415,7 @@ class ACTower:
                 checkPos=0
                 if len(p) > 0:
                     checkPos=p[0] + 1
-                if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos < 19:
+                if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:
                     driver.show(self.driver_shown)
                     
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
@@ -470,9 +482,8 @@ class ACTower:
                 self.driver_shown+=1
                 p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
-                    best_pos=p[0]+1
-                
-            if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit:
+                    best_pos=p[0]+1            
+            if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
                 driver.race_current_sector.setValue(0)
                 driver.race_gaps = []
                 self.curDriverLaps=[]
@@ -583,17 +594,22 @@ class ACTower:
                 driver.hide()
                 driver.race_standings_sector.setValue(0)
                 driver.race_gaps = []
+        if self.pinHack.hasChanged():
+            if self.pinHack.value:
+                ac.setSize(self.window.app, self.screenWidth*2, 0)  
+            else:   
+                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-                if self.pinHack:
+                if self.pinHack.value:
                     ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                if self.pinHack:
+                if self.pinHack.value:
                     ac.setSize(self.window.app, self.screenWidth*2, 0) 
                     
     def onUpdate(self, deltaT, sim_info):       
