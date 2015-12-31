@@ -23,6 +23,8 @@ class Driver:
         self.isLapLabel = isLapLabel
         self.gas=Value()
         self.wheelSpeed=Value()
+        self.race_mode = Value(0)
+        self.qual_mode = Value(0)
         self.race_gaps = []
         self.keepAlive=0
         self.fullName = Value(name)
@@ -104,15 +106,16 @@ class Driver:
         self.lbl_time.setText("")
         self.lbl_name.setText(strOffset+self.format_last_name(self.fullName.value))
             
-    def setTime(self,time,leader,session_time):
+    def setTime(self,time,leader,session_time,mode):
+        self.qual_mode.setValue(mode)
         self.time.setValue(time)
         self.gap.setValue(time-leader)
         time_changed=self.time.hasChanged()
-        if time_changed or self.gap.hasChanged():
+        if time_changed or self.gap.hasChanged() or self.qual_mode.hasChanged():
             if time_changed:
                 self.time_highlight_end = session_time - 5000
             #self.highlight.setValue(True)
-            if self.position.value==1:
+            if self.position.value==1 or mode==1:
                 self.lbl_time.setText(self.format_time(self.time.value))
             else:
                 self.lbl_time.setText("+"+self.format_time(self.gap.value))
@@ -149,7 +152,7 @@ class Driver:
                     result.append(g)
             self.race_gaps = result
                
-    def setPosition(self,position,leader,offset,battles):
+    def setPosition(self,position,leader,offset,battles,qual_mode):
         self.position.setValue(position)
         self.position_offset.setValue(offset)
         if self.position.hasChanged() or self.position_offset.hasChanged():
@@ -171,7 +174,10 @@ class Driver:
                 else:
                     #self.lbl_position.setBgColor(rgb([112, 112, 112], bg = True)).setBgOpacity(0.76)
                     self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(0.72)
-                    self.lbl_time.setText("+"+self.format_time(self.gap.value))
+                    if qual_mode == 1:
+                        self.lbl_time.setText(self.format_time(self.time.value))
+                    else:
+                        self.lbl_time.setText("+"+self.format_time(self.gap.value))
             else:
                 self.lbl_name.setBgOpacity(0.58)
                 if battles and self.identifier == 0:
@@ -179,7 +185,10 @@ class Driver:
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(0.58)
-                    self.lbl_time.setText("+"+self.format_time(self.gap.value))
+                    if qual_mode == 1:
+                        self.lbl_time.setText(self.format_time(self.time.value))
+                    else:
+                        self.lbl_time.setText("+"+self.format_time(self.gap.value))
         if not self.isLapLabel:
             self.fullName.setValue(ac.getDriverName(self.identifier))
             if self.fullName.hasChanged():
@@ -273,6 +282,8 @@ class ACTower:
         self.cursor=Value(False)
         self.max_num_cars = 18
         self.max_num_laps_stint = 8
+        self.race_mode = Value(0)
+        self.qual_mode = Value(0)
         #self.cursor.setValue(False)      
         self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
@@ -302,7 +313,9 @@ class ACTower:
         else:
             self.pinHack.setValue(False)  
         self.max_num_cars = cfg.get("SETTINGS", "num_cars_tower", "int") 
-        self.max_num_laps_stint = cfg.get("SETTINGS", "num_laps_stint", "int") 
+        self.max_num_laps_stint = cfg.get("SETTINGS", "num_laps_stint", "int")
+        self.race_mode.setValue(cfg.get("SETTINGS", "race_mode", "int"))
+        self.qual_mode.setValue(cfg.get("SETTINGS", "qual_mode", "int")) 
      
     def animate(self,sessionTimeLeft):
         for driver in self.drivers:
@@ -348,7 +361,7 @@ class ACTower:
         if self.minLapCount > 0 and (bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn)):
             self.curDriverLaps=[]
             self.stint_visible_end=0
-        
+        #mode_changed = self.qual_mode.hasChanged()
         if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and sim_info.graphics.sessionTimeLeft >= self.stint_visible_end):
             #ac.console(str(show_stint_always) + " and " + str(len(self.curDriverLaps)) + " >= " + str(self.minlap_stint) + " or " + str(self.stint_visible_end != 0) + " and " + str(sim_info.graphics.sessionTimeLeft) + " >= " + str(self.stint_visible_end))
             #if (sim_info.graphics.sessionTimeLeft > 90000 or sim_info.graphics.session == 0) and len(self.curDriverLaps) >= minlap_stint:
@@ -360,7 +373,7 @@ class ACTower:
                     driver.showFullName()
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                        
                     if len(p) > 0:
-                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0] + 1,False)                        
+                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0] + 1,False,self.qual_mode.value)                        
                     #self.stintLabels                    
                     if len(self.curDriverLaps) > len(self.stintLabels):                        
                         for i in range(len(self.stintLabels),len(self.curDriverLaps)): 
@@ -378,7 +391,7 @@ class ACTower:
                         else:
                             #lbl.final_y = 38 * (i+3)
                             self.stintLabels[j].setTimeStint(l.time,l.valid)
-                            self.stintLabels[j].setPosition(i+5,1,0,True) 
+                            self.stintLabels[j].setPosition(i+5,1,0,True,self.qual_mode.value) 
                             self.stintLabels[j].show(i+5,False)
                             i+=1    
                         j+=1          
@@ -419,8 +432,8 @@ class ACTower:
                     driver.show(self.driver_shown)
                     
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
-                        driver.setPosition(p[0] + 1,self.standings[0][1],0,False) 
-                        driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft)                           
+                        driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
+                        driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft,self.qual_mode.value)                           
                 else:
                     driver.hide() 
                 
@@ -540,7 +553,7 @@ class ACTower:
                     if len(cur_driver.race_gaps) > 15 and (driver.identifier == cur_driver.identifier or (gap < maxGap and cur_sector - self.getMaxSector(driver) < 15)):
                         p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
                         if len(p) > 0:
-                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True) 
+                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
                             driver.setTimeRaceBattle(gap,cur_driver.identifier) 
                             if p[0] <= best_pos+1:
                                 driver.show(0)
@@ -561,7 +574,7 @@ class ACTower:
                 if c == self.lapsCompleted.value:
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
                     if len(p) > 0 and driver.completedLaps.hasChanged():
-                        driver.setPosition(p[0] + 1,self.standings[0][1],0,False) 
+                        driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
                         driver.setTimeRace(c,self.leader_time,sim_info.graphics.sessionTimeLeft)  
                     if self.lapsCompleted.value == sim_info.graphics.numberOfLaps:
                         driver.showFullName()                  
