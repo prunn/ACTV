@@ -141,7 +141,7 @@ class Configuration:
           
     def hotkey_pressed(self):
         if self.session.value == 2:
-            if self.__class__.race_mode >= 2:
+            if self.__class__.race_mode >= 1:
                 self.__class__.race_mode = 0
             else:
                 self.__class__.race_mode += 1
