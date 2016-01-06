@@ -116,6 +116,7 @@ class ACSpeedTrap:
             self.lbl_time.setVisible(0)           
             self.lbl_border.setVisible(0)           
             self.lbl_title.setVisible(0)
+            self.time_end = 0
         if self.pinHack.hasChanged():
             if self.pinHack.value:
                 ac.setSize(self.window.app, self.screenWidth*2, 0)  
@@ -135,7 +136,12 @@ class ACSpeedTrap:
                     ac.setSize(self.window.app, self.screenWidth*2, 0) 
                     
     def onUpdate(self, deltaT, sim_info):   
-        self.session.setValue(sim_info.graphics.session)    
+        self.session.setValue(sim_info.graphics.session)  
+        if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sim_info.graphics.sessionTimeLeft >= 1800000:  
+            self.lbl_time.setVisible(0)           
+            self.lbl_border.setVisible(0)           
+            self.lbl_title.setVisible(0) 
+            self.time_end = 0
         self.manageWindow()
         carsCount = ac.getCarsCount()
         for x in range(carsCount):

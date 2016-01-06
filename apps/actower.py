@@ -498,13 +498,14 @@ class ACTower:
                 p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1            
-            if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                
+            if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                               
                 driver.race_gaps = []
                 self.curDriverLaps=[]
                 self.stint_visible_end=0
-                if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
+                if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sim_info.graphics.sessionTimeLeft >= 1800000:                    
                     driver.finished=False
                     self.numCarsToFinish=0
+                    driver.race_standings_sector.setValue(0)
                     driver.race_current_sector.setValue(0)
             else:                    
                 bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
@@ -706,7 +707,6 @@ class ACTower:
                     if self.sectorIsValid(bl,driver):  
                         if not driver.finished and driver.race_standings_sector.value >= sim_info.graphics.numberOfLaps:
                             driver.race_standings_sector.setValue(sim_info.graphics.numberOfLaps + (self.numCars.value - self.numCarsToFinish)/100)
-                            #ac.log(str(sim_info.graphics.numberOfLaps) + " " + str(self.numCars.value) + " " + str(self.numCarsToFinish))
                             self.numCarsToFinish+=1
                             driver.finished=True
                         elif not driver.finished:                  
