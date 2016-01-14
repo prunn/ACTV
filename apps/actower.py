@@ -279,6 +279,7 @@ class ACTower:
         self.drivers_inited=False
         self.leader_time=0
         self.tick=0  
+        self.tick_race_mode=0
         self.pinHack=Value(True)
         self.cursor=Value(False)
         self.max_num_cars = 18
@@ -469,12 +470,12 @@ class ACTower:
     
     def sectorIsValid(self,newSector,driver):
         if newSector*100 < driver.race_current_sector.value:
-            #ac.console("not added : 2 low " + str(newSector*100) + " < " + str(driver.race_current_sector.value))
             return False
         if (newSector*100) % 100 > 88 and len(driver.race_gaps) < 15:
-            #ac.console("not added : > 88")
             return False
         if ac.getCarState(driver.identifier,acsys.CS.SpeedKMH) <= 1:
+            return False
+        if newSector*100 > driver.race_current_sector.value + 25:
             return False
         #other checks
         return True                  
@@ -546,28 +547,31 @@ class ACTower:
                     self.race_show_end = sim_info.graphics.sessionTimeLeft - 12000
                     
         if self.race_mode.value == 1:
-            for driver in self.drivers:                
-                p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
-                driver.gas.setValue(ac.getCarState(driver.identifier,acsys.CS.Gas))
-                s=ac.getCarState(driver.identifier,acsys.CS.WheelAngularSpeed)
-                wheelSpeed=0
-                for w in s:
-                    wheelSpeed+=w
-                driver.wheelSpeed.setValue(wheelSpeed)
-                if driver.identifier > 0 and not driver.gas.hasChanged() and not driver.wheelSpeed.hasChanged():                        
-                    if driver.keepAlive - int(sim_info.graphics.sessionTimeLeft) > 2000:
-                        driver.isAlive=False                                          
-                else:
-                    driver.keepAlive=int(sim_info.graphics.sessionTimeLeft)
-                    driver.x=True
-                # and driver.isAlive               
-                if len(p) > 0  and p[0] < self.max_num_cars:
-                    driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
-                    driver.setTimeRaceBattle(gap,cur_driver.identifier) 
-                    driver.showFullName()                        
-                    driver.show(self.driver_shown,False)
-                else:
-                    driver.hide()
+            if not math.isinf(sim_info.graphics.sessionTimeLeft) and int(sim_info.graphics.sessionTimeLeft/100) % 18 == 0 and self.tick_race_mode > 20:
+                self.tick_race_mode = 0 
+                for driver in self.drivers:                
+                    p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
+                    driver.gas.setValue(ac.getCarState(driver.identifier,acsys.CS.Gas))
+                    s=ac.getCarState(driver.identifier,acsys.CS.WheelAngularSpeed)
+                    wheelSpeed=0
+                    for w in s:
+                        wheelSpeed+=w
+                    driver.wheelSpeed.setValue(wheelSpeed)
+                    if driver.identifier > 0 and not driver.gas.hasChanged() and not driver.wheelSpeed.hasChanged():                        
+                        if not math.isinf(sim_info.graphics.sessionTimeLeft) and driver.keepAlive - int(sim_info.graphics.sessionTimeLeft) > 2000:
+                            driver.isAlive=False                                          
+                    elif not math.isinf(sim_info.graphics.sessionTimeLeft):
+                        driver.keepAlive=int(sim_info.graphics.sessionTimeLeft)
+                        driver.x=True
+                    # and driver.isAlive               
+                    if len(p) > 0  and p[0] < self.max_num_cars:
+                        driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
+                        driver.setTimeRaceBattle(gap,cur_driver.identifier) 
+                        driver.showFullName()                        
+                        driver.show(self.driver_shown,False)
+                    else:
+                        driver.hide()
+            self.tick_race_mode+=1
                 
         elif driverShown > 1 and (self.race_show_end > sim_info.graphics.sessionTimeLeft or self.race_show_end == 0):
             self.lapsCompleted.hasChanged()
