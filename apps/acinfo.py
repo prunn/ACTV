@@ -75,7 +75,7 @@ class ACInfo:
     # PUBLIC METHODS
     #---------------------------------------------------------------------------------------------------------------------------------------------       
     def loadCFG(self):        
-        cfg = Config("apps/python/prunn/cfg/", "config.ini")        
+        cfg = Config("apps/python/prunn/", "config.ini")        
         if cfg.get("SETTINGS", "hide_pins", "int") == 1:
             self.pinHack.setValue(True)
         else:

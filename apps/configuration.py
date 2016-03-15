@@ -58,7 +58,7 @@ class Configuration:
         self.lbl_title_invalidated = Label(self.window.app,"Lap can be invalidated").setSize(200, 26).setPos(65, 401).setFontSize(16).setAlign("left").setVisible(1)
         
         self.cfg_loaded = False
-        self.cfg = Config("apps/python/prunn/cfg/", "config.ini")
+        self.cfg = Config("apps/python/prunn/", "config.ini")
         self.loadCFG()
         
             
@@ -71,14 +71,25 @@ class Configuration:
     def __del__(self):
         self.listen_active = False
             
-    def loadCFG(self):  
-        #if no cfg create cfg
+    def loadCFG(self):
         self.__class__.pinHack = self.cfg.get("SETTINGS", "hide_pins", "int") 
+        if self.__class__.pinHack == -1:
+            self.__class__.pinHack=1
         self.__class__.lapCanBeInvalidated = self.cfg.get("SETTINGS", "lap_can_be_invalidated", "int") 
+        if self.__class__.lapCanBeInvalidated == -1:
+            self.__class__.lapCanBeInvalidated=1
         self.__class__.max_num_cars = self.cfg.get("SETTINGS", "num_cars_tower", "int") 
-        self.__class__.max_num_laps_stint = self.cfg.get("SETTINGS", "num_laps_stint", "int")        
+        if self.__class__.max_num_cars == -1:
+            self.__class__.max_num_cars=18
+        self.__class__.max_num_laps_stint = self.cfg.get("SETTINGS", "num_laps_stint", "int")  
+        if self.__class__.max_num_laps_stint == -1:
+            self.__class__.max_num_laps_stint=8      
         self.__class__.race_mode = self.cfg.get("SETTINGS", "race_mode", "int") 
-        self.__class__.qual_mode = self.cfg.get("SETTINGS", "qual_mode", "int")            
+        if self.__class__.race_mode == -1:
+            self.__class__.race_mode=0
+        self.__class__.qual_mode = self.cfg.get("SETTINGS", "qual_mode", "int")
+        if self.__class__.qual_mode == -1:
+            self.__class__.qual_mode=0            
             
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)        
@@ -96,7 +107,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "race_mode", self.__class__.race_mode)   
         self.cfg.set("SETTINGS", "qual_mode", self.__class__.qual_mode) 
         self.cfg.set("SETTINGS", "hide_pins", self.__class__.pinHack) 
-        self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)   
+        self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)
         self.cfg.set("SETTINGS", "num_cars_tower", self.__class__.max_num_cars)    
         self.cfg.set("SETTINGS", "num_laps_stint", self.__class__.max_num_laps_stint) 
     

@@ -328,6 +328,8 @@ class Config:
 				if not self.has(section, option) and value is None:
 					ac.console("Prunn: Config.set -- a value must be passed.")
 				else:
+					if not self.has(section):
+						self.parser.add_section(section)
 					self.parser.set(section, option, value)
 					self._write()
 		# if sections is not specified
