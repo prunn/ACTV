@@ -243,10 +243,11 @@ class ACInfo:
         self.manageWindow()
         self.animate()
         carsCount=ac.getCarsCount()
-        for x in range(carsCount):
-            if(ac.isCameraOnBoard(x)):
-                self.currentVehicule.setValue(x)
-                break                        
+        #for x in range(carsCount):
+        #    if(ac.isCameraOnBoard(x)):
+        #        self.currentVehicule.setValue(x)
+        #        break       
+        self.currentVehicule.setValue(ac.getFocusedCar())                 
         currentVehiculeChanged=self.currentVehicule.hasChanged()
         if currentVehiculeChanged or (self.fastestLapBorderActive and sim_info.graphics.sessionTimeLeft < self.visible_end):
             self.fastestLapBorderActive = False

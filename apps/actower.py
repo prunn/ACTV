@@ -29,14 +29,13 @@ class Driver:
         self.keepAlive=0
         self.finished=False
         self.fullName = Value(name)
-        #self.fullName.setValue()
-        self.shortName = name #todo format
+        self.shortName = name
         self.driver_shown=0
         self.time = Value()
         self.gap = Value()
         self.race_current_sector = Value()
         self.race_standings_sector = Value(0)
-        #self.race_standings_sector.setValue(0)
+        self.isInPit = Value(False)
         self.completedLaps = Value()
         self.time_highlight_end = 0
         self.highlight = Value()
@@ -51,6 +50,7 @@ class Driver:
         self.lbl_position = Label(app,str(pos+1)).setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([112, 112, 112], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(1).setVisible(0)
         self.lbl_time = Label(app,"+0.000").setSize(60, 38).setPos(148, 0).setFontSize(26).setAlign("right").setBgOpacity(0).setVisible(0)
         self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, 38).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_pit = Label(app,"P").setSize(24, 36).setPos(218, 0).setFontSize(23).setAlign("center").setBgOpacity(0).setVisible(0)
         self.setName()
     
     def show(self,start,needsTLC=True):
@@ -71,7 +71,8 @@ class Driver:
                 else:
                     self.lbl_name.setPos(38, (start-2)*38)
                 self.lbl_position.setPos(0, (start-2)*38)
-                self.lbl_time.setPos(148, (start-2)*38)
+                self.lbl_time.setPos(148, (start-2)*38) 
+                self.lbl_pit.setPos(218, (start-2)*38 + 2)   
                 self.lbl_border.setPos(0, (start-2)*38 + 37)
             else:
                 self.y=38
@@ -80,16 +81,29 @@ class Driver:
                 else:
                     self.lbl_name.setPos(38, 38)
                 self.lbl_position.setPos(0, 38)
-                self.lbl_time.setPos(148, 38)
-                self.lbl_border.setPos(0, 37)            
+                self.lbl_time.setPos(148, 38)  
+                self.lbl_pit.setPos(218, 42)  
+                self.lbl_border.setPos(0, 37)        
             self.isDisplayed = True
+            
+    def updatePit(self):
+        self.isInPit.setValue(bool(ac.isCarInPitline(self.identifier)))
+        if self.isInPit.hasChanged():
+            if self.isInPit.value:
+                self.lbl_pit.setVisible(1)
+                self.lbl_name.setSize(204, 38)
+            else:
+                self.lbl_pit.setVisible(0)  
+                self.lbl_name.setSize(180, 38)                  
            
     def hide(self): 
         if self.isDisplayed: 
             self.lbl_name.setVisible(0)
+            self.lbl_name.setSize(218, 38) 
             self.lbl_position.setVisible(0)
             self.lbl_time.setVisible(0)
             self.lbl_border.setVisible(0)  
+            self.lbl_pit.setVisible(0)  
             self.isDisplayed = False    
             
     def setName(self):
@@ -163,7 +177,8 @@ class Driver:
             pos=position-1-offset
             self.final_y=pos*38
             if position % 2 == 1:
-                self.lbl_name.setBgOpacity(0.72)          
+                self.lbl_name.setBgOpacity(0.72)
+                #self.lbl_pit.setBgOpacity(0.72)           
                 if position==1:
                     self.lbl_position.setBgColor(rgb([192, 0, 0], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(0.72)
                     #self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setBgOpacity(0.76)
@@ -181,6 +196,7 @@ class Driver:
                         self.lbl_time.setText("+"+self.format_time(self.gap.value))
             else:
                 self.lbl_name.setBgOpacity(0.58)
+                #self.lbl_pit.setBgOpacity(0.58)
                 if battles and self.identifier == 0:
                     self.lbl_position.setBgColor(rgb([255, 255, 255], bg = True)).setColor(rgb([192,0,0])).setBgOpacity(0.68)
                     self.lbl_time.setText(self.format_time(self.time.value))
@@ -246,6 +262,7 @@ class Driver:
                 self.lbl_name.setPos(38, self.y)
             self.lbl_position.setPos(0, self.y)
             self.lbl_time.setPos(148, self.y)
+            self.lbl_pit.setPos(218, self.y+2)
             self.lbl_border.setPos(0, self.y+37)
         
         #color
@@ -271,10 +288,8 @@ class ACTower:
         self.standings = []
         self.numCars = Value()
         self.session=Value(-1)
-        #self.session.setValue(-1)
         self.lapsCompleted=Value()
         self.currentVehicule=Value(0)
-        #self.currentVehicule.setValue(0)
         self.race_show_end = 0
         self.drivers_inited=False
         self.leader_time=0
@@ -433,7 +448,7 @@ class ACTower:
                     checkPos=p[0] + 1
                 if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:
                     driver.show(self.driver_shown)
-                    
+                    driver.updatePit()
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
                         driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft,self.qual_mode.value)                           
@@ -723,12 +738,13 @@ class ACTower:
                     c = ac.getCarState(i,acsys.CS.LapCount)
                     if c > completed:
                         completed=c  
-                    if(ac.isCameraOnBoard(i)):
-                        self.currentVehicule.setValue(i)  
+                    #if(ac.isCameraOnBoard(i)):
+                    #    self.currentVehicule.setValue(i)  
                     bl=c + ac.getCarState(i,acsys.CS.NormalizedSplinePosition)
                     if bl > 0:
                         standings2.append((i,bl)) 
                 
+                self.currentVehicule.setValue(ac.getFocusedCar()) 
                 self.lapsCompleted.setValue(completed) 
                 if len(standings) > 0:       
                     self.standings = sorted(standings, key=lambda student: student[1], reverse=True)

@@ -145,8 +145,8 @@ class ACSpeedTrap:
         self.manageWindow()
         carsCount = ac.getCarsCount()
         for x in range(carsCount):
-            if(ac.isCameraOnBoard(x)):
-                self.currentVehicule.setValue(x)  
+            #if(ac.isCameraOnBoard(x)):
+            #    self.currentVehicule.setValue(x)  
             c = ac.getCarState(x,acsys.CS.SpeedKMH)
             if x==0 and self.topSpeed.value < c:
                 self.userTopSpeed.setValue(c)
@@ -166,7 +166,8 @@ class ACSpeedTrap:
             elif not self.relyOnEveryOne and x == 0 and self.topSpeed.value < c:
                 self.topSpeed.setValue(c)
                 self.trap = ac.getCarState(x,acsys.CS.NormalizedSplinePosition)      
-            
+        
+        self.currentVehicule.setValue(ac.getFocusedCar())     
         self.SpeedKMH.setValue(ac.getCarState(self.currentVehicule.value,acsys.CS.SpeedKMH))
         self.SpeedMPH.setValue(ac.getCarState(self.currentVehicule.value,acsys.CS.SpeedMPH))
         LapCount = ac.getCarState(self.currentVehicule.value,acsys.CS.LapCount)                   

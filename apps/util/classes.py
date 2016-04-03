@@ -139,8 +139,12 @@ class Label:
 	def __init__(self, window, text = ""):
 		self.text      = text
 		self.label     = ac.addLabel(window, self.text)
+		self.params	  = {"x" : 0, "y" : 0, "w" : 0, "h" : 0, "a" : 1  }
+		self.f_params = {"x" : 0, "y" : 0, "w" : 0, "h" : 0, "a" : 1  }
 		self.size      = { "w" : 0, "h" : 0 }
+		self.final_size = { "w" : 0, "h" : 0 }
 		self.pos       = { "x" : 0, "y" : 0 }
+		self.final_pos = { "x" : 0, "y" : 0 }
 		self.color     = (1, 1, 1, 1)
 		self.bgColor   = (0, 0, 0, 1)
 		self.fontSize  = 12
@@ -211,6 +215,45 @@ class Label:
 		self.visible=value
 		ac.setVisible(self.label, value)
 		return self
+	
+	def animate(self):
+		if self.params["x"] != self.f_params["x"]:			
+			multiplier=3
+			if abs(self.f_params["x"] - self.params["x"]) == 1:
+				multiplier=1
+			if self.params["x"] < self.f_params["x"] :
+				self.params["x"]+=multiplier
+			else:
+				self.params["x"]-=multiplier			
+			ac.setPosition(self.label, self.params["x"], self.params["y"])
+		
+		if self.params["y"] != self.f_params["y"]:			
+			multiplier=3
+			if abs(self.f_params["y"] - self.params["y"]) == 1:
+				multiplier=1
+			if self.params["y"] < self.f_params["y"] :
+				self.params["y"]+=multiplier
+			else:
+				self.params["y"]-=multiplier
+			ac.setPosition(self.label, self.params["x"], self.params["y"])
+		
+		if self.params["w"] != self.f_params["w"]:
+			if self.params["w"] < self.f_params["w"] :
+				self.params["w"]+=1
+			else:
+				self.params["w"]-=1
+		
+		if self.params["h"] != self.f_params["h"]:
+			if self.params["h"] < self.f_params["h"] :
+				self.params["h"]+=1
+			else:
+				self.params["h"]-=1
+		
+		if self.params["a"] != self.f_params["a"]:
+			if self.params["a"] < self.f_params["a"] :
+				self.params["a"]+=0.1
+			else:
+				self.params["a"]-=0.1
 
 		
 #-#####################################################################################################################################-#
