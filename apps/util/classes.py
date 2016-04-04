@@ -132,6 +132,7 @@ class Colors:
 			return Colors.lamborghini()
 		return Colors.default()	
 	
+	
 class Label:
 
 	# INITIALIZATION
@@ -139,12 +140,8 @@ class Label:
 	def __init__(self, window, text = ""):
 		self.text      = text
 		self.label     = ac.addLabel(window, self.text)
-		self.params	  = {"x" : 0, "y" : 0, "w" : 0, "h" : 0, "a" : 1  }
-		self.f_params = {"x" : 0, "y" : 0, "w" : 0, "h" : 0, "a" : 1  }
-		self.size      = { "w" : 0, "h" : 0 }
-		self.final_size = { "w" : 0, "h" : 0 }
-		self.pos       = { "x" : 0, "y" : 0 }
-		self.final_pos = { "x" : 0, "y" : 0 }
+		self.params	  = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "a" : Value(0)  }
+		self.f_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "a" : Value(0)  }
 		self.color     = (1, 1, 1, 1)
 		self.bgColor   = (0, 0, 0, 1)
 		self.fontSize  = 12
@@ -152,6 +149,8 @@ class Label:
 		self.bgTexture = ""
 		self.opacity   = 1
 		self.visible=0
+		self.isVisible = Value(False)
+		self.isTextVisible = Value(False)
 		
 	# PUBLIC METHODS
 	
@@ -159,28 +158,46 @@ class Label:
 		self.text = text
 		if hidden :
 			ac.setText(self.label, "")
+			self.isTextVisible.setValue(False)
 		else:
 			ac.setText(self.label, self.text)
+			self.isTextVisible.setValue(True)
 		return self
 	
 	def hideText(self):
+		self.isTextVisible.setValue(False)
 		ac.setText(self.label, "")
 		return self
 	
 	def showText(self):
+		self.isTextVisible.setValue(True)
 		ac.setText(self.label, self.text)
 		return self
 	
-	def setSize(self, w, h):
-		self.size["w"] = w
-		self.size["h"] = h
-		ac.setSize(self.label, self.size["w"], self.size["h"])
+	def setSize(self, w, h, animated=False):
+		if animated:
+			self.f_params["w"].setValue(w)
+			self.f_params["h"].setValue(h)	
+		else:	
+			self.params["w"].setValue(w)
+			self.params["h"].setValue(h)
+			self.f_params["w"].setValue(w)
+			self.f_params["h"].setValue(h)
+			if self.params["w"].hasChanged() or self.params["h"].hasChanged():
+				ac.setSize(self.label, self.params["w"].value, self.params["h"].value)
 		return self
 	
-	def setPos(self, x, y):
-		self.pos["x"] = x
-		self.pos["y"] = y
-		ac.setPosition(self.label, self.pos["x"], self.pos["y"])
+	def setPos(self, x, y, animated=False):
+		if animated:
+			self.f_params["x"].setValue(x)
+			self.f_params["y"].setValue(y)	
+		else:	
+			self.params["x"].setValue(x)
+			self.params["y"].setValue(y)
+			self.f_params["x"].setValue(x)
+			self.f_params["y"].setValue(y)
+			if self.params["x"].hasChanged() or self.params["y"].hasChanged():
+				ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
 		return self
 		
 	def setColor(self, color):
@@ -207,54 +224,98 @@ class Label:
 		ac.setBackgroundColor(self.label, *color)
 		return self
 	
-	def setBgOpacity(self, opacity):
-		ac.setBackgroundOpacity(self.label, opacity)
+	def setBgOpacity(self, opacity, animated=False):
+		if animated:
+			self.f_params["a"].setValue(opacity)
+		else:	
+			self.opacity=opacity
+			self.params["a"].setValue(opacity)
+			self.f_params["a"].setValue(opacity)
+			#if self.params["a"].hasChanged():
+			ac.setBackgroundOpacity(self.label, self.params["a"].value)
+		return self
+	
+	def hide(self):
+		self.setBgOpacity(0, True)
+		return self
+	
+	def show(self):
+		self.setBgOpacity(self.opacity, True)
 		return self
 	
 	def setVisible(self, value):
 		self.visible=value
+		self.isVisible.setValue(bool(value))
 		ac.setVisible(self.label, value)
-		return self
+		return self	
 	
 	def animate(self):
-		if self.params["x"] != self.f_params["x"]:			
+		#adjust size
+		if self.params["w"].value != self.f_params["w"].value:
+			if self.params["w"].value < self.f_params["w"].value :
+				self.params["w"].setValue(self.params["w"].value + 1)
+			else:
+				self.params["w"].setValue(self.params["w"].value - 1)
+		
+		if self.params["h"].value != self.f_params["h"].value:
+			if self.params["h"].value < self.f_params["h"].value :
+				self.params["h"].setValue(self.params["h"].value + 1)
+			else:
+				self.params["h"].setValue(self.params["h"].value - 1)
+		#adjust position
+		if self.params["x"].value != self.f_params["x"].value:			
 			multiplier=3
-			if abs(self.f_params["x"] - self.params["x"]) == 1:
+			if abs(self.f_params["x"].value - self.params["x"].value) == 1:
 				multiplier=1
-			if self.params["x"] < self.f_params["x"] :
-				self.params["x"]+=multiplier
+			if self.params["x"].value < self.f_params["x"].value :
+				self.params["x"].setValue(self.params["x"].value + multiplier)
 			else:
-				self.params["x"]-=multiplier			
-			ac.setPosition(self.label, self.params["x"], self.params["y"])
+				self.params["x"].setValue(self.params["x"].value - multiplier)
 		
-		if self.params["y"] != self.f_params["y"]:			
+		if self.params["y"].value != self.f_params["y"].value:			
 			multiplier=3
-			if abs(self.f_params["y"] - self.params["y"]) == 1:
+			if abs(self.f_params["y"].value - self.params["y"].value) == 1:
 				multiplier=1
-			if self.params["y"] < self.f_params["y"] :
-				self.params["y"]+=multiplier
+			if self.params["y"].value < self.f_params["y"].value :
+				self.params["y"].setValue(self.params["y"].value + multiplier)
 			else:
-				self.params["y"]-=multiplier
-			ac.setPosition(self.label, self.params["x"], self.params["y"])
-		
-		if self.params["w"] != self.f_params["w"]:
-			if self.params["w"] < self.f_params["w"] :
-				self.params["w"]+=1
+				self.params["y"].setValue(self.params["y"].value - multiplier)
+		#adjust alpha
+		if self.params["a"].value != self.f_params["a"].value:
+			multiplier=0.05
+			if abs(self.f_params["a"].value - self.params["a"].value) < 0.05:
+				multiplier=abs(self.f_params["a"].value - self.params["a"].value)
+			if self.params["a"].value < self.f_params["a"].value :
+				self.params["a"].setValue(self.params["a"].value + multiplier)
 			else:
-				self.params["w"]-=1
-		
-		if self.params["h"] != self.f_params["h"]:
-			if self.params["h"] < self.f_params["h"] :
-				self.params["h"]+=1
+				self.params["a"].setValue(self.params["a"].value - multiplier)
+		#adjust colors
+		#commit changes
+		if self.params["x"].hasChanged() or self.params["y"].hasChanged():
+			ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
+		if self.params["w"].hasChanged() or self.params["h"].hasChanged():
+			ac.setSize(self.label, self.params["w"].value, self.params["h"].value)
+		if self.params["a"].hasChanged():	
+			if self.params["a"].value == 0:
+				self.isVisible.setValue(False)
 			else:
-				self.params["h"]-=1
-		
-		if self.params["a"] != self.f_params["a"]:
-			if self.params["a"] < self.f_params["a"] :
-				self.params["a"]+=0.1
+				self.isVisible.setValue(True)
+			changed=self.isVisible.hasChanged()
+			if changed and self.params["a"].value > 0:
+				ac.setVisible(self.label, 1)
+			elif changed:
+				ac.setVisible(self.label, 0)
+			#fg opacity
+			ac.setBackgroundOpacity(self.label, self.params["a"].value)
+			if self.params["a"].value >= 0.5 :
+				self.isTextVisible.setValue(True)
 			else:
-				self.params["a"]-=0.1
-
+				self.isTextVisible.setValue(False)
+			if self.isTextVisible.hasChanged():
+				if self.isTextVisible.value:
+					ac.setText(self.label, self.text)
+				else:
+					ac.setText(self.label, "")
 		
 #-#####################################################################################################################################-#
 

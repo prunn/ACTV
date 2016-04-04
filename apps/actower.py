@@ -99,7 +99,7 @@ class Driver:
     def hide(self): 
         if self.isDisplayed: 
             self.lbl_name.setVisible(0)
-            self.lbl_name.setSize(218, 38) 
+            self.lbl_name.setSize(180, 38) 
             self.lbl_position.setVisible(0)
             self.lbl_time.setVisible(0)
             self.lbl_border.setVisible(0)  
@@ -737,9 +737,7 @@ class ACTower:
                 for i in range(self.numCars.value):  
                     c = ac.getCarState(i,acsys.CS.LapCount)
                     if c > completed:
-                        completed=c  
-                    #if(ac.isCameraOnBoard(i)):
-                    #    self.currentVehicule.setValue(i)  
+                        completed=c
                     bl=c + ac.getCarState(i,acsys.CS.NormalizedSplinePosition)
                     if bl > 0:
                         standings2.append((i,bl)) 

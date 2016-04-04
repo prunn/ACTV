@@ -73,6 +73,10 @@ class ACSpeedTrap:
             self.useMPH = True
           
     def animate(self):
+        self.lbl_title.animate()
+        self.lbl_time.animate()
+        self.lbl_border.animate()
+        '''
         multiplier=2
         if self.final_height != self.height :          
             if self.final_height < self.height :
@@ -94,6 +98,7 @@ class ACSpeedTrap:
             self.lbl_time.setVisible(0)
             self.lbl_border.setVisible(0)
             self.lbl_title.setVisible(0)
+        '''
     
     def manageWindow(self):
         pt=POINT()
@@ -145,8 +150,6 @@ class ACSpeedTrap:
         self.manageWindow()
         carsCount = ac.getCarsCount()
         for x in range(carsCount):
-            #if(ac.isCameraOnBoard(x)):
-            #    self.currentVehicule.setValue(x)  
             c = ac.getCarState(x,acsys.CS.SpeedKMH)
             if x==0 and self.topSpeed.value < c:
                 self.userTopSpeed.setValue(c)
@@ -199,11 +202,19 @@ class ACSpeedTrap:
                     self.time_end = sim_info.graphics.sessionTimeLeft - 6000
                     self.final_height = 38
                     self.height = 0        
-                    self.lbl_time.setVisible(1)
-                    self.lbl_border.setVisible(1)
-                    self.lbl_title.setVisible(1)
+                    #self.lbl_time.setVisible(1)
+                    #self.lbl_border.setVisible(1)
+                    #self.lbl_title.setVisible(1)
+                    self.lbl_title.setText("S",hidden=True)
+                    self.lbl_time.setText(self.speedText,hidden=True)
+                    self.lbl_time.show()
+                    self.lbl_border.show()
+                    self.lbl_title.show()
                 elif self.time_end == 0 or sim_info.graphics.sessionTimeLeft < self.time_end:
                     #ac.console("hidden : self.time_end == 0  or " + str(sim_info.graphics.sessionTimeLeft) + " < " + str(self.time_end))
+                    self.lbl_time.hide()
+                    self.lbl_border.hide()
+                    self.lbl_title.hide()
                     self.widget_visible.setValue(0)
                     self.time_end=0
                     self.final_height = 0
