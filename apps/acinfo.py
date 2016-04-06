@@ -14,8 +14,6 @@ class ACInfo:
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.situation = 0
-        self.lbl_name_final_height = 0
-        self.lbl_name_height = 0
         self.lbl_timing_final_height = 0
         self.lbl_timing_height = 0
         self.lbl_position_final_height = 0
@@ -52,17 +50,17 @@ class ACInfo:
         self.session.setValue(-1)    
         self.window = Window(name="ACTV Info", icon=False, width=332, height=114, texture="")
         
-        self.lbl_driver_name=Label(self.window.app,"Loading").setSize(284, 38).setPos(0, 38).setFontSize(26).setAlign("left").setBgColor(rgb([20, 20, 20], bg = True)).setBgOpacity(0.8).setVisible(1)
+        self.lbl_driver_name=Label(self.window.app,"Loading").setSize(284, 38).setPos(0, 38).setFontSize(26).setAlign("left").setBgColor(rgb([20, 20, 20], bg = True)).setBgOpacity(0.8).setVisible(0)
         self.lbl_driver_name_visible=Value()
+        self.lbl_driver_name_visible_fin=Value(0)
         self.lbl_driver_name_text=Value()
-        self.lbl_position_visible=Value()
-        self.lbl_position_visible.setValue(0)
+        self.lbl_position_visible=Value(0)
         self.lbl_timing_text=Value()
         self.race_fastest_lap=Value()
         self.race_fastest_lap.setValue(0)
         self.race_fastest_lap_driver=Value()
-        self.lbl_timing_visible=Value()
-        self.lbl_timing=Label(self.window.app,"Loading").setSize(284, 38).setPos(0, 76).setFontSize(26).setAlign("left").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(1)
+        self.lbl_timing_visible=Value(0)
+        self.lbl_timing=Label(self.window.app,"Loading").setSize(284, 38).setPos(0, 76).setFontSize(26).setAlign("left").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
         self.lbl_split=Label(self.window.app,"Loading").setSize(220, 38).setPos(10, 76).setFontSize(26).setAlign("right").setVisible(0)
         self.lbl_fastest_split=Label(self.window.app,"Loading").setSize(220, 38).setPos(48, 76).setFontSize(26).setAlign("right").setVisible(0)
         self.info_position=Label(self.window.app,"0").setSize(38, 38).setPos(0, 38).setFontSize(26).setAlign("center").setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(1).setVisible(0)
@@ -134,24 +132,17 @@ class ACInfo:
         return sector
         
     def animate(self):
-        multiplier=2
-        if self.lbl_name_final_height != self.lbl_name_height :          
-            if self.lbl_name_final_height < self.lbl_name_height :
-                self.lbl_name_height-=multiplier   
-                #manage z-index with set visible?         
-            elif self.lbl_name_final_height > self.lbl_name_height :
-                self.lbl_name_height+=multiplier 
-            
-            self.lbl_driver_name.setSize(284, self.lbl_name_height)
-            self.lbl_border.setPos(0, self.lbl_name_height+38)
-            if self.lbl_name_height < 30:
-                self.lbl_driver_name.hideText()
-            else:
-                self.lbl_driver_name.setText(self.lbl_driver_name_text.value)
-        elif self.lbl_name_final_height == 0 and self.lbl_name_height == 0 :
-            self.lbl_driver_name.setVisible(0)
-            self.lbl_border.setVisible(0)     
-        
+        self.lbl_driver_name.animate()
+        self.lbl_timing.animate()
+        self.info_position.animate()
+        self.info_position_lead.animate()
+        self.lbl_border.animate()        
+        self.lbl_split.animate()
+        self.lbl_fastest_split.animate()
+        #ac.console("visbility:"+str(self.lbl_driver_name.isVisible.value))
+        #ac.console("alpha:"+str(self.lbl_driver_name.params["a"].value))
+                
+        multiplier=2        
         if self.lbl_position_final_height > 0 and self.lbl_position_text.value == "":            
             pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicule.value) + 1
             if pos > 1:
@@ -175,30 +166,27 @@ class ACInfo:
         elif self.lbl_position_final_height == 0 and self.lbl_position_height == 0 :
             self.info_position.setVisible(0)
             
-        if self.lbl_name_final_height == self.lbl_name_height and self.lbl_timing_final_height != self.lbl_timing_height : 
+        if self.lbl_timing_final_height != self.lbl_timing_height : 
             if self.lbl_timing_final_height < self.lbl_timing_height :
-                self.lbl_timing_height-=multiplier   
-                #manage z-index with set visible?         
+                self.lbl_timing_height-=multiplier       
             elif self.lbl_timing_final_height > self.lbl_timing_height :
                 self.lbl_timing_height+=multiplier 
-            self.lbl_timing.setSize(284, self.lbl_timing_height)
             if self.lbl_timing_height < 30:
-                self.lbl_timing.hideText()
                 self.lbl_fastest_split.hideText()
             else:
-                self.lbl_timing.setText(self.lbl_timing_text.value)
                 self.lbl_fastest_split.showText()
-        elif self.lbl_timing_final_height == 0 and self.lbl_timing_height == 0 :
-            self.lbl_timing.setVisible(0)
+       
      
-    def resetVisibility(self):        
-        self.lbl_driver_name.setVisible(0)
-        self.lbl_fastest_split.setVisible(0)
-        self.lbl_border.setVisible(0)
-        self.lbl_timing.setVisible(0)
-        self.lbl_split.setVisible(0)
-        self.info_position_lead.setVisible(0) 
-        self.info_position.setVisible(0)       
+    def resetVisibility(self):  
+        self.lbl_driver_name.hide()
+        self.lbl_border.hide()
+        self.lbl_driver_name_visible_fin.setValue(0)
+        self.lbl_timing.hide()
+        self.lbl_timing_visible.setValue(0)
+        self.lbl_fastest_split.hide()
+        self.lbl_split.hide()
+        self.info_position_lead.hide()
+        self.info_position.hide()     
     
     def manageWindow(self):
         pt=POINT()
@@ -248,7 +236,8 @@ class ACInfo:
         if currentVehiculeChanged or (self.fastestLapBorderActive and sim_info.graphics.sessionTimeLeft < self.visible_end):
             self.fastestLapBorderActive = False
             car = ac.getCarName(self.currentVehicule.value)        
-            self.lbl_border.setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7)       
+            self.lbl_border.setBgColor(Colors.colorFromCar(car))
+            #.setBgOpacity(0.7)       
             
         if sim_info.graphics.status == 2 :
             #LIVE
@@ -259,7 +248,7 @@ class ACInfo:
                 bestlap = ac.getCarState(self.currentVehicule.value,acsys.CS.BestLap)
     
                 isInPit = self.currentVehicule.value==0 and bool(sim_info.graphics.isInPit)
-                #isInPit = self.currentVehicule.value==0 and bool(sim_info.physics.pitLimiterOn)
+                #isInPit = bool(ac.isCarInPitline(self.currentVehicule.value))
                 LapCount = ac.getCarState(self.currentVehicule.value,acsys.CS.LapCount)
                 if self.lastLap != LapCount:
                     self.lastLap = LapCount
@@ -465,30 +454,36 @@ class ACInfo:
                         self.info_position.setVisible(0)  
                 
                 self.lbl_fastest_split.setVisible(0)
-                if self.lbl_driver_name_visible.value == 1 and self.lbl_driver_name.visible==0:
+                if self.lbl_driver_name_visible.value == 1 and self.lbl_driver_name.isVisible.value==0:
                     self.lbl_driver_name_visible.changed=True
-                if self.lbl_timing_visible.value == 1 and self.lbl_timing.visible==0:
+                if self.lbl_timing_visible.value == 1 and self.lbl_timing.isVisible.value==0:
                     self.lbl_timing_visible.changed=True
-                if self.lbl_driver_name_visible.hasChanged():         
-                    if self.lbl_driver_name_visible.value == 0:
-                        self.lbl_name_final_height = 0
+                    
+                self.lbl_driver_name_visible_fin.setValue(self.lbl_driver_name_visible.value)
+                if self.lbl_driver_name_visible_fin.hasChanged():         
+                    if self.lbl_driver_name_visible_fin.value == 0:
+                        self.lbl_driver_name.hide()
+                        self.lbl_border.hide()
+                        ac.console("hiding driver name")
                     else:
-                        self.lbl_name_final_height = 38
-                        self.lbl_driver_name.setVisible(1)
-                        self.lbl_border.setVisible(1)
+                        ac.console("showing driver name")
+                        self.lbl_driver_name.show()
+                        self.lbl_border.show()
                         
                 if self.lbl_timing_visible.hasChanged():         
                     if self.lbl_timing_visible.value == 0:
                         self.lbl_timing_final_height = 0
+                        self.lbl_timing.hide()
                     else:
                         self.lbl_timing_final_height = 38
-                        self.lbl_timing.setVisible(1)
+                        self.lbl_timing.show()
                         
                 if self.lbl_driver_name_text.hasChanged():
                     self.lbl_driver_name.setText(self.lbl_driver_name_text.value)   
-                if self.lbl_timing_text.hasChanged() and self.lbl_timing_final_height == self.lbl_timing_height:
+                if self.lbl_timing_text.hasChanged():
                     self.lbl_timing.setText(self.lbl_timing_text.value) 
             else:
+                ################ Race ################
                 self.info_position_lead.setVisible(0) 
                 self.lbl_split.setVisible(0)
                 #fastest lap
@@ -510,7 +505,8 @@ class ACInfo:
                 if self.race_fastest_lap.hasChanged() and self.race_fastest_lap.value > 0:
                     self.fastestLapBorderActive = True
                     car = ac.getCarName(self.race_fastest_lap_driver.value)        
-                    self.lbl_border.setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7) 
+                    self.lbl_border.setBgColor(Colors.colorFromCar(car))
+                    #.setBgOpacity(0.7) 
                     self.visible_end = sim_info.graphics.sessionTimeLeft - 8000
                     self.lbl_driver_name_visible.setValue(1)
                     self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.race_fastest_lap_driver.value)))
@@ -542,24 +538,23 @@ class ACInfo:
                     
                 if self.lbl_driver_name_visible.hasChanged():         
                     if self.lbl_driver_name_visible.value == 0:
-                        self.lbl_name_final_height = 0
+                        self.lbl_driver_name.hide()
+                        self.lbl_border.hide()
                     else:
-                        self.lbl_name_final_height = 38
-                        self.lbl_driver_name.setVisible(1)
-                        self.lbl_border.setVisible(1)
+                        self.lbl_driver_name.show()
+                        self.lbl_border.show()
                     
                 if self.lbl_timing_visible.hasChanged():         
                     if self.lbl_timing_visible.value == 0:
                         self.lbl_timing_final_height = 0
+                        self.lbl_timing.hide()
                     else:
                         self.lbl_timing_final_height = 38
                         self.lbl_timing.setVisible(self.lbl_timing_visible.value)
+                        self.lbl_timing.show()
                         
                 if self.lbl_driver_name_text.hasChanged():
-                    if self.lbl_name_height < 30:
-                        self.lbl_driver_name.setText(self.lbl_driver_name_text.value,True)
-                    else:
-                        self.lbl_driver_name.setText(self.lbl_driver_name_text.value)  
+                    self.lbl_driver_name.setText(self.lbl_driver_name_text.value)  
                 if self.lbl_timing_text.hasChanged():
                     self.lbl_timing.setText(self.lbl_timing_text.value,hidden=bool(self.lbl_timing_height < 30)) 
                     

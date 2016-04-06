@@ -240,7 +240,10 @@ class Label:
 		return self
 	
 	def show(self):
-		self.setBgOpacity(self.opacity, True)
+		#self.setBgOpacity(self.opacity, True)
+		self.f_params["a"].setValue(self.opacity)
+		#ac.setBackgroundOpacity(self.label, 0)
+		#self.setVisible(1)
 		return self
 	
 	def setVisible(self, value):
@@ -302,7 +305,7 @@ class Label:
 				self.isVisible.setValue(True)
 			changed=self.isVisible.hasChanged()
 			if changed and self.params["a"].value > 0:
-				ac.setVisible(self.label, 1)
+				ac.setVisible(self.label, 1)  
 			elif changed:
 				ac.setVisible(self.label, 0)
 			#fg opacity

@@ -39,7 +39,7 @@ class ACSpeedTrap:
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
         self.lbl_title = Label(self.window.app,"").setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
         self.lbl_time = Label(self.window.app,"").setSize(172, 38).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
-        self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(1)
+        self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(0)
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.useMPH = False
         
@@ -76,29 +76,11 @@ class ACSpeedTrap:
         self.lbl_title.animate()
         self.lbl_time.animate()
         self.lbl_border.animate()
-        '''
-        multiplier=2
-        if self.final_height != self.height :          
-            if self.final_height < self.height :
-                self.height-=multiplier   
-                #manage z-index with set visible?         
-            elif self.final_height > self.height :
-                self.height+=multiplier 
-            
-            self.lbl_title.setSize(38, self.height)
-            self.lbl_time.setSize(172, self.height)
-            self.lbl_border.setPos(0, self.height+1)
-            if self.height < 30:
-                self.lbl_title.setText("")
-                self.lbl_time.setText("")
-            else:
-                self.lbl_title.setText("S")
-                self.lbl_time.setText(self.speedText)
-        elif self.final_height == 0 and self.height == 0 :
-            self.lbl_time.setVisible(0)
-            self.lbl_border.setVisible(0)
-            self.lbl_title.setVisible(0)
-        '''
+    
+    def resetVisibility(self):  
+        self.lbl_time.hide()           
+        self.lbl_border.hide()           
+        self.lbl_title.hide()
     
     def manageWindow(self):
         pt=POINT()
@@ -118,9 +100,7 @@ class ACSpeedTrap:
             self.cursor.setValue(False)        
         sessionChanged = self.session.hasChanged() 
         if sessionChanged:
-            self.lbl_time.setVisible(0)           
-            self.lbl_border.setVisible(0)           
-            self.lbl_title.setVisible(0)
+            self.resetVisibility()
             self.time_end = 0
         if self.pinHack.hasChanged():
             if self.pinHack.value:
@@ -143,9 +123,7 @@ class ACSpeedTrap:
     def onUpdate(self, deltaT, sim_info):   
         self.session.setValue(sim_info.graphics.session)  
         if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sim_info.graphics.sessionTimeLeft >= 1800000:  
-            self.lbl_time.setVisible(0)           
-            self.lbl_border.setVisible(0)           
-            self.lbl_title.setVisible(0) 
+            self.resetVisibility() 
             self.time_end = 0
         self.manageWindow()
         carsCount = ac.getCarsCount()
@@ -194,24 +172,19 @@ class ACSpeedTrap:
                     #show and set timer 
                     self.lastLapShown=LapCount
                     self.widget_visible.setValue(1)
-                    #self.lbl_time.setText("%.1f kph"%(self.curTopSpeed.value))
                     if self.useMPH:
                         self.speedText="%.1f mph"%(self.curTopSpeedMPH.value)
                     else:
                         self.speedText="%.1f kph"%(self.curTopSpeed.value)
                     self.time_end = sim_info.graphics.sessionTimeLeft - 6000
                     self.final_height = 38
-                    self.height = 0        
-                    #self.lbl_time.setVisible(1)
-                    #self.lbl_border.setVisible(1)
-                    #self.lbl_title.setVisible(1)
+                    self.height = 0
                     self.lbl_title.setText("S",hidden=True)
                     self.lbl_time.setText(self.speedText,hidden=True)
                     self.lbl_time.show()
                     self.lbl_border.show()
                     self.lbl_title.show()
                 elif self.time_end == 0 or sim_info.graphics.sessionTimeLeft < self.time_end:
-                    #ac.console("hidden : self.time_end == 0  or " + str(sim_info.graphics.sessionTimeLeft) + " < " + str(self.time_end))
                     self.lbl_time.hide()
                     self.lbl_border.hide()
                     self.lbl_title.hide()
@@ -220,26 +193,12 @@ class ACSpeedTrap:
                     self.final_height = 0
                     if self.widget_visible.hasChanged():                        
                         self.curTopSpeed.setValue(0)                      
-                        self.curTopSpeedMPH.setValue(0)
-                    
-                #if self.widget_visible.hasChanged:         
-                # #   self.lbl_time.setVisible(self.widget_visible.value)
-                #    self.lbl_border.setVisible(self.widget_visible.value)
-                #   self.lbl_title.setVisible(self.widget_visible.value)
-                   
-            elif sim_info.graphics.session == 2 :
-                #race more randomly          
-                self.lbl_time.setVisible(0) 
-                self.lbl_border.setVisible(0)  
-                self.lbl_title.setVisible(0)    
+                        self.curTopSpeedMPH.setValue(0)                   
+               
             else:       
-                self.lbl_time.setVisible(0) 
-                self.lbl_border.setVisible(0)  
-                self.lbl_title.setVisible(0)     
+                self.resetVisibility()     
                     
         elif sim_info.graphics.status == 1:  
-            self.lbl_time.setVisible(0)           
-            self.lbl_border.setVisible(0)           
-            self.lbl_title.setVisible(0)
+            self.resetVisibility()
     
     
