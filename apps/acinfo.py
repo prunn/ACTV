@@ -16,7 +16,6 @@ class ACInfo:
         self.situation = 0
         self.lbl_timing_final_height = 0
         self.lbl_timing_height = 0
-        self.lbl_position_final_height = 0
         self.lbl_position_height = 0
         self.lbl_position_text=Value()
         self.lbl_position_text.setValue("")
@@ -141,30 +140,17 @@ class ACInfo:
         self.lbl_fastest_split.animate()
         #ac.console("visbility:"+str(self.lbl_driver_name.isVisible.value))
         #ac.console("alpha:"+str(self.lbl_driver_name.params["a"].value))
-                
-        multiplier=2        
-        if self.lbl_position_final_height > 0 and self.lbl_position_text.value == "":            
+        '''       
+        multiplier=2  
+              
+        if self.info_position.isVisible.value:            
             pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicule.value) + 1
             if pos > 1:
                 self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([112, 112, 112], bg = True)).setBgOpacity(1)
             else:
                 self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(1)                    
             self.lbl_position_text.setValue(str(pos))
-            
-        if self.lbl_position_final_height != self.lbl_position_height :     
-            if self.lbl_position_final_height < self.lbl_position_height :
-                self.lbl_position_height-=multiplier        
-            elif self.lbl_position_final_height > self.lbl_position_height :
-                self.lbl_position_height+=multiplier 
-                
-            self.info_position.setSize(38, self.lbl_position_height)
-            if self.lbl_position_height < 30:
-                self.info_position.hideText()
-            else:                 
-                self.info_position.setText(self.lbl_position_text.value)
-                
-        elif self.lbl_position_final_height == 0 and self.lbl_position_height == 0 :
-            self.info_position.setVisible(0)
+        
             
         if self.lbl_timing_final_height != self.lbl_timing_height : 
             if self.lbl_timing_final_height < self.lbl_timing_height :
@@ -175,6 +161,7 @@ class ACInfo:
                 self.lbl_fastest_split.hideText()
             else:
                 self.lbl_fastest_split.showText()
+        '''
        
      
     def resetVisibility(self):  
@@ -247,8 +234,8 @@ class ACInfo:
                 #qtime          
                 bestlap = ac.getCarState(self.currentVehicule.value,acsys.CS.BestLap)
     
-                isInPit = self.currentVehicule.value==0 and bool(sim_info.graphics.isInPit)
-                #isInPit = bool(ac.isCarInPitline(self.currentVehicule.value))
+                #isInPit = self.currentVehicule.value==0 and bool(sim_info.graphics.isInPit)
+                isInPit = bool(ac.isCarInPitline(self.currentVehicule.value))
                 LapCount = ac.getCarState(self.currentVehicule.value,acsys.CS.LapCount)
                 if self.lastLap != LapCount:
                     self.lastLap = LapCount
@@ -290,8 +277,8 @@ class ACInfo:
                     self.lbl_driver_name_visible.setValue(0)
                     self.lbl_timing_visible.setValue(0)  
                     self.lbl_split.setVisible(0)  
-                    self.info_position.setVisible(0)
-                    self.info_position_lead.setVisible(0)          
+                    self.info_position.hide()
+                    self.info_position_lead.hide()          
                 elif (self.lastLapInPit < LapCount or self.minLapCount==0) and not lapInvalidated and (self.lastTimeInPit==0 or self.lastTimeInPit > self.lastLapStart) :
                     
                     sector_delay = 5000
@@ -332,17 +319,17 @@ class ACInfo:
                     for s in range(0,sectorCount):                    
                         if self.fastestLap.value > 0 and lapTime > fastestSplit_fin - sector_delay:
                             #LAST_SECONDS_OF_SECTOR_X, sector == s and
-                            self.info_position.setVisible(0) 
+                            self.info_position.hide() 
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                             if sectorCount-1 == sector:
                                 #LAST_SECONDS_OF_SECTOR_LAP,
                                 self.lbl_split.setText(self.time_splitting(self.fastestLap.value,"yes")).setColor(rgb([255, 255, 255])).setVisible(1)
-                                self.info_position_lead.setVisible(1) 
+                                self.info_position_lead.show() 
                                 
                                 showSplit=True
                             elif fastestSplit_fin > 0:
                                 self.lbl_split.setText(self.time_splitting(fastestSplit_fin,"yes")).setColor(rgb([255, 255, 255])).setVisible(1)
-                                self.info_position_lead.setVisible(1) 
+                                self.info_position_lead.show() 
                                 showSplit=True
                             break
                         if sector == s + 1 and s + 1 <= sectorCount and lapTime - timeSplit <= sector_delay and fastestSplit > 0 :
@@ -353,8 +340,8 @@ class ACInfo:
                                 self.lbl_split.setText("+"+self.time_splitting(timeSplit-fastestSplit,"yes")).setColor(rgb([240, 171, 1])).setVisible(1)
                             else:
                                 self.lbl_split.setText("-"+self.time_splitting(fastestSplit-timeSplit,"yes")).setColor(rgb([32, 192, 31])).setVisible(1)
-                            self.info_position_lead.setVisible(1) 
-                            self.info_position.setVisible(0)
+                            self.info_position_lead.show() 
+                            self.info_position.hide()
                             traite=True
                             break
                     
@@ -363,7 +350,7 @@ class ACInfo:
                             #LAST_SECONDS_OF_SECTOR_LAP,
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                             self.lbl_timing_text.setValue(strOffset + self.time_splitting(lapTime)) 
-                            self.info_position.setVisible(0)
+                            self.info_position.hide()
                             #self.lbl_split.setText(self.time_splitting(self.fastestLap,"yes") + strOffset).setVisible(1)
                         elif self.lastLapInvalidated!=LapCount-1 and ((self.lastLapInPit!=LapCount-1 and sector == 0) or (self.minLapCount==0)) and lapTime <= sector_delay and lastLap > 0:
                             #LAP_FINISHED_BEGIN_NEW_LAP,                        
@@ -374,7 +361,7 @@ class ACInfo:
                             else:
                                 self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.8)
                             self.info_position.setText(str(pos))
-                            self.info_position.setVisible(1)
+                            self.info_position.show()
                             
                             self.lbl_driver_name_text.setValue(strOffset + "     " + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                             self.lbl_timing_text.setValue(strOffset + self.time_splitting(lastLap,"yes")) 
@@ -382,19 +369,18 @@ class ACInfo:
                                 self.lbl_split.setText("+"+self.time_splitting(lastLap-self.fastestLap.value,"yes")).setColor(rgb([240, 171, 1])).setVisible(1)
                             else:                            
                                 self.lbl_split.setText("-"+self.time_splitting(self.fastestLap.old-lastLap,"yes")).setColor(rgb([32, 192, 31])).setVisible(1)
-                            self.info_position_lead.setVisible(1) 
+                            self.info_position_lead.show() 
                             
                         else:
                             #OTHER
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                             self.lbl_timing_text.setValue(strOffset + self.time_splitting(lapTime))  
-                            self.info_position.setVisible(0)
+                            self.info_position.hide()
                             if not showSplit:
                                 self.lbl_split.setVisible(0)
-                                self.info_position_lead.setVisible(0)
+                                self.info_position_lead.hide()
                 else :                    
-                    self.info_position_lead.setVisible(0)
-                    #self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(0)))                        
+                    self.info_position_lead.hide()                     
                     normalizedSplinePosition = ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition)
                     if normalizedSplinePosition <= 0.001:
                         normalizedSplinePosition=1
@@ -403,17 +389,14 @@ class ACInfo:
                         self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                         self.lbl_timing_visible.setValue(1)  
                         self.lbl_split.setVisible(0)  
-                        self.info_position.setVisible(0)
+                        self.info_position.hide()
                         self.lbl_timing_text.setValue(strOffset + "0.0") 
-                        #if bestlap > 0 :
-                        #    self.info_position.setVisible(1)
-                        #else:
-                        #self.info_position.setVisible(0)
+                        
                     elif lapInvalidated and self.lastLapInPit < LapCount and self.minLapCount > 0 :
                         self.lbl_driver_name_visible.setValue(0)
                         self.lbl_timing_visible.setValue(0)  
                         self.lbl_split.setVisible(0)  
-                        self.info_position.setVisible(0)  
+                        self.info_position.hide()  
                     elif bestlap > 0 :                
                         self.lbl_driver_name_visible.setValue(1)
                         self.lbl_timing_visible.setValue(1)  
@@ -424,7 +407,6 @@ class ACInfo:
                         else:                            
                             self.lbl_split.setVisible(0)
                         
-                        self.info_position.setVisible(1)
                         self.lbl_timing_text.setValue(strOffset + self.time_splitting(bestlap,"yes")) 
                                             
                         self.lbl_driver_name_text.setValue(strOffset + "     " + self.format_name(ac.getDriverName(self.currentVehicule.value)))
@@ -434,14 +416,14 @@ class ACInfo:
                             self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([112, 112, 112], bg = True)).setBgOpacity(1)
                         else:
                             self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(1)
-                        self.info_position.setText(str(pos)).setVisible(1)   
+                        self.info_position.setText(str(pos)).show()   
                         self.lbl_position_text.setValue(str(pos))                
                             
                     elif isInPit :     
                         self.lbl_driver_name_visible.setValue(0)
                         self.lbl_timing_visible.setValue(0)  
                         self.lbl_split.setVisible(0)  
-                        self.info_position.setVisible(0)
+                        self.info_position.hide()
                     else :  
                         self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                         self.lbl_driver_name_visible.setValue(1)
@@ -451,7 +433,7 @@ class ACInfo:
                         else:
                             self.lbl_timing_text.setValue(strOffset + "Out Lap")
                         self.lbl_split.setVisible(0)
-                        self.info_position.setVisible(0)  
+                        self.info_position.hide()  
                 
                 self.lbl_fastest_split.setVisible(0)
                 if self.lbl_driver_name_visible.value == 1 and self.lbl_driver_name.isVisible.value==0:
@@ -464,9 +446,7 @@ class ACInfo:
                     if self.lbl_driver_name_visible_fin.value == 0:
                         self.lbl_driver_name.hide()
                         self.lbl_border.hide()
-                        ac.console("hiding driver name")
                     else:
-                        ac.console("showing driver name")
                         self.lbl_driver_name.show()
                         self.lbl_border.show()
                         
@@ -484,7 +464,7 @@ class ACInfo:
                     self.lbl_timing.setText(self.lbl_timing_text.value) 
             else:
                 ################ Race ################
-                self.info_position_lead.setVisible(0) 
+                self.info_position_lead.hide() 
                 self.lbl_split.setVisible(0)
                 #fastest lap
                 completed=0
@@ -512,8 +492,8 @@ class ACInfo:
                     self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.race_fastest_lap_driver.value)))
                     self.lbl_timing_text.setValue(strOffset + "Fastest Lap")
                     self.lbl_timing_visible.setValue(1)
-                    self.info_position.setVisible(0) 
-                    self.lbl_fastest_split.setText(self.time_splitting(self.race_fastest_lap.value,"yes"),hidden=bool(self.lbl_timing_height < 30)).setVisible(1)
+                    self.info_position.hide() 
+                    self.lbl_fastest_split.setText(self.time_splitting(self.race_fastest_lap.value,"yes")).setVisible(1)
                     
                 elif currentVehiculeChanged:  
                     #driver info                  
@@ -526,13 +506,12 @@ class ACInfo:
                         self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([112, 112, 112], bg = True)).setBgOpacity(1)
                     else:
                         self.info_position.setColor(rgb([255, 255, 255])).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(1)
-                    self.info_position.setText(str(pos)).setVisible(1)   
-                    self.lbl_position_final_height = 38
+                    self.info_position.setText(str(pos)).show() 
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.setVisible(0)
                 elif self.visible_end == 0 or sim_info.graphics.sessionTimeLeft < self.visible_end:
                     self.lbl_driver_name_visible.setValue(0)
-                    self.info_position.setVisible(0)
+                    self.info_position.hide()
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.setVisible(0)
                     
@@ -550,7 +529,7 @@ class ACInfo:
                         self.lbl_timing.hide()
                     else:
                         self.lbl_timing_final_height = 38
-                        self.lbl_timing.setVisible(self.lbl_timing_visible.value)
+                        #self.lbl_timing.setVisible(self.lbl_timing_visible.value)
                         self.lbl_timing.show()
                         
                 if self.lbl_driver_name_text.hasChanged():
