@@ -163,7 +163,8 @@ class ACSpeedTrap:
         if sim_info.graphics.status == 2:
             if sim_info.graphics.session <= 2  :                
                 #Qual-Practise every time
-                isInPit = self.currentVehicule.value==0 and bool(sim_info.physics.pitLimiterOn)
+                #isInPit = self.currentVehicule.value==0 and bool(sim_info.physics.pitLimiterOn)
+                isInPit = bool(ac.isCarInPitline(self.currentVehicule.value))
                                       
                 if isInPit :
                     self.lastLapInPit = LapCount
