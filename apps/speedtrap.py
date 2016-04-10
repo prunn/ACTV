@@ -10,7 +10,8 @@ class ACSpeedTrap:
 
     # INITIALIZATION
 
-    def __init__(self):         
+    def __init__(self): 
+        self.rowHeight=38         
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.lastLapShown = 0
@@ -37,8 +38,8 @@ class ACSpeedTrap:
         self.cursor=Value()
         self.cursor.setValue(False)
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
-        self.lbl_title = Label(self.window.app,"").setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
-        self.lbl_time = Label(self.window.app,"").setSize(172, 38).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
+        self.lbl_title = Label(self.window.app,"").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
+        self.lbl_time = Label(self.window.app,"").setSize(172, self.rowHeight).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
         self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(0)
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.useMPH = False

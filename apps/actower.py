@@ -47,9 +47,9 @@ class Driver:
             self.lbl_name = Label(app,strOffset+name).setSize(218, 38).setPos(0, 0).setFontSize(26).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
         else:    
             self.lbl_name = Label(app,strOffset+self.format_name_tlc(name)).setSize(180, 38).setPos(38, 0).setFontSize(26).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
-        self.lbl_position = Label(app,str(pos+1)).setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([112, 112, 112], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(1).setVisible(0)
+        self.lbl_position = Label(app,str(pos+1)).setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.grey(bg = True)).setColor(Colors.white()).setBgOpacity(1).setVisible(0)
         self.lbl_time = Label(app,"+0.000").setSize(60, 38).setPos(148, 0).setFontSize(26).setAlign("right").setBgOpacity(0).setVisible(0)
-        self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, 38).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, 38).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.lbl_pit = Label(app,"P").setSize(24, 36).setPos(218, 0).setFontSize(23).setAlign("center").setBgOpacity(0).setVisible(0)
         self.setName()
     
@@ -143,21 +143,21 @@ class Driver:
             if self.isLapLabel:
                 self.lbl_time.setText(self.format_time(self.time.value))
         if valid:            
-            self.lbl_time.setColor(rgb([255,255,255]))
+            self.lbl_time.setColor(Colors.white())
         else:
-            self.lbl_time.setColor(rgb([192,0,0]))
+            self.lbl_time.setColor(Colors.red())
                 
     def setTimeRace(self,time,leader,session_time):
         if self.position.value==1:
-            self.lbl_time.setText("Lap " + str(time)).setColor(rgb([255,255,255]))
+            self.lbl_time.setText("Lap " + str(time)).setColor(Colors.white())
         else:
-            self.lbl_time.setText("+"+self.format_time(leader-session_time)).setColor(rgb([255,255,255]))
+            self.lbl_time.setText("+"+self.format_time(leader-session_time)).setColor(Colors.white())
             
     def setTimeRaceBattle(self,time,identifier):
         if self.identifier==identifier:           
             self.lbl_time.setText("")
         else:
-            self.lbl_time.setText(""+self.format_time(time)).setColor(rgb([255,255,255]))
+            self.lbl_time.setText(""+self.format_time(time)).setColor(Colors.white())
             
     def optimise(self,sector):
         if self.race_gaps:
@@ -180,16 +180,13 @@ class Driver:
                 self.lbl_name.setBgOpacity(0.72)
                 #self.lbl_pit.setBgOpacity(0.72)           
                 if position==1:
-                    self.lbl_position.setBgColor(rgb([192, 0, 0], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(0.72)
-                    #self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setBgOpacity(0.76)
+                    self.lbl_position.setBgColor(Colors.red(bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 elif battles and self.identifier == 0:
-                    self.lbl_position.setBgColor(rgb([255, 255, 255], bg = True)).setColor(rgb([192,0,0])).setBgOpacity(0.72)
-                    #self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setBgOpacity(0.76)
+                    self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.72)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
-                    #self.lbl_position.setBgColor(rgb([112, 112, 112], bg = True)).setBgOpacity(0.76)
-                    self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(0.72)
+                    self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
@@ -198,10 +195,10 @@ class Driver:
                 self.lbl_name.setBgOpacity(0.58)
                 #self.lbl_pit.setBgOpacity(0.58)
                 if battles and self.identifier == 0:
-                    self.lbl_position.setBgColor(rgb([255, 255, 255], bg = True)).setColor(rgb([192,0,0])).setBgOpacity(0.68)
+                    self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.68)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
-                    self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setColor(rgb([255,255,255])).setBgOpacity(0.58)
+                    self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setColor(Colors.white()).setBgOpacity(0.58)
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
@@ -270,9 +267,9 @@ class Driver:
         
         if self.highlight.hasChanged() :          
             if self.highlight.value:
-                self.lbl_time.setColor(rgb([192,0,0]))
+                self.lbl_time.setColor(Colors.red())
             else:
-                self.lbl_time.setColor(rgb([255,255,255]))
+                self.lbl_time.setColor(Colors.white())
              
 class raceGaps:
     def __init__(self,sector,time):
