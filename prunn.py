@@ -84,7 +84,24 @@ def acMain(ac_version):
         speedInit=True
     except:
         Log.w("Error init speedtrap")  
-                   
+    '''
+    try:
+        fontName="Khula"
+        #fontName="Noto Sans UI Light"
+        if ac.initFont(0,fontName,0,0) > 0:
+            if timerInit:
+                timer.setFont(fontName)
+            if infoInit:
+                info.setFont(fontName)
+            if towerInit:
+                tower.setFont(fontName)
+            if speedInit:    
+                speed.setFont(fontName)
+        else:
+            ac.console("font init failed")
+    except:
+        Log.w("Error init font") 
+    '''                      
     return "Prunn"
 
 

@@ -158,12 +158,11 @@ class Label:
 		self.params	  = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
 		self.f_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
 		self.o_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
-		self.multiplier = {"x" : Value(3), "y" : Value(3), "w" : Value(1), "h" : Value(1), "o" : Value(0.02), "r" : Value(0.02), "g" : Value(0.02), "b" : Value(0.02), "a" : Value(0.02) }
-		self.color     = (1, 1, 1, 1)
-		self.bgColor   = (0, 0, 0, 1)
+		self.multiplier = {"x" : Value(3), "y" : Value(3), "w" : Value(1), "h" : Value(1), "o" : Value(0.02), "r" : Value(0.06), "g" : Value(0.06), "b" : Value(0.06), "a" : Value(0.02) }
 		self.fontSize  = 12
 		self.align     = "left"
 		self.bgTexture = ""
+		self.fontName = ""
 		self.opacity   = 1
 		self.visible=0
 		self.isVisible = Value(False)
@@ -202,17 +201,25 @@ class Label:
 		return self
 		
 	def setColor(self, color, animated=False):
-		self.f_params["r"].setValue(self.color[0])
-		self.f_params["g"].setValue(self.color[1])
-		self.f_params["b"].setValue(self.color[2])
-		self.f_params["a"].setValue(self.color[3])
+		self.f_params["r"].setValue(color[0])
+		self.f_params["g"].setValue(color[1])
+		self.f_params["b"].setValue(color[2])
+		self.f_params["a"].setValue(color[3])
 		if not animated:
-			self.color = color
-			self.params["r"].setValue(self.color[0])
-			self.params["g"].setValue(self.color[1])
-			self.params["b"].setValue(self.color[2])
-			self.params["a"].setValue(self.color[3])
-			ac.setFontColor(self.label, *self.color)
+			self.params["r"].setValue(color[0])
+			self.params["g"].setValue(color[1])
+			self.params["b"].setValue(color[2])
+			self.params["a"].setValue(color[3])
+			ac.setFontColor(self.label, *color)
+		return self
+	
+	def setFont(self, fontName, italic, bold):
+		self.fontName = fontName		
+		ac.setCustomFont(self.label, self.fontName, italic, bold)
+		if fontName == "Khula":
+			self.fontSize+=1
+			ac.setFontSize(self.label, self.fontSize)
+			
 		return self
 	
 	def setFontSize(self, fontSize):
@@ -254,7 +261,8 @@ class Label:
 		return self	
 	
 	def setAnimationSpeed(self,param,value):
-		self.multiplier[param].setValue(value)
+		for p in param:
+			self.multiplier[p].setValue(value)
 		return self
 	
 	def hide(self):

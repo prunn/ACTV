@@ -13,7 +13,7 @@ class Laps:
         self.time = time
         
 class Driver:
-    def __init__(self,app,identifier,name,pos,isLapLabel=False):
+    def __init__(self,app,fontName,identifier,name,pos,isLapLabel=False):
         self.identifier=identifier
         strOffset = " "
         self.y = 0
@@ -39,6 +39,8 @@ class Driver:
         self.completedLaps = Value()
         self.time_highlight_end = 0
         self.highlight = Value()
+        self.pit_highlight_end = 0
+        self.pit_highlight = Value()
         self.position = Value()
         self.position_offset = Value()
         self.gapToFirst=0
@@ -52,6 +54,14 @@ class Driver:
         self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, 38).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.lbl_pit = Label(app,"P").setSize(24, 36).setPos(218, 0).setFontSize(23).setAlign("center").setBgOpacity(0).setVisible(0)
         self.setName()
+        self.lbl_time.setAnimationSpeed("rgb",0.08)
+        self.lbl_pit.setAnimationSpeed("rgb",0.08)
+        if fontName != "":
+            self.lbl_name.setFont(fontName,0,0) 
+            self.lbl_position.setFont(fontName,0,0) 
+            self.lbl_time.setFont(fontName,0,0) 
+            self.lbl_pit.setFont(fontName,0,0)
+            
     
     def show(self,start,needsTLC=True):
         if self.showingFullNames and needsTLC:
@@ -86,15 +96,23 @@ class Driver:
                 self.lbl_border.setPos(0, 37)        
             self.isDisplayed = True
             
-    def updatePit(self):
+    def updatePit(self,session_time):
         self.isInPit.setValue(bool(ac.isCarInPitline(self.identifier)))
         if self.isInPit.hasChanged():
             if self.isInPit.value:
+                self.pit_highlight_end = session_time - 5000
                 self.lbl_pit.setVisible(1)
                 self.lbl_name.setSize(204, 38)
             else:
                 self.lbl_pit.setVisible(0)  
-                self.lbl_name.setSize(180, 38)                  
+                self.lbl_name.setSize(180, 38)         
+        #color
+        self.pit_highlight.setValue(self.pit_highlight_end != 0 and self.pit_highlight_end < session_time)        
+        if self.pit_highlight.hasChanged() :          
+            if self.pit_highlight.value:
+                self.lbl_pit.setColor(Colors.red())
+            else:
+                self.lbl_pit.setColor(Colors.white(),True)          
            
     def hide(self): 
         if self.isDisplayed: 
@@ -129,7 +147,6 @@ class Driver:
         if time_changed or self.gap.hasChanged() or self.qual_mode.hasChanged():
             if time_changed:
                 self.time_highlight_end = session_time - 5000
-            #self.highlight.setValue(True)
             if self.position.value==1 or mode==1:
                 self.lbl_time.setText(self.format_time(self.time.value))
             else:
@@ -241,7 +258,8 @@ class Driver:
         else:
             return "{0}.{1}".format(int(s), str(int(d)).zfill(3))
      
-    def animate(self,sessionTimeLeft):
+    def animate(self,sessionTimeLeft): 
+        self.lbl_pit.animate()
         if self.final_y != self.y :
             multiplier=3
             if abs(self.final_y - self.y) == 1:
@@ -267,9 +285,10 @@ class Driver:
         
         if self.highlight.hasChanged() :          
             if self.highlight.value:
-                self.lbl_time.setColor(Colors.red())
+                self.lbl_time.setColor(Colors.red(),True)
             else:
-                self.lbl_time.setColor(Colors.white())
+                self.lbl_time.setColor(Colors.white(),True)
+        self.lbl_time.animate()  
              
 class raceGaps:
     def __init__(self,sector,time):
@@ -280,6 +299,7 @@ class ACTower:
 
     # INITIALIZATION
     def __init__(self): 
+        self.fontName=""
         self.drivers = []
         self.stintLabels = []
         self.standings = []
@@ -331,7 +351,13 @@ class ACTower:
         self.max_num_laps_stint = cfg.get("SETTINGS", "num_laps_stint", "int")
         self.race_mode.setValue(cfg.get("SETTINGS", "race_mode", "int"))
         self.qual_mode.setValue(cfg.get("SETTINGS", "qual_mode", "int")) 
-     
+    
+                
+    def setFont(self,fontName):
+        self.lbl_title_stint.setFont(fontName,0,0)
+        self.lbl_tire_stint.setFont(fontName,0,0) 
+        self.fontName=fontName
+        
     def animate(self,sessionTimeLeft):
         for driver in self.drivers:
             #if driver.final_y != driver.y :
@@ -352,7 +378,7 @@ class ACTower:
         if self.numCars.value > self.numCars.old:
             #init difference
             for i in range(self.numCars.old,self.numCars.value): 
-                self.drivers.append(Driver(self.window.app,i,ac.getDriverName(i),i))                      
+                self.drivers.append(Driver(self.window.app,self.fontName,i,ac.getDriverName(i),i))                      
             self.drivers_inited=True
     
     def nextDriverIsShown(self,pos):
@@ -392,7 +418,7 @@ class ACTower:
                     #self.stintLabels                    
                     if len(self.curDriverLaps) > len(self.stintLabels):                        
                         for i in range(len(self.stintLabels),len(self.curDriverLaps)): 
-                            self.stintLabels.append(Driver(self.window.app,0,"Lap " + str(i+1),i+2,True))
+                            self.stintLabels.append(Driver(self.window.app,self.fontName,0,"Lap " + str(i+1),i+2,True))
                     i=0
                     j=0
                     self.lbl_title_stint.setVisible(1)
@@ -414,7 +440,7 @@ class ACTower:
                 else:
                     driver.hide()
         else:            
-            if self.lbl_title_stint.visible != 0:
+            if self.lbl_title_stint.isVisible.value:
                 self.lbl_title_stint.setVisible(0)
                 self.lbl_tire_stint.setVisible(0)
                 for l in self.stintLabels:
@@ -445,7 +471,7 @@ class ACTower:
                     checkPos=p[0] + 1
                 if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:
                     driver.show(self.driver_shown)
-                    driver.updatePit()
+                    driver.updatePit(sim_info.graphics.sessionTimeLeft)
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
                         driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft,self.qual_mode.value)                           
@@ -493,7 +519,7 @@ class ACTower:
         return True                  
                 
     def update_drivers_race(self,sim_info): 
-        if self.lbl_title_stint.visible != 0:
+        if self.lbl_title_stint.isVisible.value:
             self.lbl_title_stint.setVisible(0)
             self.lbl_tire_stint.setVisible(0)
             for l in self.stintLabels:

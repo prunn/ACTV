@@ -66,6 +66,9 @@ class ACSpeedTrap:
         else:
             self.lapCanBeInvalidated = False
             
+    def setFont(self,fontName):
+        self.lbl_title.setFont(fontName,0,0)
+        self.lbl_time.setFont(fontName,0,0)       
                                                    
     def checkMPH(self,cfg_path):
         conf  = Config(cfg_path, "/gameplay.ini")

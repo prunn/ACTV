@@ -84,6 +84,14 @@ class ACInfo:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
+            
+    def setFont(self,fontName):
+        self.lbl_driver_name.setFont(fontName,0,0)
+        self.lbl_timing.setFont(fontName,0,0)
+        self.lbl_split.setFont(fontName,0,0)
+        self.lbl_fastest_split.setFont(fontName,0,0)
+        self.info_position.setFont(fontName,0,0)
+        self.info_position_lead.setFont(fontName,0,0)
            
     def format_name(self,name):
         space = name.find(" ")

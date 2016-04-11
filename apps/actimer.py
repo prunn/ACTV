@@ -70,7 +70,12 @@ class ACTimer:
 		if cfg.get("SETTINGS", "hide_pins", "int") == 1:
 			self.pinHack.setValue(True)
 		else:
-			self.pinHack.setValue(False)  
+			self.pinHack.setValue(False)
+
+	def setFont(self,fontName):
+		self.lbl_session_info.setFont(fontName,0,0)
+		self.lbl_session_title.setFont(fontName,0,0) 
+		self.lbl_session_single.setFont(fontName,0,0) 
 
 	def time_splitting(self, ms):
 		s=ms/1000 
