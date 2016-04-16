@@ -173,8 +173,9 @@ class ACSpeedTrap:
                 if isInPit :
                     self.lastLapInPit = LapCount
                 
-                if self.lastLapInPit < LapCount and self.curTopSpeed.value < 500 and self.lastLapShown < LapCount and self.lastLapInvalidated < LapCount and self.widget_visible.value == 0 and self.trap < ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) + 0.06 and self.trap > ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) - 0.08 and self.SpeedKMH.value < self.SpeedKMH.old - 0.3:
-                    #show and set timer 
+                if self.lastLapInPit < LapCount and self.curTopSpeed.value < 500 and self.lastLapShown < LapCount and self.lastLapInvalidated < LapCount and self.widget_visible.value == 0 and self.trap < ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) + 0.06 and self.trap > ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition) - 0.08 and self.SpeedKMH.value < self.SpeedKMH.old - 0.6:
+                    
+                    #show and set timer 0.3
                     self.lastLapShown=LapCount
                     self.widget_visible.setValue(1)
                     if self.useMPH:

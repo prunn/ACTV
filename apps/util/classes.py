@@ -157,13 +157,13 @@ class Label:
 		self.label     = ac.addLabel(window, self.text)
 		self.params	  = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
 		self.f_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
-		self.o_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
+		self.o_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(1), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
 		self.multiplier = {"x" : Value(3), "y" : Value(3), "w" : Value(1), "h" : Value(1), "o" : Value(0.02), "r" : Value(0.06), "g" : Value(0.06), "b" : Value(0.06), "a" : Value(0.02) }
 		self.fontSize  = 12
 		self.align     = "left"
 		self.bgTexture = ""
 		self.fontName = ""
-		self.opacity   = 1
+		#self.opacity   = 1
 		self.visible=0
 		self.isVisible = Value(False)
 		self.isTextVisible = Value(False)
@@ -184,6 +184,8 @@ class Label:
 		self.f_params["w"].setValue(w)
 		self.f_params["h"].setValue(h)
 		if not animated:
+			self.o_params["w"].setValue(w)
+			self.o_params["h"].setValue(h)
 			self.params["w"].setValue(w)
 			self.params["h"].setValue(h)
 			if self.params["w"].hasChanged() or self.params["h"].hasChanged():
@@ -194,6 +196,8 @@ class Label:
 		self.f_params["x"].setValue(x)
 		self.f_params["y"].setValue(y)
 		if not animated:
+			self.o_params["x"].setValue(x)
+			self.o_params["y"].setValue(y)
 			self.params["x"].setValue(x)
 			self.params["y"].setValue(y)
 			if self.params["x"].hasChanged() or self.params["y"].hasChanged():
@@ -206,6 +210,10 @@ class Label:
 		self.f_params["b"].setValue(color[2])
 		self.f_params["a"].setValue(color[3])
 		if not animated:
+			self.o_params["r"].setValue(color[0])
+			self.o_params["g"].setValue(color[1])
+			self.o_params["b"].setValue(color[2])
+			self.o_params["a"].setValue(color[3])
 			self.params["r"].setValue(color[0])
 			self.params["g"].setValue(color[1])
 			self.params["b"].setValue(color[2])
@@ -218,8 +226,7 @@ class Label:
 		ac.setCustomFont(self.label, self.fontName, italic, bold)
 		if fontName == "Khula":
 			self.fontSize+=1
-			ac.setFontSize(self.label, self.fontSize)
-			
+			ac.setFontSize(self.label, self.fontSize)			
 		return self
 	
 	def setFontSize(self, fontSize):
@@ -244,13 +251,11 @@ class Label:
 		return self
 	
 	def setBgOpacity(self, opacity, animated=False):
-		if animated:
-			self.f_params["o"].setValue(opacity)
-		else:	
-			self.opacity=opacity
+		self.f_params["o"].setValue(opacity)
+		if not animated:	
+			self.o_params["o"].setValue(opacity)	
+			#self.opacity=opacity
 			self.params["o"].setValue(opacity)
-			self.f_params["o"].setValue(opacity)
-			#if self.params["o"].hasChanged():
 			ac.setBackgroundOpacity(self.label, self.params["o"].value)
 		return self
 	############################## Animations ##############################
@@ -258,6 +263,8 @@ class Label:
 		self.visible=value
 		self.isVisible.setValue(bool(value))
 		ac.setVisible(self.label, value)
+		#self.params = self.o_params
+		#self.f_params = self.o_params
 		return self	
 	
 	def setAnimationSpeed(self,param,value):
@@ -269,14 +276,22 @@ class Label:
 		self.setBgOpacity(0, True)
 		return self
 	
+	def slideUp(self):
+		self.f_params["h"].setValue(0)
+		return self
+	
 	def show(self):
-		self.f_params["o"].setValue(self.opacity)
+		self.f_params["o"].setValue(self.o_params["o"].value)
+		return self
+	
+	def slideDown(self):
+		self.f_params["h"].setValue(self.o_params["h"].value)
 		return self
 	
 	def showText(self):
 		#if self.params["a"].value == self.opacity:
 		#	self.params["a"].setValue(0)
-		self.f_params["a"].setValue(self.opacity)		
+		self.f_params["a"].setValue(self.o_params["a"].value)		
 		return self
 	
 	def hideText(self):
@@ -309,6 +324,10 @@ class Label:
 			ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
 		if self.params["w"].hasChanged() or self.params["h"].hasChanged():
 			ac.setSize(self.label, self.params["w"].value, self.params["h"].value)
+			if self.params["h"].value == 0:
+				self.isVisible.setValue(False)
+			else:
+				self.isVisible.setValue(True)
 		if self.params["o"].hasChanged():	
 			if self.params["o"].value == 0:
 				self.isVisible.setValue(False)

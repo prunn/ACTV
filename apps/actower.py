@@ -2,10 +2,11 @@ import ac
 import acsys
 import math
 import sys
+import functools
 import ctypes
 from apps.util.func import rgb
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
-
+    
 class Laps:
     def __init__(self,lap,valid,time):
         self.lap = lap
@@ -15,6 +16,8 @@ class Laps:
 class Driver:
     def __init__(self,app,fontName,identifier,name,pos,isLapLabel=False):
         self.identifier=identifier
+        self.rowHeight=36
+        self.fontSize=24
         strOffset = " "
         self.y = 0
         self.final_y = 0
@@ -45,67 +48,78 @@ class Driver:
         self.position_offset = Value()
         self.gapToFirst=0
         self.showingFullNames=False
-        if isLapLabel:            
-            self.lbl_name = Label(app,strOffset+name).setSize(218, 38).setPos(0, 0).setFontSize(26).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
+        if self.isLapLabel:            
+            self.lbl_name = Label(app,strOffset+name).setSize(218, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
         else:    
-            self.lbl_name = Label(app,strOffset+self.format_name_tlc(name)).setSize(180, 38).setPos(38, 0).setFontSize(26).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
-        self.lbl_position = Label(app,str(pos+1)).setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.grey(bg = True)).setColor(Colors.white()).setBgOpacity(1).setVisible(0)
-        self.lbl_time = Label(app,"+0.000").setSize(60, 38).setPos(148, 0).setFontSize(26).setAlign("right").setBgOpacity(0).setVisible(0)
-        self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, 38).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
-        self.lbl_pit = Label(app,"P").setSize(24, 36).setPos(218, 0).setFontSize(23).setAlign("center").setBgOpacity(0).setVisible(0)
+            self.lbl_name = Label(app,strOffset+self.format_name_tlc(name)).setSize(180, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
+            self.lbl_position = Label(app,str(pos+1)).setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("center").setBgColor(Colors.grey(bg = True)).setColor(Colors.white()).setBgOpacity(1).setVisible(0)
+            self.lbl_pit = Label(app,"P").setSize(24, self.rowHeight-2).setPos(218, 0).setFontSize(self.fontSize-3).setAlign("center").setColor(rgb([225,225,225])).setBgOpacity(0).setVisible(0)
+            self.lbl_pit.setAnimationSpeed("rgb",0.08)
+        self.lbl_time = Label(app,"+0.000").setSize(60, self.rowHeight).setPos(148, 0).setFontSize(self.fontSize).setAlign("right").setBgOpacity(0).setVisible(0)
+        self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, self.rowHeight).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.setName()
         self.lbl_time.setAnimationSpeed("rgb",0.08)
-        self.lbl_pit.setAnimationSpeed("rgb",0.08)
+        
         if fontName != "":
             self.lbl_name.setFont(fontName,0,0) 
-            self.lbl_position.setFont(fontName,0,0) 
             self.lbl_time.setFont(fontName,0,0) 
-            self.lbl_pit.setFont(fontName,0,0)
+            if not self.isLapLabel:
+                self.lbl_position.setFont(fontName,0,0) 
+                self.lbl_pit.setFont(fontName,0,0)
             
+        if not self.isLapLabel:
+            self.partial_func = functools.partial(self.onClickFunc, driver=self.identifier)       
+            ac.addOnClickedListener(self.lbl_position.label,self.partial_func)     
+            ac.addOnClickedListener(self.lbl_name.label,self.partial_func)
+            
+    
+    @classmethod
+    def onClickFunc(*args,driver=0):
+        ac.focusCar(driver)    
     
     def show(self,start,needsTLC=True):
         if self.showingFullNames and needsTLC:
             self.setName()
+        self.lbl_name.show()
+        self.lbl_time.showText()
+        self.lbl_border.show()
+        if not self.isLapLabel:
+            self.lbl_position.show()
         if not self.isDisplayed: 
-            self.lbl_name.setVisible(1)
-            if self.isLapLabel:
-                self.lbl_position.setVisible(0)
-            else:
-                self.lbl_position.setVisible(1)
-            self.lbl_time.setVisible(1)
-            self.lbl_border.setVisible(1)
+            '''
             if start > 1:
                 self.y=(start-2)*38
                 if self.isLapLabel:
-                    self.lbl_name.setPos(0, (start-2)*38)
+                    self.lbl_name.setPos(0, (start-2)*self.rowHeight)
                 else:
-                    self.lbl_name.setPos(38, (start-2)*38)
-                self.lbl_position.setPos(0, (start-2)*38)
-                self.lbl_time.setPos(148, (start-2)*38) 
-                self.lbl_pit.setPos(218, (start-2)*38 + 2)   
-                self.lbl_border.setPos(0, (start-2)*38 + 37)
+                    self.lbl_name.setPos(38, (start-2)*self.rowHeight)
+                self.lbl_position.setPos(0, (start-2)*self.rowHeight)
+                self.lbl_time.setPos(148, (start-2)*self.rowHeight) 
+                self.lbl_pit.setPos(218, (start-2)*self.rowHeight + 2)   
+                self.lbl_border.setPos(0, (start-2)*self.rowHeight + 37)
             else:
                 self.y=38
                 if self.isLapLabel:
-                    self.lbl_name.setPos(0, 38)
+                    self.lbl_name.setPos(0, self.rowHeight)
                 else:
-                    self.lbl_name.setPos(38, 38)
-                self.lbl_position.setPos(0, 38)
-                self.lbl_time.setPos(148, 38)  
-                self.lbl_pit.setPos(218, 42)  
-                self.lbl_border.setPos(0, 37)        
+                    self.lbl_name.setPos(self.rowHeight, self.rowHeight)
+                self.lbl_position.setPos(0, self.rowHeight)
+                self.lbl_time.setPos(148, self.rowHeight)  
+                self.lbl_pit.setPos(218, self.rowHeight + 2)  
+                self.lbl_border.setPos(0, self.rowHeight-1) 
+            '''       
             self.isDisplayed = True
             
     def updatePit(self,session_time):
         self.isInPit.setValue(bool(ac.isCarInPitline(self.identifier)))
-        if self.isInPit.hasChanged():
+        if not self.isLapLabel and self.isInPit.hasChanged():
             if self.isInPit.value:
                 self.pit_highlight_end = session_time - 5000
-                self.lbl_pit.setVisible(1)
-                self.lbl_name.setSize(204, 38)
+                self.lbl_pit.showText()
+                self.lbl_name.setSize(204, self.rowHeight,True)
             else:
-                self.lbl_pit.setVisible(0)  
-                self.lbl_name.setSize(180, 38)         
+                self.lbl_pit.hideText()  
+                self.lbl_name.setSize(180, self.rowHeight,True)         
         #color
         self.pit_highlight.setValue(self.pit_highlight_end != 0 and self.pit_highlight_end < session_time)        
         if self.pit_highlight.hasChanged() :          
@@ -115,13 +129,15 @@ class Driver:
                 self.lbl_pit.setColor(Colors.white(),True)          
            
     def hide(self): 
-        if self.isDisplayed: 
-            self.lbl_name.setVisible(0)
-            self.lbl_name.setSize(180, 38) 
-            self.lbl_position.setVisible(0)
-            self.lbl_time.setVisible(0)
-            self.lbl_border.setVisible(0)  
-            self.lbl_pit.setVisible(0)  
+        if not self.isLapLabel:
+            self.lbl_position.hide()
+            self.lbl_pit.hideText() 
+        self.lbl_time.hideText()
+        self.lbl_border.hide()  
+        self.lbl_name.hide()
+        if not self.isLapLabel:
+            self.lbl_name.setSize(180, self.rowHeight) 
+        if self.isDisplayed:              
             self.isDisplayed = False    
             
     def setName(self):
@@ -157,8 +173,7 @@ class Driver:
         self.gap.setValue(time)
         time_changed=self.time.hasChanged()
         if time_changed or self.gap.hasChanged():            
-            if self.isLapLabel:
-                self.lbl_time.setText(self.format_time(self.time.value))
+            self.lbl_time.setText(self.format_time(self.time.value))
         if valid:            
             self.lbl_time.setColor(Colors.white())
         else:
@@ -187,35 +202,47 @@ class Driver:
     def setPosition(self,position,leader,offset,battles,qual_mode):
         self.position.setValue(position)
         self.position_offset.setValue(offset)
-        if self.position.hasChanged() or self.position_offset.hasChanged():
-            self.lbl_position.setText(str(self.position.value))
+        if self.position.hasChanged() or self.position_offset.hasChanged():            
+            if not self.isLapLabel:
+                self.lbl_position.setText(str(self.position.value))
             #move labels
-            #ac.console("offset:" + str(offset))
             pos=position-1-offset
-            self.final_y=pos*38
+            self.final_y=pos*self.rowHeight
+            if self.isLapLabel:
+                self.lbl_name.setPos(0, self.final_y,True)
+            else:
+                self.lbl_name.setPos(self.rowHeight, self.final_y,True)
+                if not self.isLapLabel:
+                    self.lbl_position.setPos(0, self.final_y,True) 
+                    self.lbl_pit.setPos(218, self.final_y + 2,True) 
+            self.lbl_time.setPos(148, self.final_y,True) 
+            self.lbl_border.setPos(0, self.final_y + self.rowHeight-1,True) 
             if position % 2 == 1:
-                self.lbl_name.setBgOpacity(0.72)
-                #self.lbl_pit.setBgOpacity(0.72)           
+                self.lbl_name.setBgOpacity(0.72)          
                 if position==1:
-                    self.lbl_position.setBgColor(Colors.red(bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
+                    if not self.isLapLabel:
+                        self.lbl_position.setBgColor(Colors.red(bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 elif battles and self.identifier == 0:
-                    self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.72)
+                    if not self.isLapLabel:
+                        self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.72)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
-                    self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
+                    if not self.isLapLabel:
+                        self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
                         self.lbl_time.setText("+"+self.format_time(self.gap.value))
             else:
                 self.lbl_name.setBgOpacity(0.58)
-                #self.lbl_pit.setBgOpacity(0.58)
                 if battles and self.identifier == 0:
-                    self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.68)
+                    if not self.isLapLabel:
+                        self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.68)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
-                    self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setColor(Colors.white()).setBgOpacity(0.58)
+                    if not self.isLapLabel:
+                        self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setColor(Colors.white()).setBgOpacity(0.58)
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
@@ -259,36 +286,24 @@ class Driver:
             return "{0}.{1}".format(int(s), str(int(d)).zfill(3))
      
     def animate(self,sessionTimeLeft): 
-        self.lbl_pit.animate()
-        if self.final_y != self.y :
-            multiplier=3
-            if abs(self.final_y - self.y) == 1:
-                multiplier=1
+        '''
+            multiplier=3            
             elif abs(self.final_y - self.y) > 38*3:
-                multiplier=round(abs(self.final_y - self.y)/38)        
-            if self.final_y < self.y :
-                self.y-=multiplier   
-                #manage z-index with set visible?         
-            elif self.final_y > self.y :
-                self.y+=multiplier 
-            if self.isLapLabel:                
-                self.lbl_name.setPos(0, self.y)
-            else:
-                self.lbl_name.setPos(38, self.y)
-            self.lbl_position.setPos(0, self.y)
-            self.lbl_time.setPos(148, self.y)
-            self.lbl_pit.setPos(218, self.y+2)
-            self.lbl_border.setPos(0, self.y+37)
-        
+                multiplier=round(abs(self.final_y - self.y)/38) 
+        '''
         #color
-        self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < sessionTimeLeft)
-        
+        self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < sessionTimeLeft)        
         if self.highlight.hasChanged() :          
             if self.highlight.value:
                 self.lbl_time.setColor(Colors.red(),True)
             else:
-                self.lbl_time.setColor(Colors.white(),True)
+                self.lbl_time.setColor(Colors.white(),True)        
+        if not self.isLapLabel:
+            self.lbl_position.animate()
+            self.lbl_pit.animate()
+        self.lbl_border.animate()  
         self.lbl_time.animate()  
+        self.lbl_name.animate()
              
 class raceGaps:
     def __init__(self,sector,time):
@@ -299,6 +314,7 @@ class ACTower:
 
     # INITIALIZATION
     def __init__(self): 
+        self.rowHeight=36
         self.fontName=""
         self.drivers = []
         self.stintLabels = []
@@ -318,8 +334,7 @@ class ACTower:
         self.max_num_laps_stint = 8
         self.race_mode = Value(0)
         self.qual_mode = Value(0)
-        self.numCarsToFinish=0
-        #self.cursor.setValue(False)      
+        self.numCarsToFinish=0   
         self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.minLapCount=1
@@ -329,8 +344,8 @@ class ACTower:
         self.lastLapInvalidated=-1
         self.minlap_stint = 5
         self.iLastTime=Value()
-        self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(218, 34).setPos(0, 118).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
-        self.lbl_tire_stint = Label(self.window.app,"").setSize(218, 38).setPos(0, 38).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
+        self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(218, self.rowHeight-4).setPos(0, 118).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
+        self.lbl_tire_stint = Label(self.window.app,"").setSize(218, self.rowHeight).setPos(0, self.rowHeight).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
         
         track=ac.getTrackName(0)
         config=ac.getTrackConfiguration(0)
@@ -403,10 +418,9 @@ class ACTower:
             self.curDriverLaps=[]
             self.stint_visible_end=0
         #mode_changed = self.qual_mode.hasChanged()
+        self.minlap_stint = 2255 #disabled for now
         if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and sim_info.graphics.sessionTimeLeft >= self.stint_visible_end):
-            #ac.console(str(show_stint_always) + " and " + str(len(self.curDriverLaps)) + " >= " + str(self.minlap_stint) + " or " + str(self.stint_visible_end != 0) + " and " + str(sim_info.graphics.sessionTimeLeft) + " >= " + str(self.stint_visible_end))
-            #if (sim_info.graphics.sessionTimeLeft > 90000 or sim_info.graphics.session == 0) and len(self.curDriverLaps) >= minlap_stint:
-            #visible end
+            #Lap stint mode
             for driver in self.drivers: 
                 if driver.identifier == 0:
                     driver.show(0,False)
@@ -414,16 +428,16 @@ class ACTower:
                     driver.showFullName()
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                        
                     if len(p) > 0:
-                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0] + 1,False,self.qual_mode.value)                        
+                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0],False,self.qual_mode.value)                        
                     #self.stintLabels                    
                     if len(self.curDriverLaps) > len(self.stintLabels):                        
                         for i in range(len(self.stintLabels),len(self.curDriverLaps)): 
                             self.stintLabels.append(Driver(self.window.app,self.fontName,0,"Lap " + str(i+1),i+2,True))
                     i=0
                     j=0
-                    self.lbl_title_stint.setVisible(1)
+                    self.lbl_title_stint.show()
                     self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
-                    self.lbl_tire_stint.setVisible(1)
+                    self.lbl_tire_stint.show()
                     #for lbl in self.stintLabels:
                     lapOffset=len(self.curDriverLaps)-self.max_num_laps_stint
                     for l in self.curDriverLaps:
@@ -441,8 +455,8 @@ class ACTower:
                     driver.hide()
         else:            
             if self.lbl_title_stint.isVisible.value:
-                self.lbl_title_stint.setVisible(0)
-                self.lbl_tire_stint.setVisible(0)
+                self.lbl_title_stint.hide()
+                self.lbl_tire_stint.hide()
                 for l in self.stintLabels:
                     l.hide()
             for driver in self.drivers: 
@@ -520,8 +534,8 @@ class ACTower:
                 
     def update_drivers_race(self,sim_info): 
         if self.lbl_title_stint.isVisible.value:
-            self.lbl_title_stint.setVisible(0)
-            self.lbl_tire_stint.setVisible(0)
+            self.lbl_title_stint.hide()
+            self.lbl_tire_stint.hide()
             for l in self.stintLabels:
                 l.hide()
         if self.numCars.hasChanged():
