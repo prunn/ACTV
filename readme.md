@@ -11,10 +11,6 @@ Driver colors are set with car brand
 * ruf-corvette-lotus : yellow
 * lamborghini-pagani: green
 
-No configurations are possible at the time
-
-maximum amount of cars in the tower is 18
-
 battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap for 12 sec
 
 works with ac shortcuts (but needs to have onboard camera to pickup the driver change):
@@ -24,21 +20,32 @@ works with ac shortcuts (but needs to have onboard camera to pickup the driver c
 
 -
 ###Changelog
-0.9.3.0
+0.9.5
+config window
+full tower race mode
+gaps or laps for qualif/practise
+hotkey f7 to change mode
+
+0.9.4
+bug fixes
+stint view
+speed units bounded to game options
+
+0.9.3
 * fixed ctypes import crashing
 
-0.9.2.0
+0.9.2
 * another fix for tower in race
 * deeper logging and prevent of freezing other widgets in case of an error
 * fixed ambiguous file import
 
-0.9.1.0
+0.9.1
 * added colors for afla romeo(grey),ford(blue)
 * fixed online tower - keep alive issue
 * nordschleife tourist support
 * race standings with validated progress
 
-0.9.0.0
+0.9.0
 * Initial release
 
 ####Todo

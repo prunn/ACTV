@@ -3,7 +3,7 @@ import acsys
 import ctypes
 import math
 
-from apps.util.func import rgb
+from apps.util.func import rgb, getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
        
 class ACInfo:
@@ -20,6 +20,7 @@ class ACInfo:
         self.lbl_position_text.setValue("")
         self.currentVehicule=Value()
         self.currentVehicule.setValue(0)
+        self.ui_row_height = Value(36)
         self.cursor=Value()
         self.cursor.setValue(False)
         self.fastestLap=Value()
@@ -48,7 +49,7 @@ class ACInfo:
         self.session.setValue(-1)    
         self.window = Window(name="ACTV Info", icon=False, width=332, height=self.rowHeight*2, texture="")
         
-        self.lbl_driver_name=Label(self.window.app,"Loading").setSize(284, self.rowHeight-1).setPos(0, 0).setFontSize(26).setAlign("left").setBgColor(rgb([20, 20, 20], bg = True)).setBgOpacity(0.8).setVisible(0)
+        self.lbl_driver_name=Label(self.window.app,"Loading").setSize(284, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("left").setBgColor(rgb([20, 20, 20], bg = True)).setBgOpacity(0.8).setVisible(0)
         self.lbl_driver_name_visible=Value()
         self.lbl_driver_name_visible_fin=Value(0)
         self.lbl_driver_name_text=Value()
@@ -64,7 +65,7 @@ class ACInfo:
         self.info_position=Label(self.window.app,"0").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(1).setVisible(0)
         self.info_position_lead=Label(self.window.app,"1").setSize(self.rowHeight, self.rowHeight).setPos(246, self.rowHeight).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(1).setVisible(0)
         car = ac.getCarName(0)        
-        self.lbl_border=Label(self.window.app,"").setSize(284, 1).setPos(0, self.rowHeight-1).setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_border=Label(self.window.app,"").setSize(284, 1).setPos(0, self.rowHeight).setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7).setVisible(0)
         self.loadCFG()
         self.info_position.setAnimationSpeed("o", 0.1)
         self.info_position_lead.setAnimationSpeed("o", 0.1)
@@ -84,6 +85,23 @@ class ACInfo:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
+        self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
+        if self.ui_row_height.hasChanged():
+            self.reDrawSize()
+        
+    def reDrawSize(self):
+        self.rowHeight=self.ui_row_height.value
+        fontSize=getFontSize(self.rowHeight)
+        self.row2Height=self.ui_row_height.value-2
+        fontSize2=getFontSize(self.row2Height)
+        self.lbl_driver_name.setSize(284, self.rowHeight).setFontSize(fontSize)
+        self.lbl_timing.setSize(284, self.row2Height).setPos(0, self.rowHeight).setFontSize(fontSize2)
+        self.lbl_split.setSize(220, self.row2Height).setPos(10, self.rowHeight).setFontSize(fontSize2)
+        self.lbl_fastest_split.setSize(220, self.row2Height).setPos(48, self.rowHeight).setFontSize(fontSize2)
+        self.info_position.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)
+        self.info_position_lead.setSize(self.row2Height, self.row2Height).setPos(284-self.row2Height, self.rowHeight).setFontSize(fontSize2)      
+        self.lbl_border.setPos(0, self.rowHeight)
+        
             
     def setFont(self,fontName):
         self.lbl_driver_name.setFont(fontName,0,0)
@@ -93,11 +111,16 @@ class ACInfo:
         self.info_position.setFont(fontName,0,0)
         self.info_position_lead.setFont(fontName,0,0)
            
-    def format_name(self,name):
+    def format_name(self,name):        
         space = name.find(" ")
         if space > 0:
+            if len(name) > 14 and space+1 < len(name):
+                return name[space+1:].upper()
             return name[:space].capitalize() + name[space:].upper()
+        if len(name) > 14:
+            return name[:15].upper()
         return name.upper()
+            
      
             
     def format_tire(self,name):

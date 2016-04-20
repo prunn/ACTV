@@ -12,61 +12,70 @@ class Configuration:
     lapCanBeInvalidated=1
     max_num_cars=18 
     max_num_laps_stint=8
+    ui_row_height=38
     # INITIALIZATION
     def __init__(self):
         self.session=Value(-1)
         self.listen_active = True
-        self.window = Window(name="ACTV Config", icon=True, width=256, height=440, texture="").setBgOpacity(0.6)    
+        self.window = Window(name="ACTV Config", icon=True, width=251, height=520, texture="").setBgOpacity(0.6)    
                
-           
+        y=60
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
         ac.setRange(self.spin_race_mode, 0,1)
-        ac.setPosition(self.spin_race_mode,25,60)
+        ac.setPosition(self.spin_race_mode,20,y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.onSpinRaceModeChanged) 
-        self.lbl_race_mode = Label(self.window.app,"Auto").setSize(120, 26).setPos(192, 33).setFontSize(15).setAlign("left").setVisible(1) 
+        self.lbl_race_mode = Label(self.window.app,"Auto").setSize(120, 26).setPos(192, y-27).setFontSize(15).setAlign("left").setVisible(1) 
         
+        y+=80
         self.spin_qual_mode = ac.addSpinner(self.window.app, "Qual tower mode :      ")
         ac.setRange(self.spin_qual_mode, 0,1)
-        ac.setPosition(self.spin_qual_mode,25,140)
+        ac.setPosition(self.spin_qual_mode,20,y)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
         ac.addOnValueChangeListener(self.spin_qual_mode, self.onSpinQualModeChanged) 
-        self.lbl_qual_mode = Label(self.window.app,"Gaps").setSize(120, 26).setPos(192, 113).setFontSize(15).setAlign("left").setVisible(1)       
-            
+        self.lbl_qual_mode = Label(self.window.app,"Gaps").setSize(120, 26).setPos(192, y-27).setFontSize(15).setAlign("left").setVisible(1)       
+          
+        y+=80  
         self.spin_num_cars = ac.addSpinner(self.window.app, "Number cars tower")
         ac.setRange(self.spin_num_cars, 2,28)
-        ac.setPosition(self.spin_num_cars,25,220)
+        ac.setPosition(self.spin_num_cars,20,y)
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.addOnValueChangeListener(self.spin_num_cars, self.onSpinNumCarsChanged)          
         
+        y+=80
         self.spin_num_laps = ac.addSpinner(self.window.app, "Number laps stint mode")
         ac.setRange(self.spin_num_laps, 2,28)
-        ac.setPosition(self.spin_num_laps,25,300)
+        ac.setPosition(self.spin_num_laps,20,y)
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
-        ac.addOnValueChangeListener(self.spin_num_laps, self.onSpinNumLapsChanged)        
+        ac.addOnValueChangeListener(self.spin_num_laps, self.onSpinNumLapsChanged)   
         
+        y+=80 
+        self.spin_row_height = ac.addSpinner(self.window.app, "Row height")
+        ac.setRange(self.spin_row_height, 20,48)
+        ac.setPosition(self.spin_row_height,20,y)
+        ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
+        ac.addOnValueChangeListener(self.spin_row_height, self.onSpinRowHeightChanged)       
         
+        y+=60
         self.chk_pins = ac.addCheckBox(self.window.app, "")
-        ac.setPosition(self.chk_pins,25,360)  
+        ac.setPosition(self.chk_pins,20,y)  
         ac.addOnCheckBoxChanged(self.chk_pins, self.onCheckPinChanged)
-        self.lbl_title_pins = Label(self.window.app,"Hide pins").setSize(200, 26).setPos(65, 361).setFontSize(16).setAlign("left").setVisible(1)        
+        self.lbl_title_pins = Label(self.window.app,"Hide pins").setSize(200, 26).setPos(65, y+1).setFontSize(16).setAlign("left").setVisible(1)        
         
-        
+        y+=40
         self.chk_invalidated = ac.addCheckBox(self.window.app, "")
-        ac.setPosition(self.chk_invalidated,25,400)
+        ac.setPosition(self.chk_invalidated,20,y)
         ac.addOnCheckBoxChanged(self.chk_invalidated, self.onCheckInvalidatedChanged)
-        self.lbl_title_invalidated = Label(self.window.app,"Lap can be invalidated").setSize(200, 26).setPos(65, 401).setFontSize(16).setAlign("left").setVisible(1)
+        self.lbl_title_invalidated = Label(self.window.app,"Lap can be invalidated").setSize(200, 26).setPos(65, y+1).setFontSize(16).setAlign("left").setVisible(1)
         
         self.cfg_loaded = False
         self.cfg = Config("apps/python/prunn/", "config.ini")
         self.loadCFG()
         
-            
         #thread
         self.key_listener = threading.Thread(target=self.listen_key)  
         self.key_listener.daemon = True      
-        self.key_listener.start()
-        
+        self.key_listener.start()        
     
     def __del__(self):
         self.listen_active = False
@@ -83,7 +92,10 @@ class Configuration:
             self.__class__.max_num_cars=18
         self.__class__.max_num_laps_stint = self.cfg.get("SETTINGS", "num_laps_stint", "int")  
         if self.__class__.max_num_laps_stint == -1:
-            self.__class__.max_num_laps_stint=8      
+            self.__class__.max_num_laps_stint=8
+        self.__class__.ui_row_height = self.cfg.get("SETTINGS", "ui_row_height", "int")  
+        if self.__class__.ui_row_height == -1:
+            self.__class__.ui_row_height=38
         self.__class__.race_mode = self.cfg.get("SETTINGS", "race_mode", "int") 
         if self.__class__.race_mode == -1:
             self.__class__.race_mode=0
@@ -95,6 +107,7 @@ class Configuration:
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)        
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
+        ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.setValue(self.chk_pins,self.__class__.pinHack)
         ac.setValue(self.chk_invalidated,self.__class__.lapCanBeInvalidated)
         self.setLabelQual()
@@ -110,6 +123,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)
         self.cfg.set("SETTINGS", "num_cars_tower", self.__class__.max_num_cars)    
         self.cfg.set("SETTINGS", "num_laps_stint", self.__class__.max_num_laps_stint) 
+        self.cfg.set("SETTINGS", "ui_row_height", self.__class__.ui_row_height) 
     
     def setLabelQual(self):
         if self.__class__.qual_mode == 0:
@@ -183,7 +197,12 @@ class Configuration:
     @staticmethod
     def onSpinNumLapsChanged(value): 
         Configuration.max_num_laps_stint = value
-        Configuration.configChanged=True        
+        Configuration.configChanged=True  
+        
+    @staticmethod
+    def onSpinRowHeightChanged(value): 
+        Configuration.ui_row_height = value
+        Configuration.configChanged=True       
     
     @staticmethod
     def onSpinRaceModeChanged(value):

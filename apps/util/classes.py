@@ -134,6 +134,9 @@ class Colors:
 	@staticmethod
 	def grey(bg = False):
 		return rgb([112, 112, 112], bg = bg)
+	@staticmethod
+	def pitColor(bg = False):
+		return rgb([225, 225, 225], bg = bg)
 	
 	@staticmethod
 	def colorFromCar(car):

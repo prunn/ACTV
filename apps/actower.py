@@ -17,7 +17,7 @@ class Driver:
     def __init__(self,app,fontName,identifier,name,pos,isLapLabel=False):
         self.identifier=identifier
         self.rowHeight=36
-        self.fontSize=24
+        self.fontSize=self.rowHeight-12
         strOffset = " "
         self.y = 0
         self.final_y = 0
@@ -53,7 +53,7 @@ class Driver:
         else:    
             self.lbl_name = Label(app,strOffset+self.format_name_tlc(name)).setSize(180, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
             self.lbl_position = Label(app,str(pos+1)).setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("center").setBgColor(Colors.grey(bg = True)).setColor(Colors.white()).setBgOpacity(1).setVisible(0)
-            self.lbl_pit = Label(app,"P").setSize(24, self.rowHeight-2).setPos(218, 0).setFontSize(self.fontSize-3).setAlign("center").setColor(rgb([225,225,225])).setBgOpacity(0).setVisible(0)
+            self.lbl_pit = Label(app,"P").setSize(24, self.rowHeight-2).setPos(218, 0).setFontSize(self.fontSize-3).setAlign("center").setBgOpacity(0).setVisible(0)
             self.lbl_pit.setAnimationSpeed("rgb",0.08)
         self.lbl_time = Label(app,"+0.000").setSize(60, self.rowHeight).setPos(148, 0).setFontSize(self.fontSize).setAlign("right").setBgOpacity(0).setVisible(0)
         self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, self.rowHeight).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
@@ -126,7 +126,7 @@ class Driver:
             if self.pit_highlight.value:
                 self.lbl_pit.setColor(Colors.red())
             else:
-                self.lbl_pit.setColor(Colors.white(),True)          
+                self.lbl_pit.setColor(Colors.pitColor(),True)          
            
     def hide(self): 
         if not self.isLapLabel:
@@ -334,6 +334,7 @@ class ACTower:
         self.max_num_laps_stint = 8
         self.race_mode = Value(0)
         self.qual_mode = Value(0)
+        self.ui_row_height = Value(36)
         self.numCarsToFinish=0   
         self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
@@ -344,8 +345,8 @@ class ACTower:
         self.lastLapInvalidated=-1
         self.minlap_stint = 5
         self.iLastTime=Value()
-        self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(218, self.rowHeight-4).setPos(0, 118).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
-        self.lbl_tire_stint = Label(self.window.app,"").setSize(218, self.rowHeight).setPos(0, self.rowHeight).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
+        self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(180 + self.rowHeight, self.rowHeight-4).setPos(0, 118).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
+        self.lbl_tire_stint = Label(self.window.app,"").setSize(180 + self.rowHeight, self.rowHeight).setPos(0, self.rowHeight).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
         
         track=ac.getTrackName(0)
         config=ac.getTrackConfiguration(0)
@@ -366,6 +367,7 @@ class ACTower:
         self.max_num_laps_stint = cfg.get("SETTINGS", "num_laps_stint", "int")
         self.race_mode.setValue(cfg.get("SETTINGS", "race_mode", "int"))
         self.qual_mode.setValue(cfg.get("SETTINGS", "qual_mode", "int")) 
+        self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
     
                 
     def setFont(self,fontName):
@@ -374,6 +376,8 @@ class ACTower:
         self.fontName=fontName
         
     def animate(self,sessionTimeLeft):
+        self.lbl_title_stint.animate()
+        self.lbl_tire_stint.animate()  
         for driver in self.drivers:
             #if driver.final_y != driver.y :
             driver.animate(sessionTimeLeft)
@@ -418,26 +422,25 @@ class ACTower:
             self.curDriverLaps=[]
             self.stint_visible_end=0
         #mode_changed = self.qual_mode.hasChanged()
-        self.minlap_stint = 2255 #disabled for now
+        #self.minlap_stint = 2255 #disabled for now
         if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and sim_info.graphics.sessionTimeLeft >= self.stint_visible_end):
             #Lap stint mode
             for driver in self.drivers: 
-                if driver.identifier == 0:
+                if driver.identifier == 0:                    
                     driver.show(0,False)
-                    driver.final_y = 0
                     driver.showFullName()
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                        
                     if len(p) > 0:
-                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0],False,self.qual_mode.value)                        
-                    #self.stintLabels                    
+                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0],False,self.qual_mode.value)
+                    self.lbl_title_stint.show()
+                    self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
+                    self.lbl_tire_stint.show()                        
+                    #self.stintLabels 
                     if len(self.curDriverLaps) > len(self.stintLabels):                        
                         for i in range(len(self.stintLabels),len(self.curDriverLaps)): 
                             self.stintLabels.append(Driver(self.window.app,self.fontName,0,"Lap " + str(i+1),i+2,True))
                     i=0
                     j=0
-                    self.lbl_title_stint.show()
-                    self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
-                    self.lbl_tire_stint.show()
                     #for lbl in self.stintLabels:
                     lapOffset=len(self.curDriverLaps)-self.max_num_laps_stint
                     for l in self.curDriverLaps:
@@ -445,12 +448,13 @@ class ACTower:
                             self.stintLabels[j].hide()
                         else:
                             #lbl.final_y = 38 * (i+3)
+                            ac.console(str(l.time))
                             self.stintLabels[j].setTimeStint(l.time,l.valid)
                             self.stintLabels[j].setPosition(i+5,1,0,True,self.qual_mode.value) 
                             self.stintLabels[j].show(i+5,False)
                             i+=1    
-                        j+=1          
-                
+                        j+=1   
+                    
                 else:
                     driver.hide()
         else:            
@@ -468,15 +472,10 @@ class ACTower:
                 for w in s:
                     wheelSpeed+=w
                 driver.wheelSpeed.setValue(wheelSpeed)
-                if driver.identifier > 0 and not driver.gas.hasChanged() and not driver.wheelSpeed.hasChanged():
-                    #todo last time alive from time
-                    #if driver.aliveMissed > 180:
+                if driver.identifier > 0 and not driver.gas.hasChanged() and not driver.wheelSpeed.hasChanged():                    
                     if driver.keepAlive - int(sim_info.graphics.sessionTimeLeft) > 2000:
-                        driver.isAlive=False 
-                    #else:
-                    #    driver.aliveMissed += 1                   
+                        driver.isAlive=False               
                 else:
-                    #driver.aliveMissed = 0
                     driver.keepAlive=int(sim_info.graphics.sessionTimeLeft)
                     driver.isAlive=True
                 p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]

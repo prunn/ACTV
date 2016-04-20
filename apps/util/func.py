@@ -10,9 +10,7 @@ def millisToString(millis):
 
 #-#####################################################################################################################################-#
 
-
 # COLOR CONVERSION
-
 def rgb(color, a = 1, bg = False):
 	r = color[0] / 255
 	g = color[1] / 255
@@ -21,3 +19,13 @@ def rgb(color, a = 1, bg = False):
 		return r, g, b, a
 	else:
 		return r, g, b
+
+def getFontSize(rowHeight):
+	if rowHeight > 42:
+		return rowHeight-13
+	if rowHeight >= 34 and rowHeight <= 42:
+		return rowHeight-12
+	if rowHeight < 34:
+		return rowHeight-10
+	if rowHeight < 30:
+		return rowHeight-8

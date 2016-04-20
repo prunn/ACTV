@@ -3,7 +3,7 @@ import acsys
 import ctypes
 import math
 import os
-from apps.util.func import rgb
+from apps.util.func import rgb, getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Config
 
 class ACSpeedTrap:
@@ -37,6 +37,7 @@ class ACSpeedTrap:
         self.widget_visible=Value()
         self.cursor=Value()
         self.cursor.setValue(False)
+        self.ui_row_height = Value(38)
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
         self.lbl_title = Label(self.window.app,"").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
         self.lbl_time = Label(self.window.app,"").setSize(172, self.rowHeight).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
@@ -65,6 +66,17 @@ class ACSpeedTrap:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
+        self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
+        if self.ui_row_height.hasChanged():
+            self.reDrawSize()
+        
+    def reDrawSize(self):
+        self.rowHeight=self.ui_row_height.value
+        fontSize=getFontSize(self.rowHeight)
+        self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)
+        self.lbl_time.setSize(172, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)
+        self.lbl_border.setSize(self.rowHeight + 172, 1).setPos(0, self.rowHeight+1)
+        
             
     def setFont(self,fontName):
         self.lbl_title.setFont(fontName,0,0)

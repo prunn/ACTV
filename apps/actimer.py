@@ -4,7 +4,7 @@ import os.path
 import json
 import ctypes
 import math
-from apps.util.func import rgb
+from apps.util.func import rgb,getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Config
 
 class ACTimer:
@@ -23,13 +23,15 @@ class ACTimer:
 		self.cursor.setValue(False)
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
+		self.ui_row_height = Value(38)
+		self.rowHeight=38
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
 		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, 38).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
 		self.lbl_session_title=Label(self.window.app,"P").setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([192, 0, 0], bg = True)).setBgOpacity(0.64)
 		
 		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
-		self.lbl_session_border=Label(self.window.app,"").setSize(190, 1).setPos(0, 39).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(1)
+		self.lbl_session_border=Label(self.window.app,"").setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(1)
 		
 		trackFilePath = "content/tracks/"+ ac.getTrackName(0) + "/ui/"
 		if ac.getTrackConfiguration(0) != "":
@@ -71,6 +73,18 @@ class ACTimer:
 			self.pinHack.setValue(True)
 		else:
 			self.pinHack.setValue(False)
+		self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
+		if self.ui_row_height.hasChanged():
+			self.reDrawSize()
+
+	def reDrawSize(self):
+		self.rowHeight=self.ui_row_height.value
+		fontSize=getFontSize(self.rowHeight)
+		self.lbl_session_info.setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)
+		self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)		
+		self.lbl_session_single.setSize(154+self.rowHeight, self.rowHeight).setFontSize(fontSize)
+		self.lbl_session_border.setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1)
+		
 
 	def setFont(self,fontName):
 		self.lbl_session_info.setFont(fontName,0,0)
