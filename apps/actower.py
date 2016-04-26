@@ -80,14 +80,8 @@ class Driver:
     def show(self,start,needsTLC=True):
         if self.showingFullNames and needsTLC:
             self.setName()
-        self.lbl_name.show()
-        self.lbl_time.showText()
-        self.lbl_border.show()
-        if not self.isLapLabel:
-            self.lbl_position.show()
-        if not self.isDisplayed: 
-            '''
-            if start > 1:
+        if not self.isDisplayed:          
+            '''if start > 1:
                 self.y=(start-2)*38
                 if self.isLapLabel:
                     self.lbl_name.setPos(0, (start-2)*self.rowHeight)
@@ -109,6 +103,11 @@ class Driver:
                 self.lbl_border.setPos(0, self.rowHeight-1) 
             '''       
             self.isDisplayed = True
+        self.lbl_name.show()
+        self.lbl_time.showText()
+        self.lbl_border.show()
+        if not self.isLapLabel:
+            self.lbl_position.show()
             
     def updatePit(self,session_time):
         self.isInPit.setValue(bool(ac.isCarInPitline(self.identifier)))
@@ -138,7 +137,8 @@ class Driver:
         if not self.isLapLabel:
             self.lbl_name.setSize(180, self.rowHeight) 
         if self.isDisplayed:              
-            self.isDisplayed = False    
+            self.isDisplayed = False 
+            self.isInPit.setValue(False)     
             
     def setName(self):
         strOffset = " "
@@ -171,13 +171,12 @@ class Driver:
     def setTimeStint(self,time,valid):
         self.time.setValue(time)
         self.gap.setValue(time)
-        time_changed=self.time.hasChanged()
-        if time_changed or self.gap.hasChanged():            
-            self.lbl_time.setText(self.format_time(self.time.value))
-        if valid:            
-            self.lbl_time.setColor(Colors.white())
-        else:
-            self.lbl_time.setColor(Colors.red())
+        if self.time.hasChanged() or self.gap.hasChanged():            
+            self.lbl_time.setText(self.format_time(self.time.value)).setVisible(1)            
+            if valid:            
+                self.lbl_time.setColor(Colors.white())
+            else:
+                self.lbl_time.setColor(Colors.red())
                 
     def setTimeRace(self,time,leader,session_time):
         if self.position.value==1:
@@ -448,7 +447,6 @@ class ACTower:
                             self.stintLabels[j].hide()
                         else:
                             #lbl.final_y = 38 * (i+3)
-                            ac.console(str(l.time))
                             self.stintLabels[j].setTimeStint(l.time,l.valid)
                             self.stintLabels[j].setPosition(i+5,1,0,True,self.qual_mode.value) 
                             self.stintLabels[j].show(i+5,False)

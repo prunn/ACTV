@@ -5,7 +5,7 @@ import json
 import ctypes
 import math
 from apps.util.func import rgb,getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Config
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config
 
 class ACTimer:
 
@@ -23,15 +23,15 @@ class ACTimer:
 		self.cursor.setValue(False)
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
-		self.ui_row_height = Value(38)
+		self.ui_row_height = Value(-1)
 		self.rowHeight=38
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
-		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, 38).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
-		self.lbl_session_title=Label(self.window.app,"P").setSize(38, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([192, 0, 0], bg = True)).setBgOpacity(0.64)
+		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
+		self.lbl_session_title=Label(self.window.app,"P").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(0.64)
 		
-		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, 38).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
-		self.lbl_session_border=Label(self.window.app,"").setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(1)
+		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
+		self.lbl_session_border=Label(self.window.app,"").setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(1)
 		
 		trackFilePath = "content/tracks/"+ ac.getTrackName(0) + "/ui/"
 		if ac.getTrackConfiguration(0) != "":
@@ -80,11 +80,11 @@ class ACTimer:
 	def reDrawSize(self):
 		self.rowHeight=self.ui_row_height.value
 		fontSize=getFontSize(self.rowHeight)
-		self.lbl_session_info.setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)
+		width=self.rowHeight*5
+		self.lbl_session_info.setSize(self.rowHeight*4, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)		
 		self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)		
-		self.lbl_session_single.setSize(154+self.rowHeight, self.rowHeight).setFontSize(fontSize)
-		self.lbl_session_border.setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1)
-		
+		self.lbl_session_single.setSize(width, self.rowHeight).setFontSize(fontSize)		
+		self.lbl_session_border.setSize(width, 1).setPos(0, self.rowHeight+1)		
 
 	def setFont(self,fontName):
 		self.lbl_session_info.setFont(fontName,0,0)
@@ -111,7 +111,7 @@ class ACTimer:
 			for label in self.finish_labels:		
 				label.setVisible(1)
 		else:
-			height=38/3
+			height=self.rowHeight/3
 			for i in range(0,3):			
 				for j in range(0,8):
 					if i % 2 == 1 and j < 7:
@@ -184,8 +184,8 @@ class ACTimer:
 					self.lbl_session_single.setVisible(0)
 					self.lbl_session_border.setVisible(1)
 					if self.session.hasChanged():
-						self.lbl_session_title.setSize(38, 38)
-						self.lbl_session_info.setSize(154, 38).setPos(38, 0)						
+						self.lbl_session_title.setSize(self.rowHeight, self.rowHeight)
+						self.lbl_session_info.setSize(self.rowHeight*4, self.rowHeight).setPos(self.rowHeight, 0)						
 						if self.session.value == 1 :
 							self.lbl_session_title.setText("Q")
 						else:
@@ -226,8 +226,8 @@ class ACTimer:
 					self.lbl_session_single.setVisible(1)
 					self.lbl_session_border.setVisible(1)
 					if self.session.hasChanged():
-						self.lbl_session_info.setSize(134,  38).setPos(58, 0)
-						self.lbl_session_title.setSize(58, 38)
+						self.lbl_session_info.setSize(self.rowHeight*4,  self.rowHeight).setPos(self.rowHeight, 0)
+						self.lbl_session_title.setSize(self.rowHeight, self.rowHeight)
 						self.lbl_session_title.setText("Lap")
 					self.lbl_session_single.setText("{0} / {1}".format(completed,total))
 			else:

@@ -4,7 +4,7 @@ import ctypes
 import math
 import os
 from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Config
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config
 
 class ACSpeedTrap:
 
@@ -41,7 +41,7 @@ class ACSpeedTrap:
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
         self.lbl_title = Label(self.window.app,"").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
         self.lbl_time = Label(self.window.app,"").setSize(172, self.rowHeight).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
-        self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(rgb([191, 0, 0], bg = True)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.useMPH = False
         

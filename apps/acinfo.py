@@ -20,7 +20,7 @@ class ACInfo:
         self.lbl_position_text.setValue("")
         self.currentVehicule=Value()
         self.currentVehicule.setValue(0)
-        self.ui_row_height = Value(36)
+        self.ui_row_height = Value(-1)
         self.cursor=Value()
         self.cursor.setValue(False)
         self.fastestLap=Value()
