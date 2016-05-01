@@ -74,8 +74,8 @@ class ACSpeedTrap:
         self.rowHeight=self.ui_row_height.value
         fontSize=getFontSize(self.rowHeight)
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)
-        self.lbl_time.setSize(172, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)
-        self.lbl_border.setSize(self.rowHeight + 172, 1).setPos(0, self.rowHeight+1)
+        self.lbl_time.setSize(self.rowHeight*4.8, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)
+        self.lbl_border.setSize(self.rowHeight*5.8, 1).setPos(0, self.rowHeight+1)
         
             
     def setFont(self,fontName):

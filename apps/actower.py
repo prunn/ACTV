@@ -4,7 +4,7 @@ import math
 import sys
 import functools
 import ctypes
-from apps.util.func import rgb
+from apps.util.func import rgb, getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
     
 class Laps:
@@ -14,10 +14,10 @@ class Laps:
         self.time = time
         
 class Driver:
-    def __init__(self,app,fontName,identifier,name,pos,isLapLabel=False):
+    def __init__(self,app,rowHeight,fontName,identifier,name,pos,isLapLabel=False):
         self.identifier=identifier
-        self.rowHeight=36
-        self.fontSize=self.rowHeight-12
+        self.rowHeight=rowHeight
+        self.fontSize=getFontSize(self.rowHeight)
         strOffset = " "
         self.y = 0
         self.final_y = 0
@@ -47,16 +47,17 @@ class Driver:
         self.position = Value()
         self.position_offset = Value()
         self.gapToFirst=0
+        self.num_pos=0
         self.showingFullNames=False
         if self.isLapLabel:            
-            self.lbl_name = Label(app,strOffset+name).setSize(218, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
+            self.lbl_name = Label(app,strOffset+name).setSize(self.rowHeight*6, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
         else:    
-            self.lbl_name = Label(app,strOffset+self.format_name_tlc(name)).setSize(180, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
+            self.lbl_name = Label(app,strOffset+self.format_name_tlc(name)).setSize(self.rowHeight*5, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(self.fontSize).setAlign("left").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.6).setVisible(0)
             self.lbl_position = Label(app,str(pos+1)).setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("center").setBgColor(Colors.grey(bg = True)).setColor(Colors.white()).setBgOpacity(1).setVisible(0)
             self.lbl_pit = Label(app,"P").setSize(24, self.rowHeight-2).setPos(218, 0).setFontSize(self.fontSize-3).setAlign("center").setBgOpacity(0).setVisible(0)
             self.lbl_pit.setAnimationSpeed("rgb",0.08)
-        self.lbl_time = Label(app,"+0.000").setSize(60, self.rowHeight).setPos(148, 0).setFontSize(self.fontSize).setAlign("right").setBgOpacity(0).setVisible(0)
-        self.lbl_border=Label(app,"").setSize(104, 1).setPos(0, self.rowHeight).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_time = Label(app,"+0.000").setSize(self.rowHeight*4.7, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(self.fontSize).setAlign("right").setBgOpacity(0).setVisible(0)
+        self.lbl_border=Label(app,"").setSize(self.rowHeight*2.8, 1).setPos(0, self.rowHeight-1).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.setName()
         self.lbl_time.setAnimationSpeed("rgb",0.08)
         
@@ -77,6 +78,23 @@ class Driver:
     def onClickFunc(*args,driver=0):
         ac.focusCar(driver)    
     
+    def reDrawSize(self,height):
+        self.rowHeight=height
+        fontSize=getFontSize(self.rowHeight)
+        self.final_y=self.num_pos*self.rowHeight
+        if self.isLapLabel:            
+            self.lbl_name.setSize(self.rowHeight*6, self.rowHeight).setPos(0, self.final_y).setFontSize(fontSize)
+        else:    
+            if self.isInPit.value:
+                self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight).setPos(self.rowHeight, self.final_y).setFontSize(fontSize)
+            else:
+                self.lbl_name.setSize(self.rowHeight*5, self.rowHeight).setPos(self.rowHeight, self.final_y).setFontSize(fontSize)
+            self.lbl_position.setSize(self.rowHeight, self.rowHeight).setPos(0, self.final_y).setFontSize(fontSize)
+            self.lbl_pit.setSize(self.rowHeight*0.6, self.rowHeight-2).setPos(self.rowHeight*6, self.final_y + 2).setFontSize(fontSize-3)            
+        self.lbl_time.setSize(self.rowHeight*4.7, self.rowHeight).setPos(self.rowHeight, self.final_y).setFontSize(fontSize)
+        self.lbl_border.setSize(self.rowHeight*2.8, 1).setPos(0, self.final_y + self.rowHeight-1)
+        
+        
     def show(self,start,needsTLC=True):
         if self.showingFullNames and needsTLC:
             self.setName()
@@ -115,10 +133,10 @@ class Driver:
             if self.isInPit.value:
                 self.pit_highlight_end = session_time - 5000
                 self.lbl_pit.showText()
-                self.lbl_name.setSize(204, self.rowHeight,True)
+                self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
             else:
                 self.lbl_pit.hideText()  
-                self.lbl_name.setSize(180, self.rowHeight,True)         
+                self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True)         
         #color
         self.pit_highlight.setValue(self.pit_highlight_end != 0 and self.pit_highlight_end < session_time)        
         if self.pit_highlight.hasChanged() :          
@@ -135,7 +153,7 @@ class Driver:
         self.lbl_border.hide()  
         self.lbl_name.hide()
         if not self.isLapLabel:
-            self.lbl_name.setSize(180, self.rowHeight) 
+            self.lbl_name.setSize(self.rowHeight*5, self.rowHeight) 
         if self.isDisplayed:              
             self.isDisplayed = False 
             self.isInPit.setValue(False)     
@@ -201,20 +219,18 @@ class Driver:
     def setPosition(self,position,leader,offset,battles,qual_mode):
         self.position.setValue(position)
         self.position_offset.setValue(offset)
-        if self.position.hasChanged() or self.position_offset.hasChanged():            
-            if not self.isLapLabel:
-                self.lbl_position.setText(str(self.position.value))
+        if self.position.hasChanged() or self.position_offset.hasChanged():
             #move labels
-            pos=position-1-offset
-            self.final_y=pos*self.rowHeight
+            self.num_pos=position-1-offset
+            self.final_y=self.num_pos*self.rowHeight
             if self.isLapLabel:
                 self.lbl_name.setPos(0, self.final_y,True)
             else:
-                self.lbl_name.setPos(self.rowHeight, self.final_y,True)
-                if not self.isLapLabel:
-                    self.lbl_position.setPos(0, self.final_y,True) 
-                    self.lbl_pit.setPos(218, self.final_y + 2,True) 
-            self.lbl_time.setPos(148, self.final_y,True) 
+                self.lbl_position.setText(str(self.position.value))
+                self.lbl_name.setPos(self.rowHeight, self.final_y,True)                
+                self.lbl_position.setPos(0, self.final_y,True) 
+                self.lbl_pit.setPos(self.rowHeight*6, self.final_y + 2,True) 
+            self.lbl_time.setPos(self.rowHeight, self.final_y,True) 
             self.lbl_border.setPos(0, self.final_y + self.rowHeight-1,True) 
             if position % 2 == 1:
                 self.lbl_name.setBgOpacity(0.72)          
@@ -367,8 +383,22 @@ class ACTower:
         self.race_mode.setValue(cfg.get("SETTINGS", "race_mode", "int"))
         self.qual_mode.setValue(cfg.get("SETTINGS", "qual_mode", "int")) 
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
-    
-                
+        if self.ui_row_height.hasChanged():
+            self.reDrawSize()
+            
+    def reDrawSize(self):
+        self.rowHeight=self.ui_row_height.value
+        height=self.rowHeight-2
+        fontSize=getFontSize(height)
+        fontSize2=getFontSize(height-2)
+        self.lbl_tire_stint.setSize(height*5, height).setPos(0, height).setFontSize(fontSize)
+        self.lbl_title_stint.setSize(height*5, height-2).setPos(0, height*4 - height-2).setFontSize(fontSize2)
+        for driver in self.drivers:
+            driver.reDrawSize(self.rowHeight)
+        for lbl in self.stintLabels:
+            lbl.reDrawSize(self.rowHeight)
+         
+           
     def setFont(self,fontName):
         self.lbl_title_stint.setFont(fontName,0,0)
         self.lbl_tire_stint.setFont(fontName,0,0) 
@@ -396,7 +426,7 @@ class ACTower:
         if self.numCars.value > self.numCars.old:
             #init difference
             for i in range(self.numCars.old,self.numCars.value): 
-                self.drivers.append(Driver(self.window.app,self.fontName,i,ac.getDriverName(i),i))                      
+                self.drivers.append(Driver(self.window.app,self.rowHeight,self.fontName,i,ac.getDriverName(i),i))                      
             self.drivers_inited=True
     
     def nextDriverIsShown(self,pos):
@@ -437,7 +467,7 @@ class ACTower:
                     #self.stintLabels 
                     if len(self.curDriverLaps) > len(self.stintLabels):                        
                         for i in range(len(self.stintLabels),len(self.curDriverLaps)): 
-                            self.stintLabels.append(Driver(self.window.app,self.fontName,0,"Lap " + str(i+1),i+2,True))
+                            self.stintLabels.append(Driver(self.window.app,self.rowHeight,self.fontName,0,"Lap " + str(i+1),i+2,True))
                     i=0
                     j=0
                     #for lbl in self.stintLabels:

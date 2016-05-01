@@ -21,6 +21,8 @@ def rgb(color, a = 1, bg = False):
 		return r, g, b
 
 def getFontSize(rowHeight):
+	if rowHeight == 50 or rowHeight == 49:
+		return 34
 	if rowHeight == 48 or rowHeight == 47:
 		return 33
 	if rowHeight == 46 or rowHeight == 45:

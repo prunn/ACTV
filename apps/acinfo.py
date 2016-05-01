@@ -90,17 +90,18 @@ class ACInfo:
             self.reDrawSize()
         
     def reDrawSize(self):
-        self.rowHeight=self.ui_row_height.value
+        self.rowHeight=self.ui_row_height.value+2
         fontSize=getFontSize(self.rowHeight)
-        self.row2Height=self.ui_row_height.value-2
+        self.row2Height=self.ui_row_height.value
         fontSize2=getFontSize(self.row2Height)
-        self.lbl_driver_name.setSize(284, self.rowHeight).setFontSize(fontSize)
-        self.lbl_timing.setSize(284, self.row2Height).setPos(0, self.rowHeight).setFontSize(fontSize2)
-        self.lbl_split.setSize(220, self.row2Height).setPos(10, self.rowHeight).setFontSize(fontSize2)
-        self.lbl_fastest_split.setSize(220, self.row2Height).setPos(48, self.rowHeight).setFontSize(fontSize2)
+        width=self.rowHeight*7
+        self.lbl_driver_name.setSize(width, self.rowHeight).setFontSize(fontSize)
+        self.lbl_timing.setSize(width, self.row2Height).setPos(0, self.rowHeight).setFontSize(fontSize2)
+        self.lbl_split.setSize(self.rowHeight*4.7, self.row2Height).setPos(self.rowHeight, self.rowHeight).setFontSize(fontSize2)
+        self.lbl_fastest_split.setSize(self.rowHeight*5.7, self.row2Height).setPos(self.rowHeight, self.rowHeight).setFontSize(fontSize2)
         self.info_position.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)
-        self.info_position_lead.setSize(self.row2Height, self.row2Height).setPos(284-self.row2Height, self.rowHeight).setFontSize(fontSize2)      
-        self.lbl_border.setPos(0, self.rowHeight)
+        self.info_position_lead.setSize(self.row2Height, self.row2Height).setPos(width-self.row2Height, self.rowHeight).setFontSize(fontSize2)      
+        self.lbl_border.setSize(width, 1).setPos(0, self.rowHeight)
         
             
     def setFont(self,fontName):
