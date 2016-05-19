@@ -100,24 +100,24 @@ class Driver:
             self.setName()
         if not self.isDisplayed:          
             '''if start > 1:
-                self.y=(start-2)*38
+                self.y=(start-2)*self.rowHeight
                 if self.isLapLabel:
                     self.lbl_name.setPos(0, (start-2)*self.rowHeight)
                 else:
-                    self.lbl_name.setPos(38, (start-2)*self.rowHeight)
+                    self.lbl_name.setPos(self.rowHeight, (start-2)*self.rowHeight)
                 self.lbl_position.setPos(0, (start-2)*self.rowHeight)
-                self.lbl_time.setPos(148, (start-2)*self.rowHeight) 
-                self.lbl_pit.setPos(218, (start-2)*self.rowHeight + 2)   
+                self.lbl_time.setPos(self.rowHeight, (start-2)*self.rowHeight) 
+                self.lbl_pit.setPos(self.rowHeight*6, (start-2)*self.rowHeight + 2)   
                 self.lbl_border.setPos(0, (start-2)*self.rowHeight + 37)
             else:
-                self.y=38
+                self.y=0
                 if self.isLapLabel:
-                    self.lbl_name.setPos(0, self.rowHeight)
+                    self.lbl_name.setPos(0, 0)
                 else:
-                    self.lbl_name.setPos(self.rowHeight, self.rowHeight)
-                self.lbl_position.setPos(0, self.rowHeight)
-                self.lbl_time.setPos(148, self.rowHeight)  
-                self.lbl_pit.setPos(218, self.rowHeight + 2)  
+                    self.lbl_name.setPos(self.rowHeight, 0)
+                self.lbl_position.setPos(0, 0)
+                self.lbl_time.setPos(self.rowHeight, 0)  
+                self.lbl_pit.setPos(self.rowHeight*6, 2)  
                 self.lbl_border.setPos(0, self.rowHeight-1) 
             '''       
             self.isDisplayed = True
@@ -145,27 +145,17 @@ class Driver:
             else:
                 self.lbl_pit.setColor(Colors.pitColor(),True)          
      
-    def reset(self):
+       
+    def hide(self,reset=False): 
         if not self.isLapLabel:
             self.lbl_position.hide()
             self.lbl_pit.hideText() 
             self.lbl_name.setSize(self.rowHeight*5, self.rowHeight) 
         self.lbl_time.hideText()
         self.lbl_border.hide()  
-        self.lbl_name.hide()                
+        self.lbl_name.hide()            
         self.isDisplayed = False 
-        self.isInPit.setValue(False) 
-        
-    def hide(self): 
-        if not self.isLapLabel:
-            self.lbl_position.hide()
-            self.lbl_pit.hideText() 
-            self.lbl_name.setSize(self.rowHeight*5, self.rowHeight) 
-        self.lbl_time.hideText()
-        self.lbl_border.hide()  
-        self.lbl_name.hide()
-        if self.isDisplayed:              
-            self.isDisplayed = False 
+        if reset:#self.isDisplayed:  
             self.isInPit.setValue(False)     
             
     def setName(self):
@@ -523,9 +513,9 @@ class ACTower:
                 if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:
                     
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
+                        driver.show(self.driver_shown)
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
                         driver.setTime(c,self.standings[0][1],sim_info.graphics.sessionTimeLeft,self.qual_mode.value) 
-                        driver.show(self.driver_shown)
                         driver.updatePit(sim_info.graphics.sessionTimeLeft)                          
                 else:
                     driver.hide() 
@@ -668,7 +658,7 @@ class ACTower:
            
             if not math.isinf(sim_info.graphics.sessionTimeLeft) and int(sim_info.graphics.sessionTimeLeft/100) % 18 == 0 and self.tick > 20:  
                 #ac.console("updating gaps" + str(self.tick))
-                self.tick = 0                        
+                self.tick = 0                    
                 for driver in self.drivers: 
                     gap = self.gapToDriver(driver,cur_driver,cur_sector)
                     #self.lapsCompleted.value > 0 and 
@@ -698,9 +688,9 @@ class ACTower:
                     if len(p) > 0 and driver.completedLaps.hasChanged():
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
                         driver.setTimeRace(c,self.leader_time,sim_info.graphics.sessionTimeLeft)  
-                    if self.lapsCompleted.value == sim_info.graphics.numberOfLaps:
-                        driver.showFullName()                  
-                    driver.show(self.driver_shown,needsTLC)
+                        if self.lapsCompleted.value == sim_info.graphics.numberOfLaps:
+                            driver.showFullName()                  
+                        driver.show(self.driver_shown,needsTLC)
         else:   
             for driver in self.drivers: 
                 driver.hide()   
@@ -726,7 +716,7 @@ class ACTower:
             self.curDriverLaps=[]
             self.stint_visible_end=0
             for driver in self.drivers:
-                driver.reset()
+                driver.hide(True)
                 driver.race_standings_sector.setValue(0)
                 driver.race_gaps = []
         if self.pinHack.hasChanged():
