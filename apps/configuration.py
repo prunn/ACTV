@@ -21,11 +21,11 @@ class Configuration:
                
         y=60
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
-        ac.setRange(self.spin_race_mode, 0,1)
+        ac.setRange(self.spin_race_mode, 0,2)
         ac.setPosition(self.spin_race_mode,20,y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.onSpinRaceModeChanged) 
-        self.lbl_race_mode = Label(self.window.app,"Auto").setSize(120, 26).setPos(192, y-27).setFontSize(15).setAlign("left").setVisible(1) 
+        self.lbl_race_mode = Label(self.window.app,"Auto").setSize(120, 26).setPos(192, y-27).setFontSize(13).setAlign("left").setVisible(1) 
         
         y+=80
         self.spin_qual_mode = ac.addSpinner(self.window.app, "Qual tower mode :      ")
@@ -33,7 +33,7 @@ class Configuration:
         ac.setPosition(self.spin_qual_mode,20,y)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
         ac.addOnValueChangeListener(self.spin_qual_mode, self.onSpinQualModeChanged) 
-        self.lbl_qual_mode = Label(self.window.app,"Gaps").setSize(120, 26).setPos(192, y-27).setFontSize(15).setAlign("left").setVisible(1)       
+        self.lbl_qual_mode = Label(self.window.app,"Gaps").setSize(120, 26).setPos(192, y-27).setFontSize(13).setAlign("left").setVisible(1)       
           
         y+=80  
         self.spin_num_cars = ac.addSpinner(self.window.app, "Number cars tower")
@@ -134,6 +134,8 @@ class Configuration:
     def setLabelRace(self):
         if self.__class__.race_mode == 0:
             self.lbl_race_mode.setText("Auto")
+        elif self.__class__.race_mode == 1:
+            self.lbl_race_mode.setText("Full-Gaps")
         else:
             self.lbl_race_mode.setText("Full")
                         

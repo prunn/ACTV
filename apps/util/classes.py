@@ -142,7 +142,7 @@ class Colors:
 	def colorFromCar(car):
 		if car.find("bmw")>=0 or car.find("ford")>=0:
 			return Colors.bmw()
-		if car.find("merc")>=0 or car.find("alfa")>=0:
+		if car.find("merc")>=0 or car.find("alfa")>=0 or car.find("mazda")>=0:
 			return Colors.mercedes()
 		if car.find("ruf")>=0 or car.find("corvette")>=0 or car.find("lotus")>=0 or car.find("porsche")>=0:
 			return Colors.corvette()

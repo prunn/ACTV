@@ -122,7 +122,8 @@ class Driver:
             '''       
             self.isDisplayed = True
         self.lbl_name.show()
-        self.lbl_time.showText()
+        if needsTLC:
+            self.lbl_time.showText()
         self.lbl_border.show()
         if not self.isLapLabel:
             self.lbl_position.show()
@@ -169,7 +170,7 @@ class Driver:
     
     def showFullName(self):
         strOffset = " "
-        self.showingFullNames=True   
+        self.showingFullNames=True
         self.lbl_time.hideText()
         self.lbl_name.setText(strOffset+self.format_last_name(self.fullName.value))
             
@@ -202,9 +203,16 @@ class Driver:
         else:
             self.lbl_time.setText("+"+self.format_time(leader-session_time)).setColor(Colors.white())
             
-    def setTimeRaceBattle(self,time,identifier):
+    def setTimeRaceBattle(self,time,identifier,lap=False):
         if self.identifier==identifier:           
             self.lbl_time.setText("")
+        elif lap:
+            str_time="+" + str(math.floor(abs(time)))
+            if abs(time) >= 2:
+                str_time += " Laps"
+            else:
+                str_time += " Lap"
+            self.lbl_time.setText(str_time).setColor(Colors.white())
         else:
             self.lbl_time.setText(""+self.format_time(time)).setColor(Colors.white())
             
@@ -212,7 +220,7 @@ class Driver:
         if self.race_gaps:
             result = []
             for g in self.race_gaps:
-                if g.sector + 75 > sector:
+                if g.sector + 112 > sector:
                     result.append(g)
             self.race_gaps = result
                
@@ -525,9 +533,9 @@ class ACTower:
         t2=0
         found1=False
         found2=False
-        if abs(sector - self.getMaxSector(d1)) > 25:
+        if abs(sector - self.getMaxSector(d1)) > 110:
             return 100000
-        if abs(sector - self.getMaxSector(d2)) > 25:
+        if abs(sector - self.getMaxSector(d2)) > 110:
             return 100000
         for g in reversed(d1.race_gaps):
             if g.sector==sector:
@@ -570,13 +578,16 @@ class ACTower:
             self.init_drivers()        
         self.driver_shown=0
         cur_driver=0
+        first_driver=0
         cur_sector=0
         best_pos=0
         isInPit = self.currentVehicule.value==0 and (bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn))
         for driver in self.drivers:
+            p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
+            if len(p) > 0 and p[0] == 0:
+                first_driver=driver
             if driver.isDisplayed:
                 self.driver_shown+=1
-                p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1            
             if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                               
@@ -626,10 +637,11 @@ class ACTower:
                 else:     
                     self.race_show_end = sim_info.graphics.sessionTimeLeft - 12000
                     
-        if self.race_mode.value == 1:
-            if not math.isinf(sim_info.graphics.sessionTimeLeft) and int(sim_info.graphics.sessionTimeLeft/100) % 18 == 0 and self.tick_race_mode > 20:
+        if self.race_mode.value == 1 or self.race_mode.value == 2:
+            if not math.isinf(sim_info.graphics.sessionTimeLeft) and int(sim_info.graphics.sessionTimeLeft/100) % 18 == 0 and self.tick_race_mode > 36:
                 self.tick_race_mode = 0 
-                for driver in self.drivers:                
+                for driver in self.drivers:  
+                    gap = self.gapToDriver(driver,first_driver,cur_sector)              
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                     driver.gas.setValue(ac.getCarState(driver.identifier,acsys.CS.Gas))
                     s=ac.getCarState(driver.identifier,acsys.CS.WheelAngularSpeed)
@@ -646,9 +658,16 @@ class ACTower:
                     # and driver.isAlive               
                     if len(p) > 0  and p[0] < self.max_num_cars:
                         driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
-                        driver.setTimeRaceBattle(gap,cur_driver.identifier) 
-                        driver.showFullName()                        
-                        driver.show(self.driver_shown,False)
+                        if self.race_mode.value == 1:
+                            lapGap=self.getMaxSector(first_driver) - self.getMaxSector(driver)
+                            if lapGap > 100:                            
+                                driver.setTimeRaceBattle(lapGap/100,first_driver.identifier,True) 
+                            else:
+                                driver.setTimeRaceBattle(gap,first_driver.identifier)         
+                            driver.show(self.driver_shown)
+                        else:
+                            driver.showFullName()                        
+                            driver.show(self.driver_shown,False)
                     else:
                         driver.hide()
             self.tick_race_mode+=1
