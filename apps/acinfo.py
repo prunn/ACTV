@@ -1,7 +1,6 @@
 import ac
 import acsys
 import ctypes
-import math
 
 from apps.util.func import rgb, getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
@@ -10,7 +9,7 @@ class ACInfo:
 
     # INITIALIZATION
     def __init__(self):   
-        self.rowHeight=38     
+        self.rowHeight=36     
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.situation = 0
@@ -30,7 +29,6 @@ class ACInfo:
         self.lastTimeInPit=0
         self.visible_end = 0
         self.lastLapTime = 0
-        self.pinHack=Value(True)
         self.lapCanBeInvalidated=True
         self.fastestLapBorderActive = False
         self.firstLapStarted=False
@@ -44,7 +42,6 @@ class ACInfo:
             self.minLapCount=0
             self.lastLapInvalidated = -1
         self.fastestLapSectors = [0,0,0,0,0,0]
-        self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.session=Value()
         self.session.setValue(-1)    
         self.window = Window(name="ACTV Info", icon=False, width=332, height=self.rowHeight*2, texture="")
@@ -76,11 +73,7 @@ class ACInfo:
     # PUBLIC METHODS
     #---------------------------------------------------------------------------------------------------------------------------------------------       
     def loadCFG(self):        
-        cfg = Config("apps/python/prunn/", "config.ini")        
-        if cfg.get("SETTINGS", "hide_pins", "int") == 1:
-            self.pinHack.setValue(True)
-        else:
-            self.pinHack.setValue(False)            
+        cfg = Config("apps/python/prunn/", "config.ini") 
         if cfg.get("SETTINGS", "lap_can_be_invalidated", "int") == 1:
             self.lapCanBeInvalidated = True
         else:
@@ -204,24 +197,15 @@ class ACInfo:
         
         sessionChanged = self.session.hasChanged()
         if sessionChanged:
-            self.resetVisibility()
-        if self.pinHack.hasChanged():
-            if self.pinHack.value:
-                ac.setSize(self.window.app, self.screenWidth*2, 0)  
-            else:   
-                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))         
+            self.resetVisibility()                 
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
-                self.window.showTitle(True)
-                if self.pinHack.value:
-                    ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+                self.window.showTitle(True)  
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                if self.pinHack.value:
-                    ac.setSize(self.window.app, self.screenWidth*2, 0) 
         
     def onUpdate(self, deltaT, sim_info):
         self.session.setValue(sim_info.graphics.session)

@@ -3,7 +3,6 @@ import acsys
 import os.path
 import json
 import ctypes
-import math
 from apps.util.func import rgb,getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
 
@@ -19,12 +18,11 @@ class ACTimer:
 		self.replay_rgb=255
 		self.session=Value()
 		self.cursor=Value()
-		self.pinHack=Value(True)
 		self.cursor.setValue(False)
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
 		self.ui_row_height = Value(-1)
-		self.rowHeight=38
+		self.rowHeight=36
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
 		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
@@ -61,18 +59,13 @@ class ACTimer:
 		if len(self.trackName) > 12:
 			self.trackName = self.trackName[:12]
 			
-		self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
 		self.loadCFG()
 			
 		
 	# PUBLIC METHODS
 	#---------------------------------------------------------------------------------------------------------------------------------------------    
 	def loadCFG(self):        
-		cfg = Config("apps/python/prunn/", "config.ini")
-		if cfg.get("SETTINGS", "hide_pins", "int") == 1:
-			self.pinHack.setValue(True)
-		else:
-			self.pinHack.setValue(False)
+		cfg = Config("apps/python/prunn/", "config.ini")		
 		self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
 		if self.ui_row_height.hasChanged():
 			self.reDrawSize()
@@ -143,23 +136,14 @@ class ACTimer:
 		if result and pt.x > win_x and pt.x < win_x + self.window.width and pt.y > win_y and pt.y < win_y + self.window.height:   
 			self.cursor.setValue(True)
 		else:
-			self.cursor.setValue(False)
+			self.cursor.setValue(False)		
 		
-		if self.pinHack.hasChanged():
-			if self.pinHack.value:
-				ac.setSize(self.window.app, self.screenWidth*2, 0)  
-			else:   
-				ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))
 		if self.cursor.hasChanged() or self.session_draw.hasChanged():
 			if self.cursor.value:
-				self.window.setBgOpacity(0.4).border(0)
-				if self.pinHack.value:
-					ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+				self.window.setBgOpacity(0.4).border(0)  
 			else:   
 				#pin outside
-				self.window.setBgOpacity(0).border(0)
-				if self.pinHack.value:
-					ac.setSize(self.window.app, self.screenWidth*2, 0) 
+				self.window.setBgOpacity(0).border(0) 
 		
 	def onUpdate(self, deltaT, sim_info):		
 		self.session_draw.setValue(sim_info.graphics.session)

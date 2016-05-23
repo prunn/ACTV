@@ -1,7 +1,6 @@
 import ac
 import acsys
 import ctypes
-import math
 import os
 from apps.util.func import rgb, getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
@@ -11,12 +10,10 @@ class ACSpeedTrap:
     # INITIALIZATION
 
     def __init__(self): 
-        self.rowHeight=38         
+        self.rowHeight=36         
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.lastLapShown = 0
-        self.height = 0
-        self.final_height = 0
         self.SpeedKMH=Value()
         self.SpeedMPH=Value()
         self.topSpeed=Value()
@@ -31,18 +28,16 @@ class ACSpeedTrap:
         self.trap=0
         self.userTrap=0
         self.time_end=0
-        self.pinHack=Value(True)
         self.lapCanBeInvalidated=True
         self.relyOnEveryOne=True
         self.widget_visible=Value()
         self.cursor=Value()
         self.cursor.setValue(False)
-        self.ui_row_height = Value(38)
+        self.ui_row_height = Value(-1)
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
         self.lbl_title = Label(self.window.app,"").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
         self.lbl_time = Label(self.window.app,"").setSize(172, self.rowHeight).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
         self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
-        self.screenWidth = ctypes.windll.user32.GetSystemMetrics(0)
         self.useMPH = False
         
         user_path = os.path.join(os.path.expanduser("~"), "Documents","Assetto Corsa","cfg")
@@ -57,11 +52,7 @@ class ACSpeedTrap:
     
     #--------------------------------------------------------------------------------------------------------------------------------------------- 
     def loadCFG(self):        
-        cfg = Config("apps/python/prunn/", "config.ini")
-        if cfg.get("SETTINGS", "hide_pins", "int") == 1:
-            self.pinHack.setValue(True)
-        else:
-            self.pinHack.setValue(False)
+        cfg = Config("apps/python/prunn/", "config.ini")        
         if cfg.get("SETTINGS", "lap_can_be_invalidated", "int") == 1:
             self.lapCanBeInvalidated = True
         else:
@@ -118,23 +109,14 @@ class ACSpeedTrap:
         if sessionChanged:
             self.resetVisibility()
             self.time_end = 0
-        if self.pinHack.hasChanged():
-            if self.pinHack.value:
-                ac.setSize(self.window.app, self.screenWidth*2, 0)  
-            else:   
-                ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
-                self.window.showTitle(True)
-                if self.pinHack.value:
-                    ac.setSize(self.window.app, math.floor(self.window.width*self.window.scale), math.floor(self.window.height*self.window.scale))   
+                self.window.showTitle(True)  
             else:   
                 #pin outside
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
-                if self.pinHack.value:
-                    ac.setSize(self.window.app, self.screenWidth*2, 0) 
                     
     def onUpdate(self, deltaT, sim_info):   
         self.session.setValue(sim_info.graphics.session)  
@@ -195,8 +177,6 @@ class ACSpeedTrap:
                     else:
                         self.speedText="%.1f kph"%(self.curTopSpeed.value)
                     self.time_end = sim_info.graphics.sessionTimeLeft - 6000
-                    self.final_height = 38
-                    self.height = 0
                     self.lbl_title.setText("S",hidden=True)
                     self.lbl_time.setText(self.speedText,hidden=True)
                     self.lbl_time.show()
@@ -208,7 +188,6 @@ class ACSpeedTrap:
                     self.lbl_title.hide()
                     self.widget_visible.setValue(0)
                     self.time_end=0
-                    self.final_height = 0
                     if self.widget_visible.hasChanged():                        
                         self.curTopSpeed.setValue(0)                      
                         self.curTopSpeedMPH.setValue(0)                   

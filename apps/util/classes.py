@@ -206,6 +206,15 @@ class Label:
 			if self.params["x"].hasChanged() or self.params["y"].hasChanged():
 				ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
 		return self
+	
+	def setY(self, y, animated=False):
+		self.f_params["y"].setValue(y)
+		if not animated:
+			self.o_params["y"].setValue(y)
+			self.params["y"].setValue(y)
+			if self.params["y"].hasChanged():
+				ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
+		return self
 		
 	def setColor(self, color, animated=False):
 		self.f_params["r"].setValue(color[0])
