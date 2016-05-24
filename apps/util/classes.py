@@ -312,7 +312,17 @@ class Label:
 	
 	def adjustParam(self,p):
 		if self.params[p].value != self.f_params[p].value:
-			multiplier=self.multiplier[p].value
+			if self.multiplier[p].value == "spring":
+				multiplier=self.multiplier[p].value
+				if abs(self.f_params[p].value - self.params[p].value) > 38*3:
+					multiplier=round(abs(self.f_params[p].value - self.params[p].value)/38) 
+				'''
+		            multiplier=3            
+		            elif abs(self.final_y - self.y) > 38*3:
+		                multiplier=round(abs(self.final_y - self.y)/38) 
+		        '''
+			else:
+				multiplier=self.multiplier[p].value
 			if abs(self.f_params[p].value - self.params[p].value) < multiplier:
 				multiplier=abs(self.f_params[p].value - self.params[p].value)
 			if self.params[p].value < self.f_params[p].value :

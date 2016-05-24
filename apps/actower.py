@@ -35,7 +35,7 @@ class Driver:
         self.driver_shown=0
         self.time = Value()
         self.gap = Value()
-        self.race_current_sector = Value()
+        self.race_current_sector = Value(0)
         self.race_standings_sector = Value(0)
         self.isInPit = Value(False)
         self.completedLaps = Value()
@@ -344,11 +344,7 @@ class Driver:
             return "{0}.{1}".format(int(s), str(int(d)).zfill(3))
      
     def animate(self,sessionTimeLeft): 
-        '''
-            multiplier=3            
-            elif abs(self.final_y - self.y) > 38*3:
-                multiplier=round(abs(self.final_y - self.y)/38) 
-        '''
+        
         #color
         self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < sessionTimeLeft)        
         if self.highlight.hasChanged() :          
@@ -384,6 +380,7 @@ class ACTower:
         self.currentVehicule=Value(0)
         self.race_show_end = 0
         self.drivers_inited=False
+        self.force_hidden=False
         self.leader_time=0
         self.tick=0  
         self.tick_race_mode=0
@@ -563,9 +560,12 @@ class ACTower:
         t2=0
         found1=False
         found2=False
-        if abs(sector - self.getMaxSector(d1)) > 125:
+        maxOffset = 25
+        if self.race_mode.value == 1:
+            maxOffset = 125
+        if abs(sector - self.getMaxSector(d1)) > maxOffset:
             return 600000
-        if abs(sector - self.getMaxSector(d2)) > 125:
+        if abs(sector - self.getMaxSector(d2)) > maxOffset:
             return 600000
         for g in reversed(d1.race_gaps):
             if g.sector==sector:
@@ -614,8 +614,6 @@ class ACTower:
         first_driver_sector=0
         cur_sector=0
         best_pos=0
-        #isInPit = self.currentVehicule.value==0 and (bool(sim_info.graphics.isInPit) or bool(sim_info.physics.pitLimiterOn))
-        isInPit = bool(ac.isCarInPitline(self.currentVehicule.value))
         for driver in self.drivers:
             p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
             if len(p) > 0 and p[0] == 0:
@@ -624,17 +622,14 @@ class ACTower:
             if driver.isDisplayed:
                 self.driver_shown+=1
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
-                    best_pos=p[0]+1            
-            if sim_info.graphics.sessionTimeLeft >= 1800000 or isInPit or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                               
-                if bool(ac.isCarInPit(driver.identifier)):
-                    driver.race_gaps = []
-                self.curDriverLaps=[]
-                self.stint_visible_end=0
-                if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sim_info.graphics.sessionTimeLeft >= 1800000:                    
-                    driver.finished=False
-                    self.numCarsToFinish=0
-                    driver.race_standings_sector.setValue(0)
-                    driver.race_current_sector.setValue(0)
+                    best_pos=p[0]+1   
+            if bool(ac.isCarInPit(driver.identifier)):
+                driver.race_gaps = []           
+            if sim_info.graphics.sessionTimeLeft >= 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                    
+                driver.finished=False
+                self.numCarsToFinish=0
+                driver.race_standings_sector.setValue(0)
+                driver.race_current_sector.setValue(0)
             else:                    
                 bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
                 if bl <= sim_info.graphics.numberOfLaps and self.sectorIsValid(bl,driver):
@@ -673,7 +668,7 @@ class ACTower:
                 else:     
                     self.race_show_end = sim_info.graphics.sessionTimeLeft - 12000
                     
-        if self.race_mode.value == 1 or self.race_mode.value == 2:
+        if (self.race_mode.value == 1 or self.race_mode.value == 2) and not self.force_hidden:
             tickLimit=20
             if self.race_mode.value == 1:
                 tickLimit=40
@@ -723,7 +718,7 @@ class ACTower:
                         driver.hide()
             self.tick_race_mode+=1
                 
-        elif driverShown > 1 and (self.race_show_end > sim_info.graphics.sessionTimeLeft or self.race_show_end == 0):
+        elif not self.force_hidden and driverShown > 1 and (self.race_show_end > sim_info.graphics.sessionTimeLeft or self.race_show_end == 0):
             self.lapsCompleted.hasChanged()
            
             if not math.isinf(sim_info.graphics.sessionTimeLeft) and int(sim_info.graphics.sessionTimeLeft/100) % 18 == 0 and self.tick > 20:  
@@ -745,7 +740,7 @@ class ACTower:
                         driver.hide()
             self.tick+=1
                     
-        elif self.race_show_end != 0 and self.race_show_end < sim_info.graphics.sessionTimeLeft: 
+        elif self.race_show_end != 0 and self.race_show_end < sim_info.graphics.sessionTimeLeft and not self.force_hidden: 
             self.driver_shown=0
             for driver in self.drivers:
                 if driver.isDisplayed:
@@ -853,16 +848,14 @@ class ACTower:
                 standings2 = []
                 #new standings
                 for driver in self.drivers:
-                    bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
-                    #bl <= sim_info.graphics.numberOfLaps and
+                    bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
                     if self.sectorIsValid(bl,driver):  
                         if not driver.finished and driver.race_standings_sector.value >= sim_info.graphics.numberOfLaps:
                             driver.race_standings_sector.setValue(sim_info.graphics.numberOfLaps + (self.numCars.value - self.numCarsToFinish)/100)
                             self.numCarsToFinish+=1
                             driver.finished=True
                         elif not driver.finished:                  
-                            driver.race_standings_sector.setValue(bl)
-                            
+                            driver.race_standings_sector.setValue(bl)                            
                     if driver.race_standings_sector.value > 0:
                         standings.append((driver.identifier,driver.race_standings_sector.value))     
                         
@@ -878,8 +871,10 @@ class ACTower:
                 self.lapsCompleted.setValue(completed) 
                 if len(standings) > 0:       
                     self.standings = sorted(standings, key=lambda student: student[1], reverse=True)
+                    self.force_hidden=False
                 else:       
                     self.standings = sorted(standings2, key=lambda student: student[1], reverse=True)
+                    self.force_hidden=True
                 
                 #Debug code
                 '''
