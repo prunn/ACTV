@@ -589,7 +589,7 @@ class ACTower:
     def sectorIsValid(self,newSector,driver):
         if len(driver.race_gaps) == 0 and self.sessionTimeLeft < 1760000 and not bool(ac.isCarInPitline(driver.identifier)):
             return True
-        if newSector*100 < driver.race_current_sector.value:
+        if newSector*100 < driver.race_current_sector.value:            
             return False
         if (newSector*100) % 100 > 88 and len(driver.race_gaps) < 15:
             return False
@@ -623,7 +623,7 @@ class ACTower:
                 self.driver_shown+=1
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1   
-            if bool(ac.isCarInPit(driver.identifier)):
+            if bool(ac.isCarInPit(driver.identifier)) and not driver.finished:
                 driver.race_gaps = []           
             if sim_info.graphics.sessionTimeLeft >= 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                    
                 driver.finished=False
@@ -632,8 +632,12 @@ class ACTower:
                 driver.race_current_sector.setValue(0)
             else:                    
                 bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
-                if bl <= sim_info.graphics.numberOfLaps and self.sectorIsValid(bl,driver):
-                    driver.race_current_sector.setValue(math.floor(bl*100))
+                if bl >= 0.06 and bl <= sim_info.graphics.numberOfLaps and self.sectorIsValid(bl,driver):
+                    driver.race_current_sector.setValue(math.floor(bl*100))                
+                elif bl < 0.06 and len(driver.race_gaps) < 30:
+                    driver.race_gaps = []   
+                    driver.race_standings_sector.setValue(0)
+                    driver.race_current_sector.setValue(0) 
                 
             if driver.race_current_sector.hasChanged():
                 driver.race_gaps.append(raceGaps(driver.race_current_sector.value, sim_info.graphics.sessionTimeLeft))                
@@ -789,14 +793,13 @@ class ACTower:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
-            else:   
-                #pin outside
+            else:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False) 
                     
     def onUpdate(self, deltaT, sim_info):       
         self.session.setValue(sim_info.graphics.session)
-        if self.sessionTimeLeft != 0 and self.sessionTimeLeft < sim_info.graphics.sessionTimeLeft:
+        if (sim_info.graphics.status != 3 and self.sessionTimeLeft != 0 and self.sessionTimeLeft + 100 < sim_info.graphics.sessionTimeLeft) or sim_info.graphics.status==0:
             self.session.setValue(-1)
             self.session.setValue(sim_info.graphics.session)
         self.manageWindow()
@@ -845,7 +848,6 @@ class ACTower:
                 #RACE
                 completed=0
                 standings = []
-                standings2 = []
                 #new standings
                 for driver in self.drivers:
                     bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
@@ -858,21 +860,22 @@ class ACTower:
                             driver.race_standings_sector.setValue(bl)                            
                     if driver.race_standings_sector.value > 0:
                         standings.append((driver.identifier,driver.race_standings_sector.value))     
-                        
-                for i in range(self.numCars.value):  
-                    c = ac.getCarState(i,acsys.CS.LapCount)
-                    if c > completed:
-                        completed=c
-                    bl=c + ac.getCarState(i,acsys.CS.NormalizedSplinePosition)
-                    if bl > 0:
-                        standings2.append((i,bl)) 
-                
+                       
                 self.currentVehicule.setValue(ac.getFocusedCar()) 
                 self.lapsCompleted.setValue(completed) 
                 if len(standings) > 0:       
                     self.standings = sorted(standings, key=lambda student: student[1], reverse=True)
                     self.force_hidden=False
-                else:       
+                else: 
+                    #backup standings
+                    standings2 = []     
+                    for i in range(self.numCars.value):  
+                        c = ac.getCarState(i,acsys.CS.LapCount)
+                        if c > completed:
+                            completed=c
+                        bl=c + ac.getCarState(i,acsys.CS.NormalizedSplinePosition)
+                        if bl > 0:
+                            standings2.append((i,bl))                             
                     self.standings = sorted(standings2, key=lambda student: student[1], reverse=True)
                     self.force_hidden=True
                 
@@ -887,9 +890,5 @@ class ACTower:
                 '''
                 self.update_drivers_race(sim_info)
                     
-        elif sim_info.graphics.status == 1:
-            #REPLAY
-            test=1
         
-    
     
