@@ -4,7 +4,13 @@ import ctypes
 
 from apps.util.func import rgb, getFontSize
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config
-       
+
+class lapTimeStart:
+    def __init__(self,lap,time,lastpit):
+        self.lap = lap
+        self.time = time 
+        self.lastpit = lastpit   
+         
 class ACInfo:
 
     # INITIALIZATION
@@ -26,6 +32,7 @@ class ACInfo:
         self.fastestPos=1
         self.lastLap=0
         self.lastLapStart=10000
+        self.sector_delay = 5000
         self.lastTimeInPit=0
         self.visible_end = 0
         self.lastLapTime = 0
@@ -33,6 +40,8 @@ class ACInfo:
         self.fastestLapBorderActive = False
         self.firstLapStarted=False
         self.minLapCount=1
+        self.lapTimesArray = []
+        self.driversLap = []
         track=ac.getTrackName(0)
         config=ac.getTrackConfiguration(0)
         if track.find("ks_nordschleife")>=0 and config.find("touristenfahrten")>=0:
@@ -211,9 +220,32 @@ class ACInfo:
         self.session.setValue(sim_info.graphics.session)
         self.manageWindow()
         self.animate()
-        carsCount=ac.getCarsCount()      
-        self.currentVehicule.setValue(ac.getFocusedCar())                 
+        carsCount=ac.getCarsCount()   
+        self.currentVehicule.setValue(ac.getFocusedCar())
+        backupLaptime=0
+        backupLastLapInPits=0
+        if len(self.lapTimesArray) < carsCount:
+            for x in range(carsCount):
+                c = ac.getCarState(x,acsys.CS.LapCount)
+                self.driversLap.append(Value(c))
+                self.lapTimesArray.append(lapTimeStart(c,sim_info.graphics.sessionTimeLeft,0)) 
+        else:
+            for x in range(carsCount):
+                c = ac.getCarState(x,acsys.CS.LapCount)
+                self.driversLap[x].setValue(c)
+                if self.driversLap[x].hasChanged():
+                    self.lapTimesArray[x].lap=self.driversLap[x].value
+                    self.lapTimesArray[x].time=sim_info.graphics.sessionTimeLeft
+                if bool(ac.isCarInPitline(x)):
+                    self.lapTimesArray[x].lastpit=c
+                if x == self.currentVehicule.value:
+                    backupLaptime=self.lapTimesArray[x].time-sim_info.graphics.sessionTimeLeft
+                    self.lastLapStart = self.lapTimesArray[x].time
+                    backupLastLapInPits = self.lapTimesArray[x].lastpit
+        
+                            
         currentVehiculeChanged=self.currentVehicule.hasChanged()
+            
         if currentVehiculeChanged or (self.fastestLapBorderActive and sim_info.graphics.sessionTimeLeft < self.visible_end):
             self.fastestLapBorderActive = False
             car = ac.getCarName(self.currentVehicule.value)        
@@ -231,12 +263,14 @@ class ACInfo:
                 if self.lastLap != LapCount:
                     self.lastLap = LapCount
                     self.firstLapStarted=False
-                    self.lastLapStart = sim_info.graphics.sessionTimeLeft
+                    #self.lastLapStart = sim_info.graphics.sessionTimeLeft
                 curLapTime = ac.getCarState(self.currentVehicule.value, acsys.CS.LapTime)
+                if curLapTime == 0 and backupLaptime > 0:
+                    curLapTime = backupLaptime
                 if curLapTime > 0:
                     self.firstLapStarted=True
-                if self.minLapCount == 0 and self.firstLapStarted and ((self.lastLapTime > curLapTime and curLapTime < 1000) or self.lastLapStart==10000):
-                    self.lastLapStart = sim_info.graphics.sessionTimeLeft                    
+                #if self.minLapCount == 0 and self.firstLapStarted and ((self.lastLapTime > curLapTime and curLapTime < 1000) or self.lastLapStart==10000):
+                #    self.lastLapStart = sim_info.graphics.sessionTimeLeft                    
                 self.lastLapTime = curLapTime
                                   
                 if isInPit :
@@ -260,6 +294,7 @@ class ACInfo:
                             
                 #lapInvalidated = bool(ac.getCarState(0, acsys.CS.LapInvalidated))
                 lapInvalidated = bool(self.lastLapInvalidated==LapCount)
+                #sector_delay = 5000
                 # live or info                
                 if ((self.lastLapStart < 0 and self.minLapCount > 0) or (self.minLapCount == 0 and lapInvalidated)) and sim_info.graphics.session != 0:                    
                     self.lbl_driver_name_visible.setValue(0)
@@ -269,7 +304,6 @@ class ACInfo:
                     self.info_position_lead.hide()          
                 elif (self.lastLapInPit < LapCount or self.minLapCount==0) and not lapInvalidated and (self.lastTimeInPit==0 or self.lastTimeInPit > self.lastLapStart) :
                     
-                    sector_delay = 5000
                     if self.currentVehicule.value == 0:
                         sector = sim_info.graphics.currentSectorIndex
                     else:
@@ -278,7 +312,7 @@ class ACInfo:
                     self.lbl_driver_name_visible.setValue(1)
                     self.lbl_timing_visible.setValue(1)  
                     
-                    lapTime = ac.getCarState(self.currentVehicule.value, acsys.CS.LapTime)
+                    #lapTime = ac.getCarState(self.currentVehicule.value, acsys.CS.LapTime)
                     if self.currentVehicule.value == 0:
                         lastLap = sim_info.graphics.iLastTime
                     else: 
@@ -286,6 +320,8 @@ class ACInfo:
                         lastSplits = ac.getLastSplits(self.currentVehicule.value)
                         for c in lastSplits:
                             lastLap+=c
+                        if lastLap==0:
+                            lastLap=ac.getCarState(self.currentVehicule.value, acsys.CS.LastLap)
                             
                     
                     traite=False
@@ -305,7 +341,7 @@ class ACInfo:
                          
                     #Situation
                     for s in range(0,sectorCount):                    
-                        if self.fastestLap.value > 0 and lapTime > fastestSplit_fin - sector_delay:
+                        if self.fastestLap.value > 0 and curLapTime > fastestSplit_fin - self.sector_delay:
                             #LAST_SECONDS_OF_SECTOR_X, sector == s and
                             self.info_position.hide() 
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
@@ -320,7 +356,7 @@ class ACInfo:
                                 self.info_position_lead.show() 
                                 showSplit=True
                             break
-                        if sector == s + 1 and s + 1 <= sectorCount and lapTime - timeSplit <= sector_delay and fastestSplit > 0 :
+                        if sector == s + 1 and s + 1 <= sectorCount and curLapTime - timeSplit <= self.sector_delay and fastestSplit > 0 :
                             #SECTOR_X_FINISHED_BEGIN_SECTOR_Y  
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))                  
                             self.lbl_timing_text.setValue(strOffset + self.time_splitting(timeSplit,"yes")) 
@@ -334,13 +370,13 @@ class ACInfo:
                             break
                     
                     if not traite:
-                        if sectorCount-1 == sector and self.fastestLap.value > 0 and lapTime > self.fastestLap.value - sector_delay:
+                        if sectorCount-1 == sector and self.fastestLap.value > 0 and curLapTime > self.fastestLap.value - self.sector_delay:
                             #LAST_SECONDS_OF_SECTOR_LAP,
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
-                            self.lbl_timing_text.setValue(strOffset + self.time_splitting(lapTime)) 
+                            self.lbl_timing_text.setValue(strOffset + self.time_splitting(curLapTime)) 
                             self.info_position.hide()
                             #self.lbl_split.setText(self.time_splitting(self.fastestLap,"yes") + strOffset).setVisible(1)
-                        elif self.lastLapInvalidated!=LapCount-1 and ((self.lastLapInPit!=LapCount-1 and sector == 0) or (self.minLapCount==0)) and lapTime <= sector_delay and lastLap > 0:
+                        elif self.lastLapInvalidated!=LapCount-1 and ((self.lastLapInPit!=LapCount-1 and sector == 0) or (self.minLapCount==0)) and curLapTime <= self.sector_delay and lastLap > 0:
                             #LAP_FINISHED_BEGIN_NEW_LAP,                       
                             pos = ac.getCarLeaderboardPosition(self.currentVehicule.value)
                             if pos > 1:
@@ -361,7 +397,7 @@ class ACInfo:
                         else:
                             #OTHER
                             self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
-                            self.lbl_timing_text.setValue(strOffset + self.time_splitting(lapTime))  
+                            self.lbl_timing_text.setValue(strOffset + self.time_splitting(curLapTime))  
                             self.info_position.hide()
                             if not showSplit:
                                 self.lbl_split.hideText()
@@ -419,8 +455,14 @@ class ACInfo:
                         else:
                             self.lbl_timing_text.setValue(strOffset + "Out Lap")
                         self.lbl_split.hideText()
-                        self.info_position.hide()  
-                
+                        self.info_position.hide() 
+                     
+                if curLapTime <= self.sector_delay and ac.getCarState(self.currentVehicule.value, acsys.CS.LastLap) > 0 and backupLastLapInPits + 1 < ac.getCarState(x,acsys.CS.LapCount):
+                    self.lbl_driver_name_visible.setValue(1)
+                    self.lbl_timing_visible.setValue(1)
+                    self.lbl_split.showText()
+                    self.info_position.show() 
+                    #time vis
                 self.lbl_fastest_split.hideText()
                 if self.lbl_driver_name_visible.value == 1 and self.lbl_driver_name.isVisible.value==0:
                     self.lbl_driver_name_visible.changed=True
