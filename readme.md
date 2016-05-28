@@ -4,6 +4,7 @@
 * Speedtrap
 * Driver info (driver change info - qualif time - fastest lap)
 * Timer (Session info - Replay)
+* Config (Configuration)
 
 Driver colors are set with car brand
 * bmw-ford: blue
@@ -13,13 +14,17 @@ Driver colors are set with car brand
 
 battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap for 12 sec
 
-works with ac shortcuts (but needs to have onboard camera to pickup the driver change):
-* CTRL+1: switch to previous opponent car
-* CTRL+3: switch to next opponent car
-* CTRL+2: switch to player car
-
 -
 ###Changelog
+0.9.6.0
+Config : base row height
+Removed pinhack option and code(not needed anymore)
+Full tower with gaps - PIT and DNF(for player disconnected)
+Reworked animations - implemented in label class
+added pitlane indicator for qualif/practice
+added new fonction from AC 1.5 api
+added tower: click to view driver
+
 0.9.5
 config window
 full tower race mode
@@ -49,9 +54,6 @@ speed units bounded to game options
 * Initial release
 
 ####Todo
-* Options
-  * maximum number of cars in the tower
-  * wether a lap can be invalidated or not (currently hiding lap info)
 
 -
 ###Installation instructions
@@ -61,7 +63,7 @@ speed units bounded to game options
    * in the section UI Modules
    * check prunn
 3. In game all 4 widgets should appear in the list:
-   * ACTV Info, ACTV Timer, ACTV Tower and ACTV Speed Trap
+   * ACTV Info, ACTV Timer, ACTV Tower, ACTV Speed Trap and ACTV Config
    * if you don't see them at first its normal if they have nothing to show but a mouse over the widget will trigger a background and a title(AC puts them at the top left by default) allowing you to place them as you want
 4. don't forget to take a deep breath and smile ;) as you are all set
 
