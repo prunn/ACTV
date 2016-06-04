@@ -55,10 +55,15 @@ class Driver:
             self.lbl_position = Label(app,str(pos+1)).setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(self.fontSize).setAlign("center").setBgColor(Colors.grey(bg = True)).setColor(Colors.white()).setBgOpacity(1).setVisible(0)
             self.lbl_pit = Label(app,"P").setSize(self.rowHeight*0.6, self.rowHeight-2).setPos(self.rowHeight*6, self.final_y + 2).setFontSize(self.fontSize-3).setAlign("center").setBgOpacity(0).setVisible(0)
             self.lbl_pit.setAnimationSpeed("rgb",0.08)
+            self.lbl_position.setAnimationMode("y","spring")
+            self.lbl_pit.setAnimationMode("y","spring")
         self.lbl_time = Label(app,"+0.000").setSize(self.rowHeight*4.7, self.rowHeight).setPos(self.rowHeight, 0).setColor(Colors.grey()).setFontSize(self.fontSize).setAlign("right").setBgOpacity(0).setVisible(0)
         self.lbl_border=Label(app,"").setSize(self.rowHeight*2.8, 1).setPos(0, self.rowHeight-1).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.setName()
         self.lbl_time.setAnimationSpeed("rgb",0.08)
+        self.lbl_name.setAnimationMode("y","spring")
+        self.lbl_time.setAnimationMode("y","spring")
+        self.lbl_border.setAnimationMode("y","spring")
         
         if fontName != "":
             self.lbl_name.setFont(fontName,0,0) 
@@ -97,35 +102,14 @@ class Driver:
     def show(self,start,needsTLC=True):
         if self.showingFullNames and needsTLC:
             self.setName()
-        if not self.isDisplayed:          
-            '''if start > 1:
-                self.y=(start-2)*self.rowHeight
-                if self.isLapLabel:
-                    self.lbl_name.setPos(0, (start-2)*self.rowHeight)
-                else:
-                    self.lbl_name.setPos(self.rowHeight, (start-2)*self.rowHeight)
-                self.lbl_position.setPos(0, (start-2)*self.rowHeight)
-                self.lbl_time.setPos(self.rowHeight, (start-2)*self.rowHeight) 
-                self.lbl_pit.setPos(self.rowHeight*6, (start-2)*self.rowHeight + 2)   
-                self.lbl_border.setPos(0, (start-2)*self.rowHeight + 37)
-            else:
-                self.y=0
-                if self.isLapLabel:
-                    self.lbl_name.setPos(0, 0)
-                else:
-                    self.lbl_name.setPos(self.rowHeight, 0)
-                self.lbl_position.setPos(0, 0)
-                self.lbl_time.setPos(self.rowHeight, 0)  
-                self.lbl_pit.setPos(self.rowHeight*6, 2)  
-                self.lbl_border.setPos(0, self.rowHeight-1) 
-            ''' 
+        if not self.isDisplayed:
             if not self.isLapLabel:
                 if self.isInPit.value:
                     self.lbl_pit.showText()
                     self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
                 else:
                     self.lbl_pit.hideText()  
-                    self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True)     
+                    self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True) 
             self.isDisplayed = True
         self.lbl_name.show()
         
@@ -133,7 +117,11 @@ class Driver:
             self.lbl_time.showText()#.setVisible(1)
         self.lbl_border.show()
         if not self.isLapLabel:
-            self.lbl_position.show()
+            self.lbl_position.show()            
+            if not bool(ac.isConnected(self.identifier)) or bool(ac.isCarInPitline(self.identifier)) or ac.getCarState(self.identifier,acsys.CS.SpeedKMH) > 30:  
+                self.lbl_name.setColor(Colors.white(),True)  
+            else:
+                self.lbl_name.setColor(Colors.yellow(),True)
             
     def updatePit(self,session_time):
         self.isInPit.setValue(bool(ac.isCarInPitline(self.identifier)))

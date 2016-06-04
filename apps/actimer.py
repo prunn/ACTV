@@ -28,7 +28,7 @@ class ACTimer:
 		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
 		self.lbl_session_title=Label(self.window.app,"P").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(0.64)
 		
-		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
+		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setColor(Colors.white()).setVisible(0)
 		self.lbl_session_border=Label(self.window.app,"").setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(1)
 		
 		trackFilePath = "content/tracks/"+ ac.getTrackName(0) + "/ui/"
@@ -148,7 +148,7 @@ class ACTimer:
 	def onUpdate(self, deltaT, sim_info):		
 		self.session_draw.setValue(sim_info.graphics.session)
 		self.manageWindow()
-		if sim_info.graphics.status == 2:
+		if sim_info.graphics.status == 2: #LIVE
 			if self.replay_initialised:
 				self.lbl_session_single.setColor(rgb([255,255,255]))
 			self.session.setValue(sim_info.graphics.session)
@@ -175,6 +175,20 @@ class ACTimer:
 						else:
 							self.lbl_session_title.setText("P")  
 					self.lbl_session_info.setText(self.time_splitting(sessionTimeLeft))
+					if not self.finish_initialised:
+						if sim_info.graphics.flag == 2:
+							self.lbl_session_info.setBgColor(Colors.yellow(True))
+							self.lbl_session_info.setColor(Colors.black(),True)
+							self.lbl_session_border.setBgColor(Colors.black(bg = True),True)
+							self.lbl_session_title.setBgColor(Colors.black(bg = True),True)
+						else:
+							self.lbl_session_info.setBgColor(rgb([55, 55, 55], bg = True))
+							self.lbl_session_info.setColor(Colors.white(),True)	
+							self.lbl_session_border.setBgColor(Colors.red(bg = True),True)	
+							self.lbl_session_title.setBgColor(Colors.red(bg = True),True)
+					self.lbl_session_border.animate()		
+					self.lbl_session_info.animate()
+					self.lbl_session_title.animate()
 			elif self.session.value == 2 :
 				completed=0
 				for x in range(ac.getCarsCount()): 
@@ -214,11 +228,23 @@ class ACTimer:
 						self.lbl_session_title.setSize(self.rowHeight, self.rowHeight)
 						self.lbl_session_title.setText("Lap")
 					self.lbl_session_single.setText("{0} / {1}".format(completed,total))
+				if not self.finish_initialised:
+					if sim_info.graphics.flag == 2:
+						self.lbl_session_single.setBgColor(Colors.yellow(True),True)
+						self.lbl_session_single.setColor(Colors.black(),True)
+						self.lbl_session_border.setBgColor(Colors.black(bg = True),True)
+					else:
+						self.lbl_session_single.setBgColor(rgb([55, 55, 55], bg = True),True)
+						self.lbl_session_single.setColor(Colors.white(),True)
+						self.lbl_session_border.setBgColor(Colors.red(bg = True),True)
+				self.lbl_session_border.animate()		
+				self.lbl_session_single.animate()
 			else:
 				self.lbl_session_info.setVisible(0)
 				self.lbl_session_title.setVisible(0)
 				self.lbl_session_single.setVisible(0)
 				self.lbl_session_border.setVisible(0)
+			
 					
 		elif sim_info.graphics.status == 1:
 			if self.finish_initialised:

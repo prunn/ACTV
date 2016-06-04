@@ -123,6 +123,11 @@ class Colors:
 	def white(bg = False):
 		return rgb([255, 255, 255], bg = bg)
 	@staticmethod
+	def black(bg = False):
+		if bg:
+			return rgb([0, 0, 0], bg = bg)
+		return rgb([12, 12, 12], bg = bg)
+	@staticmethod
 	def red(bg = False):
 		return rgb([191, 0, 0], bg = bg)
 	@staticmethod
@@ -158,11 +163,13 @@ class Label:
 	def __init__(self, window, text = ""):
 		self.text      = text
 		self.label     = ac.addLabel(window, self.text)
-		self.params	  = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
-		self.f_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
-		self.o_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0), "o" : Value(1), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
-		self.multiplier = {"x" : Value(3), "y" : Value(3), "w" : Value(1), "h" : Value(1), "o" : Value(0.02), "r" : Value(0.06), "g" : Value(0.06), "b" : Value(0.06), "a" : Value(0.02) }
+		self.params	  = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0),"br" : Value(1), "bg" : Value(1), "bb" : Value(1), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
+		self.f_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0),"br" : Value(1), "bg" : Value(1), "bb" : Value(1), "o" : Value(0), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
+		self.o_params = {"x" : Value(0), "y" : Value(0), "w" : Value(0), "h" : Value(0),"br" : Value(1), "bg" : Value(1), "bb" : Value(1), "o" : Value(1), "r" : Value(1), "g" : Value(1), "b" : Value(1), "a" : Value(1) }
+		self.multiplier = {"x" : Value(3), "y" : Value(3), "w" : Value(1), "h" : Value(1),"br" : Value(0.06), "bg" : Value(0.06), "bb" : Value(0.06), "o" : Value(0.02), "r" : Value(0.06), "g" : Value(0.06), "b" : Value(0.06), "a" : Value(0.02) }
+		self.multiplier_mode = {"x" : "", "y" : "", "w" : "", "h" : "","br" : "", "bg" : "", "bb" : "", "o" : "", "r" : "", "g" : "", "b" : "", "a" : "" }
 		self.fontSize  = 12
+		self.spring_multiplier = 36
 		self.align     = "left"
 		self.bgTexture = ""
 		self.fontName = ""
@@ -256,10 +263,20 @@ class Label:
 		ac.setBackgroundTexture(self.label, self.bgTexture)
 		return self
 	
-	def setBgColor(self, color):
-		ac.setBackgroundColor(self.label, *color)
-		if self.f_params["o"].value > 0:			
-			ac.setBackgroundOpacity(self.label, self.params["o"].value)
+	def setBgColor(self, color, animated=False):
+		self.f_params["br"].setValue(color[0])
+		self.f_params["bg"].setValue(color[1])
+		self.f_params["bb"].setValue(color[2])
+		if not animated:
+			self.o_params["br"].setValue(color[0])
+			self.o_params["bg"].setValue(color[1])
+			self.o_params["bb"].setValue(color[2])
+			self.params["br"].setValue(color[0])
+			self.params["bg"].setValue(color[1])
+			self.params["bb"].setValue(color[2])			
+			ac.setBackgroundColor(self.label, *color)
+			if self.f_params["o"].value > 0:			
+				ac.setBackgroundOpacity(self.label, self.params["o"].value)
 		return self
 	
 	def setBgOpacity(self, opacity, animated=False):
@@ -282,6 +299,11 @@ class Label:
 	def setAnimationSpeed(self,param,value):
 		for p in param:
 			self.multiplier[p].setValue(value)
+		return self
+	
+	def setAnimationMode(self,param,value):
+		for p in param:
+			self.multiplier_mode[p]=value
 		return self
 	
 	def hide(self):
@@ -312,15 +334,13 @@ class Label:
 	
 	def adjustParam(self,p):
 		if self.params[p].value != self.f_params[p].value:
-			if self.multiplier[p].value == "spring":
+			if self.multiplier_mode[p] == "spring":
 				multiplier=self.multiplier[p].value
-				if abs(self.f_params[p].value - self.params[p].value) > 38*3:
-					multiplier=round(abs(self.f_params[p].value - self.params[p].value)/38) 
-				'''
-		            multiplier=3            
-		            elif abs(self.final_y - self.y) > 38*3:
-		                multiplier=round(abs(self.final_y - self.y)/38) 
-		        '''
+				spring_multi=self.spring_multiplier
+				if p == "y":
+					spring_multi=self.f_params["h"].value-1
+				if abs(self.f_params[p].value - self.params[p].value) > spring_multi*self.multiplier[p].value:
+					multiplier=round(abs(self.f_params[p].value - self.params[p].value)/spring_multi) 				
 			else:
 				multiplier=self.multiplier[p].value
 			if abs(self.f_params[p].value - self.params[p].value) < multiplier:
@@ -336,8 +356,8 @@ class Label:
 		self.adjustParam("w").adjustParam("h")		
 		#adjust position +3
 		self.adjustParam("x").adjustParam("y")	
-		#adjust alpha + 0.02
-		self.adjustParam("o")		
+		#adjust background
+		self.adjustParam("br").adjustParam("bg").adjustParam("bb").adjustParam("o")		
 		#adjust colors + 0.02
 		self.adjustParam("r").adjustParam("g").adjustParam("b").adjustParam("a")
 			
@@ -350,6 +370,10 @@ class Label:
 				self.isVisible.setValue(False)
 			else:
 				self.isVisible.setValue(True)
+		if self.params["br"].hasChanged() or self.params["bg"].hasChanged() or self.params["bb"].hasChanged():
+			ac.setBackgroundColor(self.label, self.params["br"].value, self.params["bg"].value, self.params["bb"].value)			
+			if self.f_params["o"].value > 0:			
+				ac.setBackgroundOpacity(self.label, self.params["o"].value)
 		if self.params["o"].hasChanged():	
 			if self.params["o"].value == 0:
 				self.isVisible.setValue(False)

@@ -457,7 +457,8 @@ class ACInfo:
                         self.lbl_split.hideText()
                         self.info_position.hide() 
                      
-                if curLapTime <= self.sector_delay and ac.getCarState(self.currentVehicule.value, acsys.CS.LastLap) > 0 and backupLastLapInPits + 1 < ac.getCarState(x,acsys.CS.LapCount):
+                if curLapTime <= self.sector_delay and ac.getCarState(self.currentVehicule.value, acsys.CS.LastLap) > 0 and backupLastLapInPits + 1 < ac.getCarState(x,acsys.CS.LapCount) and sim_info.graphics.sessionTimeLeft < 0:
+                    self.lbl_driver_name_text.setValue(strOffset + "     " + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                     self.lbl_driver_name_visible.setValue(1)
                     self.lbl_timing_visible.setValue(1)
                     self.lbl_split.showText()
