@@ -236,7 +236,7 @@ class ACInfo:
                 if self.driversLap[x].hasChanged():
                     self.lapTimesArray[x].lap=self.driversLap[x].value
                     self.lapTimesArray[x].time=sim_info.graphics.sessionTimeLeft
-                if bool(ac.isCarInPitline(x)):
+                if bool(ac.isCarInPitline(x)) or bool(ac.isCarInPit(x)):
                     self.lapTimesArray[x].lastpit=c
                 if x == self.currentVehicule.value:
                     backupLaptime=self.lapTimesArray[x].time-sim_info.graphics.sessionTimeLeft
@@ -258,7 +258,7 @@ class ACInfo:
                 #NOT RACE
                 #qtime          
                 bestlap = ac.getCarState(self.currentVehicule.value,acsys.CS.BestLap)
-                isInPit = bool(ac.isCarInPitline(self.currentVehicule.value))
+                isInPit = (bool(ac.isCarInPitline(self.currentVehicule.value)) or bool(ac.isCarInPit(self.currentVehicule.value)))
                 LapCount = ac.getCarState(self.currentVehicule.value,acsys.CS.LapCount)
                 if self.lastLap != LapCount:
                     self.lastLap = LapCount

@@ -140,7 +140,8 @@ class Configuration:
     
     def listen_key(self):
         try:        
-            ctypes.windll.user32.RegisterHotKey(None, 1, 0, apps.util.win32con.VK_F7)
+            #ctypes.windll.user32.RegisterHotKey(None, 1, 0, apps.util.win32con.VK_F7)
+            ctypes.windll.user32.RegisterHotKey(None, 1, apps.util.win32con.MOD_CONTROL, 0x41)
             msg = ctypes.wintypes.MSG()
             while self.listen_active :
                 if ctypes.windll.user32.GetMessageA(ctypes.byref(msg), None, 0, 0) != 0: 
@@ -148,7 +149,7 @@ class Configuration:
                     if msg.message == apps.util.win32con.WM_HOTKEY:
                         self.hotkey_pressed()
                     ctypes.windll.user32.TranslateMessage(ctypes.byref(msg))
-                    ctypes.windll.user32.DispatchMessageA(ctypes.byref(msg))             
+                    ctypes.windll.user32.DispatchMessageA(ctypes.byref(msg))           
         except:
             Log.w("Error")
         finally:

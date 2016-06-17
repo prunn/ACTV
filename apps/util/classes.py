@@ -338,9 +338,11 @@ class Label:
 				multiplier=self.multiplier[p].value
 				spring_multi=self.spring_multiplier
 				if p == "y":
-					spring_multi=self.f_params["h"].value-1
+					spring_multi=self.f_params["h"].value-1				
+					if not spring_multi > 0:
+						spring_multi=36
 				if abs(self.f_params[p].value - self.params[p].value) > spring_multi*self.multiplier[p].value:
-					multiplier=round(abs(self.f_params[p].value - self.params[p].value)/spring_multi) 				
+					multiplier=round(abs(self.f_params[p].value - self.params[p].value)/spring_multi) 			
 			else:
 				multiplier=self.multiplier[p].value
 			if abs(self.f_params[p].value - self.params[p].value) < multiplier:
