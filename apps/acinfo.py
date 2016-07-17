@@ -263,7 +263,8 @@ class ACInfo:
                 if self.lastLap != LapCount:
                     self.lastLap = LapCount
                     self.firstLapStarted=False
-                    #self.lastLapStart = sim_info.graphics.sessionTimeLeft
+                    if self.currentVehicule.value==0:
+                        self.lastLapStart = sim_info.graphics.sessionTimeLeft
                 curLapTime = ac.getCarState(self.currentVehicule.value, acsys.CS.LapTime)
                 if curLapTime == 0 and backupLaptime > 0:
                     curLapTime = backupLaptime
@@ -295,14 +296,15 @@ class ACInfo:
                 #lapInvalidated = bool(ac.getCarState(0, acsys.CS.LapInvalidated))
                 lapInvalidated = bool(self.lastLapInvalidated==LapCount)
                 #sector_delay = 5000
-                # live or info                
+                # live or info      
+                #ac.console("("+str(self.lastLapInPit)+" < "+str(LapCount)+" or "+str(self.minLapCount)+"==0) and not "+str(lapInvalidated)+" and ("+str(self.lastTimeInPit)+"==0 or "+str(self.lastTimeInPit)+" > "+str(self.lastLapStart)+")")            
                 if ((self.lastLapStart < 0 and self.minLapCount > 0) or (self.minLapCount == 0 and lapInvalidated)) and sim_info.graphics.session != 0:                    
                     self.lbl_driver_name_visible.setValue(0)
                     self.lbl_timing_visible.setValue(0)  
                     self.lbl_split.hideText()  
                     self.info_position.hide()
                     self.info_position_lead.hide()          
-                elif (self.lastLapInPit < LapCount or self.minLapCount==0) and not lapInvalidated and (self.lastTimeInPit==0 or self.lastTimeInPit > self.lastLapStart) :
+                elif (self.lastLapInPit < LapCount or self.minLapCount==0) and not lapInvalidated and (self.lastTimeInPit==0 or self.lastTimeInPit > self.lastLapStart or self.minLapCount==0) :
                     
                     if self.currentVehicule.value == 0:
                         sector = sim_info.graphics.currentSectorIndex
@@ -407,7 +409,7 @@ class ACInfo:
                     normalizedSplinePosition = ac.getCarState(self.currentVehicule.value,acsys.CS.NormalizedSplinePosition)
                     if normalizedSplinePosition <= 0.001:
                         normalizedSplinePosition=1
-                    if sim_info.graphics.sessionTimeLeft > 0 and self.minLapCount==1 and normalizedSplinePosition > 0.95 and not isInPit :                         
+                    if sim_info.graphics.sessionTimeLeft > 0 and self.minLapCount==1 and normalizedSplinePosition > 0.95 and not isInPit :          
                         self.lbl_driver_name_visible.setValue(1)                    
                         self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                         self.lbl_timing_visible.setValue(1)  
@@ -420,7 +422,7 @@ class ACInfo:
                         self.lbl_timing_visible.setValue(0)  
                         self.lbl_split.hideText()  
                         self.info_position.hide()  
-                    elif bestlap > 0 :                
+                    elif bestlap > 0 :             
                         self.lbl_driver_name_visible.setValue(1)
                         self.lbl_timing_visible.setValue(1)  
                          
@@ -446,7 +448,7 @@ class ACInfo:
                         self.lbl_timing_visible.setValue(0)  
                         self.lbl_split.hideText()  
                         self.info_position.hide()
-                    else :  
+                    else :
                         self.lbl_driver_name_text.setValue(strOffset + self.format_name(ac.getDriverName(self.currentVehicule.value)))
                         self.lbl_driver_name_visible.setValue(1)
                         self.lbl_timing_visible.setValue(1)

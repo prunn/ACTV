@@ -176,7 +176,10 @@ class Driver:
         strOffset = " "
         self.showingFullNames=True
         self.lbl_time.hideText()
-        self.lbl_name.setText(strOffset+self.format_last_name(self.fullName.value))
+        if self.isLapLabel:
+            self.lbl_name.setText(strOffset+self.fullName.value)
+        else:
+            self.lbl_name.setText(strOffset+self.format_last_name(self.fullName.value))
             
     def setTime(self,time,leader,session_time,mode):
         self.qual_mode.setValue(mode)
@@ -500,7 +503,8 @@ class ACTower:
                             #lbl.final_y = 38 * (i+3)
                             self.stintLabels[j].setTimeStint(l.time,l.valid)
                             self.stintLabels[j].setPosition(i+5,1,0,True,self.qual_mode.value) 
-                            self.stintLabels[j].show(i+5,False)
+                            self.stintLabels[j].show(False)
+                            #i+5,
                             i+=1    
                         j+=1   
                     
