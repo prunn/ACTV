@@ -35,6 +35,7 @@ class Driver:
         self.race_standings_sector = Value(0)
         self.isInPit = Value(False)
         self.completedLaps = Value()
+        self.last_lap_visible_end = 0
         self.time_highlight_end = 0
         self.highlight = Value()
         self.pit_highlight_end = 0
@@ -661,6 +662,11 @@ class ACTower:
                         gap = self.gapToDriver(driver,first_driver,first_driver_sector)              
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                                           
                     driver.isAlive=bool(ac.isConnected(driver.identifier)) 
+                    c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
+                    driver.completedLaps.setValue(c) 
+                    if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
+                        driver.last_lap_visible_end = sim_info.graphics.sessionTimeLeft - 5000
+                        
                     if len(p) > 0  and p[0] < self.max_num_cars:
                         driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
                         if self.race_mode.value == 1:
@@ -675,6 +681,9 @@ class ACTower:
                             elif bool(ac.isCarInPitline(driver.identifier)) or bool(ac.isCarInPit(driver.identifier)):           
                                 driver.setTimeRaceBattle("PIT",first_driver.identifier)          
                                 driver.show()
+                            elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < sim_info.graphics.sessionTimeLeft:
+                                lastlap = ac.getCarState(driver.identifier,acsys.CS.LastLap)
+                                driver.setTimeRaceBattle(lastlap,-1) 
                             elif lapGap > 100:                            
                                 driver.setTimeRaceBattle(lapGap/100,first_driver.identifier,True)          
                                 driver.show()

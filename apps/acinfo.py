@@ -266,7 +266,7 @@ class ACInfo:
                     if self.currentVehicule.value==0:
                         self.lastLapStart = sim_info.graphics.sessionTimeLeft
                 curLapTime = ac.getCarState(self.currentVehicule.value, acsys.CS.LapTime)
-                if curLapTime == 0 and backupLaptime > 0:
+                if curLapTime == 0 and backupLaptime > 0 and self.minLapCount > 0:
                     curLapTime = backupLaptime
                 if curLapTime > 0:
                     self.firstLapStarted=True
