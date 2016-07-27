@@ -671,9 +671,7 @@ class ACTower:
                         driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
                         if self.race_mode.value == 1:
                             lapGap=self.getMaxSector(first_driver) - self.getMaxSector(driver)
-                            if driver.finished:
-                                #driver.setTimeRaceBattle(gap,driver.identifier) 
-                                #driver.showFullName()         
+                            if driver.finished:        
                                 driver.show(False)
                             elif not driver.isAlive:           
                                 driver.setTimeRaceBattle("DNF",first_driver.identifier)          
@@ -690,11 +688,22 @@ class ACTower:
                             else:
                                 driver.setTimeRaceBattle(gap,first_driver.identifier)         
                                 driver.show()
-                        else:
-                            #driver.showFullName()                        
+                        else:                       
                             driver.show(False)
                     else:
                         driver.hide()
+            elif self.race_mode.value == 1:
+                for driver in self.drivers: 
+                    driver.isAlive=bool(ac.isConnected(driver.identifier)) 
+                    c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
+                    driver.completedLaps.setValue(c) 
+                    if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
+                        driver.last_lap_visible_end = sim_info.graphics.sessionTimeLeft - 5000
+                    if driver.finished:                                
+                        driver.show(False)
+                    elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < sim_info.graphics.sessionTimeLeft and driver.isAlive and not bool(ac.isCarInPitline(driver.identifier)) and not bool(ac.isCarInPit(driver.identifier)):
+                        lastlap = ac.getCarState(driver.identifier,acsys.CS.LastLap)
+                        driver.setTimeRaceBattle(lastlap,-1) 
             self.tick_race_mode+=1
                 
         elif not self.force_hidden and driverShown > 1 and (self.race_show_end > sim_info.graphics.sessionTimeLeft or self.race_show_end == 0):
