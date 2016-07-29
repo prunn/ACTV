@@ -141,7 +141,7 @@ class Configuration:
     def listen_key(self):
         try:        
             #ctypes.windll.user32.RegisterHotKey(None, 1, 0, apps.util.win32con.VK_F7)
-            ctypes.windll.user32.RegisterHotKey(None, 1, apps.util.win32con.MOD_CONTROL, 0x41)
+            ctypes.windll.user32.RegisterHotKey(None, 1, apps.util.win32con.MOD_CONTROL, 0x44)#CTRL+D
             msg = ctypes.wintypes.MSG()
             while self.listen_active :
                 if ctypes.windll.user32.GetMessageA(ctypes.byref(msg), None, 0, 0) != 0: 
