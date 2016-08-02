@@ -42,7 +42,7 @@ class Driver:
         self.pit_highlight = Value()
         self.position = Value()
         self.position_offset = Value()
-        self.gapToFirst=0
+        #self.gapToFirst=0
         self.num_pos=0
         self.showingFullNames=False
         if self.isLapLabel:            
@@ -160,11 +160,20 @@ class Driver:
         self.lbl_border.hide()  
         self.lbl_name.hide()            
         self.isDisplayed = False 
-        if reset:#self.isDisplayed:  
+        if reset:  
+            self.finished=False
             self.isInPit.setValue(False)    
             self.firstDraw = False 
+            self.setName()            
+            self.race_current_sector.setValue(0)
+            self.race_standings_sector.setValue(0)
+            self.race_gaps = []
+            self.completedLaps.setValue(0)
+            self.last_lap_visible_end = 0
+            self.time_highlight_end = 0
             
     def setName(self):
+        self.showingFullNames=False
         strOffset = " "
         if self.isLapLabel:
             self.lbl_name.setText(strOffset+self.fullName.value)
@@ -768,8 +777,6 @@ class ACTower:
             self.stint_visible_end=0
             for driver in self.drivers:
                 driver.hide(True)
-                driver.race_standings_sector.setValue(0)
-                driver.race_gaps = []
        
         if self.cursor.hasChanged() or sessionChanged:
             if self.cursor.value:
