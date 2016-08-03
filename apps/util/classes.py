@@ -140,6 +140,9 @@ class Colors:
 	def grey(bg = False):
 		return rgb([112, 112, 112], bg = bg)
 	@staticmethod
+	def purple(bg = False):
+		return rgb([135, 31, 144], bg = bg)
+	@staticmethod
 	def pitColor(bg = False):
 		return rgb([225, 225, 225], bg = bg)
 	
