@@ -680,11 +680,11 @@ class ACTower:
                     driver.completedLaps.setValue(c) 
                     if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
                         driver.last_lap_visible_end = sim_info.graphics.sessionTimeLeft - 5000
-                        
-                    if len(p) > 0  and p[0] < self.max_num_cars:
+                    driver_max_sector = self.getMaxSector(driver)  
+                    if len(p) > 0  and p[0] < self.max_num_cars and driver_max_sector > 5:
                         driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
                         if self.race_mode.value == 1:
-                            lapGap=self.getMaxSector(first_driver) - self.getMaxSector(driver)
+                            lapGap=self.getMaxSector(first_driver) - driver_max_sector
                             if driver.finished:        
                                 driver.show(False)
                             elif not driver.isAlive:           
@@ -796,14 +796,15 @@ class ACTower:
                 self.window.showTitle(False) 
                     
     def onUpdate(self, deltaT, sim_info):       
-        self.session.setValue(sim_info.graphics.session)
-        if (sim_info.graphics.status != 3 and self.sessionTimeLeft != 0 and self.sessionTimeLeft + 100 < sim_info.graphics.sessionTimeLeft) or sim_info.graphics.status==0:
+        self.session.setValue(sim_info.graphics.session)        
+        if (sim_info.graphics.status != 3 and self.sessionTimeLeft != 0 and self.sessionTimeLeft != -1 and self.sessionTimeLeft + 100 < sim_info.graphics.sessionTimeLeft) or sim_info.graphics.status==0:
             self.session.setValue(-1)
             self.session.setValue(sim_info.graphics.session)
         self.manageWindow()
         self.numCars.setValue(ac.getCarsCount()) 
         self.sessionTimeLeft=sim_info.graphics.sessionTimeLeft
-        self.animate(self.sessionTimeLeft)
+        if sim_info.graphics.status != 3:
+            self.animate(self.sessionTimeLeft)
            
         #stint view
         LapCount=ac.getCarState(0,acsys.CS.LapCount)
@@ -887,6 +888,12 @@ class ACTower:
                 ac.console("---------------------------------") 
                 '''
                 self.update_drivers_race(sim_info)
-                    
+        elif sim_info.graphics.status == 1: #Replay
+            for driver in self.drivers: 
+                driver.hide() 
+            self.lbl_title_stint.hide()
+            self.lbl_tire_stint.hide() 
+            for l in self.stintLabels:
+                l.hide()        
         
     
