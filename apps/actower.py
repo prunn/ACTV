@@ -140,6 +140,8 @@ class Driver:
             self.lbl_pit.hideText()   
             self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True)   
         #color
+        if session_time == -1:
+            self.pit_highlight_end=0
         self.pit_highlight.setValue(self.pit_highlight_end != 0 and self.pit_highlight_end < session_time)        
         if self.pit_highlight.hasChanged() :          
             if self.pit_highlight.value:
@@ -349,7 +351,8 @@ class Driver:
             return "{0}.{1}".format(int(s), str(int(d)).zfill(3))
      
     def animate(self,sessionTimeLeft): 
-        
+        if sessionTimeLeft == -1:
+            self.time_highlight_end = 0
         #color
         self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < sessionTimeLeft)        
         if self.highlight.hasChanged() :          
@@ -602,12 +605,17 @@ class ACTower:
         if self.numCars.hasChanged():
             self.init_drivers()        
         self.driver_shown=0
+        nb_drivers_alive=0
         cur_driver=0
+        cur_driver_pos=0
         first_driver=0
         first_driver_sector=0
         cur_sector=0
         best_pos=0
         for driver in self.drivers:
+            driver.isAlive=bool(ac.isConnected(driver.identifier))
+            if driver.isAlive:
+                nb_drivers_alive+=1
             p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
             if len(p) > 0 and p[0] == 0:
                 first_driver=driver
@@ -638,6 +646,8 @@ class ACTower:
             if driver.identifier == self.currentVehicule.value:
                 cur_driver=driver
                 cur_sector=driver.race_current_sector.value
+                if len(p) > 0:
+                    cur_driver_pos=p[0]+1 
         driverShown=0
         driverShownMaxGap=0
         maxGap=2500
@@ -664,7 +674,11 @@ class ACTower:
                     self.race_show_end = sim_info.graphics.sessionTimeLeft - 360000                    
                 else:     
                     self.race_show_end = sim_info.graphics.sessionTimeLeft - 12000
-                    
+        display_offset=0
+        if cur_driver_pos >= self.max_num_cars:  
+            display_offset=cur_driver_pos-self.max_num_cars
+            if nb_drivers_alive > cur_driver_pos:#showing next driver to user
+                display_offset+=1
         if (self.race_mode.value == 1 or self.race_mode.value == 2) and not self.force_hidden:
             tickLimit=20
             if self.race_mode.value == 1:
@@ -675,15 +689,18 @@ class ACTower:
                     if self.race_mode.value == 1:
                         gap = self.gapToDriver(driver,first_driver,first_driver_sector)              
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                                           
-                    driver.isAlive=bool(ac.isConnected(driver.identifier)) 
+                    #driver.isAlive=bool(ac.isConnected(driver.identifier)) 
                     c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
                     driver.completedLaps.setValue(c) 
                     if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
                         driver.last_lap_visible_end = sim_info.graphics.sessionTimeLeft - 5000
-                    driver_max_sector = self.getMaxSector(driver)  
-                    if len(p) > 0  and p[0] < self.max_num_cars and driver_max_sector > 5:
-                        driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
-                        if self.race_mode.value == 1:
+                    driver_max_sector = self.getMaxSector(driver)                      
+                    if len(p) > 0  and p[0] < self.max_num_cars+display_offset and driver_max_sector > 5 and (p[0]<3 or p[0]-2 > display_offset):                        
+                        if p[0]<3:
+                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
+                        else:
+                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1+display_offset,True,self.qual_mode.value) 
+                        if self.race_mode.value == 1:                            
                             lapGap=self.getMaxSector(first_driver) - driver_max_sector
                             if driver.finished:        
                                 driver.show(False)
@@ -710,7 +727,7 @@ class ACTower:
                 for driver in self.drivers: 
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                     if len(p) > 0  and p[0] < self.max_num_cars:
-                        driver.isAlive=bool(ac.isConnected(driver.identifier)) 
+                        #driver.isAlive=bool(ac.isConnected(driver.identifier)) 
                         c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
                         driver.completedLaps.setValue(c) 
                         if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
@@ -828,7 +845,7 @@ class ACTower:
             else: 
                 self.curLapCount.changed = True 
         
-        if sim_info.graphics.status == 2:
+        if sim_info.graphics.status == 2 or (sim_info.graphics.status == 1 and self.session.value < 2):
             #LIVE             
             if self.session.value < 2  :                
                 #Qualify - Practise
