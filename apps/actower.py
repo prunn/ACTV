@@ -726,7 +726,7 @@ class ACTower:
             elif self.race_mode.value == 1:
                 for driver in self.drivers: 
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
-                    if len(p) > 0  and p[0] < self.max_num_cars:
+                    if len(p) > 0  and p[0] < self.max_num_cars and driver.isDisplayed:
                         #driver.isAlive=bool(ac.isConnected(driver.identifier)) 
                         c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
                         driver.completedLaps.setValue(c) 

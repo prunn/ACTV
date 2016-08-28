@@ -117,6 +117,15 @@ class Colors:
 	def lamborghini():
 		return rgb([150, 191, 13], bg = True)
 	@staticmethod
+	def ktm():
+		return rgb([250, 88, 0], bg = True)
+	@staticmethod
+	def nissan():
+		return rgb([175, 71, 169], bg = True)
+	@staticmethod
+	def alfa():
+		return rgb([0, 154, 100], bg = True)
+	@staticmethod
 	def default():
 		return rgb([191, 0, 0], bg = True)
 	@staticmethod
@@ -148,14 +157,24 @@ class Colors:
 	
 	@staticmethod
 	def colorFromCar(car):
-		if car.find("bmw")>=0 or car.find("ford")>=0:
+		if car.find("bmw")>=0 or car.find("ford")>=0 or car.find("shelby")>=0:
 			return Colors.bmw()
-		if car.find("merc")>=0 or car.find("alfa")>=0 or car.find("mazda")>=0:
+		if car.find("merc")>=0 or car.find("mazda")>=0:
 			return Colors.mercedes()
 		if car.find("ruf")>=0 or car.find("corvette")>=0 or car.find("lotus")>=0 or car.find("porsche")>=0:
 			return Colors.corvette()
 		if car.find("lamborghini")>=0 or car.find("pagani")>=0:
 			return Colors.lamborghini()
+		if car.find("ktm")>=0 or car.find("mclaren")>=0:
+			return Colors.ktm()
+		if car.find("nissan")>=0:
+			return Colors.nissan()
+		if car.find("alfa")>=0:
+			return Colors.alfa()
+		if car.find("honda")>=0:
+			return rgb([214, 112, 157], bg = True)
+		#if car.find("glickenhaus")>=0 or car.find("p4-5_2011")>=0:
+		#	return rgb([0, 0, 0], bg = True)
 		return Colors.default()	
 	
 	

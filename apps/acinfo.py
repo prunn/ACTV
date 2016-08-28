@@ -306,7 +306,7 @@ class ACInfo:
                             
         currentVehiculeChanged=self.currentVehicule.hasChanged()
             
-        if currentVehiculeChanged or (self.fastestLapBorderActive and sim_info.graphics.sessionTimeLeft < self.visible_end):
+        if currentVehiculeChanged or (self.fastestLapBorderActive and sim_info.graphics.sessionTimeLeft < self.visible_end-2000):
             self.fastestLapBorderActive = False
             car = ac.getCarName(self.currentVehicule.value)        
             self.lbl_border.setBgColor(Colors.colorFromCar(car))           
