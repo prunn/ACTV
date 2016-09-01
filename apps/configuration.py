@@ -36,7 +36,7 @@ class Configuration:
           
         y+=80  
         self.spin_num_cars = ac.addSpinner(self.window.app, "Number cars tower")
-        ac.setRange(self.spin_num_cars, 2,28)
+        ac.setRange(self.spin_num_cars, 6,28)
         ac.setPosition(self.spin_num_cars,20,y)
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.addOnValueChangeListener(self.spin_num_cars, self.onSpinNumCarsChanged)          

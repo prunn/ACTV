@@ -695,7 +695,7 @@ class ACTower:
                     if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
                         driver.last_lap_visible_end = sim_info.graphics.sessionTimeLeft - 5000
                     driver_max_sector = self.getMaxSector(driver)                      
-                    if len(p) > 0  and p[0] < self.max_num_cars+display_offset and driver_max_sector > 5 and (p[0]<3 or p[0]-2 > display_offset):                        
+                    if len(p) > 0  and p[0] < self.max_num_cars+display_offset and driver.race_current_sector.value > 5 and (p[0]<3 or p[0]-2 > display_offset):                        
                         if p[0]<3:
                             driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
                         else:
@@ -905,6 +905,13 @@ class ACTower:
                 ac.console("---------------------------------") 
                 '''
                 self.update_drivers_race(sim_info)
+            elif self.session.value > 2:  # other session 
+                for driver in self.drivers: 
+                    driver.hide() 
+                self.lbl_title_stint.hide()
+                self.lbl_tire_stint.hide() 
+                for l in self.stintLabels:
+                    l.hide() 
         elif sim_info.graphics.status == 1: #Replay
             for driver in self.drivers: 
                 driver.hide() 

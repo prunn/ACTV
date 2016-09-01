@@ -124,7 +124,8 @@ class Colors:
 		return rgb([175, 71, 169], bg = True)
 	@staticmethod
 	def alfa():
-		return rgb([0, 154, 100], bg = True)
+		#return rgb([0, 154, 100], bg = True)
+		return rgb([54, 172, 68], bg = True)
 	@staticmethod
 	def default():
 		return rgb([191, 0, 0], bg = True)
