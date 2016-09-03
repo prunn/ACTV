@@ -7,15 +7,27 @@
 * Config (Configuration)
 
 Driver colors are set with car brand
-* bmw-ford: blue
-* mercedes-afla romeo: grey
+* bmw-ford-shelby: blue
+* mercedes-mazda: grey
 * ruf-corvette-lotus : yellow
-* lamborghini-pagani: green
+* lamborghini-pagani: lime-green
+* alpha romeo: forest-green
+* nissan: purple
+* ktm-mclaren: orange
 
 battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap for 12 sec
 
 -
 ###Changelog
+1.0.0.0
+yellow timer flag
+name in tower is yellow when stopped on track
+changed hotkey(mode change) to ctrl+d
+last laptime is shown for full tower with gaps in race(5 sec purple for personal best,red for slower)
+scrolling effect for tower in race(top 3 always shown, then driver remains displayed whatever the maximum number of driver shown in config)
+added colors for nissan(purple),ktm/mclaren(orange),alpha romeo(forest green)
+replay beta working on practice qualify sessions
+
 0.9.6.0
 Config : base row height
 Removed pinhack option and code(not needed anymore)
