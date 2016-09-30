@@ -199,7 +199,8 @@ class ACInfo:
         self.lbl_fastest_split.hideText()
         self.lbl_split.hideText()
         self.info_position_lead.hide()
-        self.info_position.hide()     
+        self.info_position.hide()  
+        self.visible_end = 0   
         
     def visibilityQualif(self):
         self.lbl_fastest_split.hideText()
@@ -606,33 +607,13 @@ class ACInfo:
                     self.info_position.setText(str(pos)).show() 
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
-                elif self.visible_end == 0 or sim_info.graphics.sessionTimeLeft < self.visible_end:
+                elif self.visible_end == 0 or sim_info.graphics.sessionTimeLeft < self.visible_end or sim_info.graphics.sessionTimeLeft > 1800000:
                     self.lbl_driver_name_visible.setValue(0)
                     self.info_position.hide()
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
                     
                 self.visibilityRace()
-                '''  
-                if self.lbl_driver_name_visible.hasChanged():         
-                    if self.lbl_driver_name_visible.value == 0:
-                        self.lbl_driver_name.hide()
-                        self.lbl_border.hide()
-                    else:
-                        self.lbl_driver_name.show()
-                        self.lbl_border.show()
-                    
-                if self.lbl_timing_visible.hasChanged():         
-                    if self.lbl_timing_visible.value == 0:
-                        self.lbl_timing.hide()
-                    else:
-                        self.lbl_timing.show()
-                        
-                if self.lbl_driver_name_text.hasChanged():
-                    self.lbl_driver_name.setText(self.lbl_driver_name_text.value)  
-                if self.lbl_timing_text.hasChanged():
-                    self.lbl_timing.setText(self.lbl_timing_text.value,hidden=bool(self.lbl_timing_height < 30)) 
-                '''
                     
         elif sim_info.graphics.status == 1 and sim_info.graphics.session != 2:
             #Replay Qualif
