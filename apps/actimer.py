@@ -22,6 +22,7 @@ class ACTimer:
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
 		self.ui_row_height = Value(-1)
+		self.numberOfLaps=0
 		self.rowHeight=36
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
@@ -148,10 +149,11 @@ class ACTimer:
 	def onUpdate(self, deltaT, sim_info):		
 		self.session_draw.setValue(sim_info.graphics.session)
 		self.manageWindow()
-		if sim_info.graphics.status == 2: #LIVE
+		sim_info_status=sim_info.graphics.status
+		if sim_info_status == 2: #LIVE
 			if self.replay_initialised:
 				self.lbl_session_single.setColor(rgb([255,255,255]))
-			self.session.setValue(sim_info.graphics.session)
+			self.session.setValue(self.session_draw.value)
 			sessionTimeLeft = sim_info.graphics.sessionTimeLeft
 			if self.session.value < 2  :				
 				#0 to -5000 show finish
@@ -196,7 +198,8 @@ class ACTimer:
 					if c > completed:
 						completed=c     
 				completed+=1    
-				total=sim_info.graphics.numberOfLaps
+				if self.numberOfLaps==0:
+					self.numberOfLaps=sim_info.graphics.numberOfLaps
 				if sessionTimeLeft > 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
 					if self.finish_initialised:
 						self.destoy_finish()
@@ -205,10 +208,10 @@ class ACTimer:
 					self.lbl_session_single.setVisible(1)
 					self.lbl_session_border.setVisible(1)
 					self.lbl_session_single.setText(self.trackName)
-				elif completed > total:
+				elif completed > self.numberOfLaps:
 					if not self.finish_initialised:
 						self.init_finish()
-				elif completed == total:
+				elif completed == self.numberOfLaps:
 					if self.finish_initialised:
 						self.destoy_finish()
 					self.lbl_session_info.setVisible(0)
@@ -227,7 +230,7 @@ class ACTimer:
 						self.lbl_session_info.setSize(self.rowHeight*4,  self.rowHeight).setPos(self.rowHeight, 0)
 						self.lbl_session_title.setSize(self.rowHeight, self.rowHeight)
 						self.lbl_session_title.setText("Lap")
-					self.lbl_session_single.setText("{0} / {1}".format(completed,total))
+					self.lbl_session_single.setText("{0} / {1}".format(completed,self.numberOfLaps))
 				if not self.finish_initialised:
 					if sim_info.graphics.flag == 2:
 						self.lbl_session_single.setBgColor(Colors.yellow(True),True)
@@ -246,7 +249,8 @@ class ACTimer:
 				self.lbl_session_border.setVisible(0)
 			
 					
-		elif sim_info.graphics.status == 1:
+		elif sim_info_status == 1:
+			replayTimeMultiplier=sim_info.graphics.replayTimeMultiplier
 			if self.finish_initialised:
 				self.destoy_finish()
 			self.lbl_session_info.setVisible(0)
@@ -255,9 +259,9 @@ class ACTimer:
 			self.lbl_session_single.setVisible(1)
 			self.replay_initialised=True
 			self.lbl_session_single.setColor(rgb([self.replay_rgb,self.replay_rgb,self.replay_rgb]))
-			if self.replay_asc and sim_info.graphics.replayTimeMultiplier > 0:
+			if self.replay_asc and replayTimeMultiplier > 0:
 				self.replay_rgb += 2
-			elif sim_info.graphics.replayTimeMultiplier > 0:
+			elif replayTimeMultiplier > 0:
 				self.replay_rgb -= 2
 			if self.replay_rgb < 100:
 				self.replay_asc=True

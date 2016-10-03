@@ -28,6 +28,7 @@ class ACSpeedTrap:
         self.trap=0
         self.userTrap=0
         self.time_end=0
+        self.carsCount=0
         self.lapCanBeInvalidated=True
         self.relyOnEveryOne=True
         self.widget_visible=Value()
@@ -120,12 +121,15 @@ class ACSpeedTrap:
                     
     def onUpdate(self, deltaT, sim_info):   
         self.session.setValue(sim_info.graphics.session)  
-        if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sim_info.graphics.sessionTimeLeft >= 1800000:  
+        sessionTimeLeft=sim_info.graphics.sessionTimeLeft
+        sim_info_status=sim_info.graphics.status
+        if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sessionTimeLeft >= 1800000:  
             self.resetVisibility() 
             self.time_end = 0
         self.manageWindow()
-        carsCount = ac.getCarsCount()
-        for x in range(carsCount):
+        if self.carsCount==0:
+            self.carsCount = ac.getCarsCount()
+        for x in range(self.carsCount):
             c = ac.getCarState(x,acsys.CS.SpeedKMH)
             if x==0 and self.topSpeed.value < c:
                 self.userTopSpeed.setValue(c)
@@ -158,8 +162,8 @@ class ACSpeedTrap:
             self.lastLapInvalidated = LapCount
         self.animate()
         
-        if sim_info.graphics.status == 2:
-            if sim_info.graphics.session <= 2  :                
+        if sim_info_status == 2:
+            if self.session.value <= 2  :                
                 #Qual-Practise every time
                 #isInPit = self.currentVehicule.value==0 and bool(sim_info.physics.pitLimiterOn)
                 isInPit = (bool(ac.isCarInPitline(self.currentVehicule.value)) or bool(ac.isCarInPit(self.currentVehicule.value)))
@@ -176,13 +180,13 @@ class ACSpeedTrap:
                         self.speedText="%.1f mph"%(self.curTopSpeedMPH.value)
                     else:
                         self.speedText="%.1f kph"%(self.curTopSpeed.value)
-                    self.time_end = sim_info.graphics.sessionTimeLeft - 6000
+                    self.time_end = sessionTimeLeft - 6000
                     self.lbl_title.setText("S",hidden=True)
                     self.lbl_time.setText(self.speedText,hidden=True)
                     self.lbl_time.show()
                     self.lbl_border.show()
                     self.lbl_title.show()
-                elif self.time_end == 0 or sim_info.graphics.sessionTimeLeft < self.time_end:
+                elif self.time_end == 0 or sessionTimeLeft < self.time_end:
                     self.lbl_time.hide()
                     self.lbl_border.hide()
                     self.lbl_title.hide()
@@ -195,7 +199,7 @@ class ACSpeedTrap:
             else:       
                 self.resetVisibility()     
                     
-        elif sim_info.graphics.status == 1:  
+        elif sim_info_status == 1:  
             self.resetVisibility()
     
     

@@ -5,8 +5,51 @@ import functools
 import ctypes
 import time
 from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config
-    
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log
+import http.client
+import encodings.idna
+import threading
+from html.parser import HTMLParser
+ 
+class MyHTMLParser(HTMLParser):
+    html_table=0
+    logging_html=False
+    line=[]
+    data=[]
+    tmp_data=""
+    b=0
+    def handle_starttag(self, tag, attrs):
+        if tag == "table":
+            self.__class__.html_table+=1
+            if self.__class__.html_table > 1:
+                self.__class__.logging_html=True
+    def handle_endtag(self, tag):
+        if tag == "table":
+            self.__class__.logging_html=False
+        elif self.__class__.logging_html and tag == "tr" and len(self.__class__.line) > 0:
+            self.__class__.data.append(self.__class__.line)
+            self.__class__.line=[]
+            self.__class__.tmp_data=""
+        elif self.__class__.logging_html and tag == "td":
+            self.__class__.line.append(self.__class__.tmp_data)
+            self.__class__.tmp_data=""
+            
+    def handle_data(self, data):
+        if self.__class__.logging_html : 
+            self.__class__.tmp_data=data 
+            #.decode('unicode_escape').replace("\'", "'")
+            #ac.console("data :" + str(data))
+            #ac.log(str(data))
+            #self.__class__.line.append(data)
+            #self.__class__.b+=1
+            #.append
+            #if len(self.__class__.line) >= 7:
+            #    self.__class__.data.append(self.__class__.line)
+            #    self.__class__.line=[]
+            #    #self.__class__.b=0
+            #    ac.log("------------------")
+            
+           
 class Laps:
     def __init__(self,lap,valid,time):
         self.lap = lap
@@ -27,11 +70,14 @@ class Driver:
         self.qual_mode = Value(0)
         self.race_gaps = []
         self.finished=False
+        self.bestLap=0
+        self.bestLapServer=0
+        self.lapCount=0
         self.fullName = Value(name)
         self.shortName = name
-        self.driver_shown=0
         self.time = Value()
         self.gap = Value()
+        self.raceProgress=0
         self.race_current_sector = Value(0)
         self.race_standings_sector = Value(0)
         self.isInPit = Value(False)
@@ -43,6 +89,7 @@ class Driver:
         self.pit_highlight = Value()
         self.position = Value()
         self.position_offset = Value()
+        self.carName = ac.getCarName(self.identifier) 
         #self.gapToFirst=0
         self.num_pos=0
         self.showingFullNames=False
@@ -174,7 +221,21 @@ class Driver:
             self.completedLaps.setValue(0)
             self.last_lap_visible_end = 0
             self.time_highlight_end = 0
-            
+    
+    def getBestLap(self,lap=False):
+        if lap:
+            self.bestLap=lap
+        if self.bestLapServer > 0 and self.bestLap > 0:
+            if self.bestLapServer > self.bestLap:
+                return self.bestLap
+            else:
+                return self.bestLapServer
+        if self.bestLapServer > 0:
+            return self.bestLapServer
+        if self.bestLap > 0:
+            return self.bestLap            
+        return 0
+                
     def setName(self):
         self.showingFullNames=False
         strOffset = " "
@@ -182,8 +243,8 @@ class Driver:
             self.lbl_name.setText(strOffset+self.fullName.value)
         else:
             self.lbl_name.setText(strOffset+self.format_name_tlc(self.fullName.value))        
-            car = ac.getCarName(self.identifier) 
-            self.lbl_border.setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7)
+            #car = ac.getCarName(self.identifier) 
+            self.lbl_border.setBgColor(Colors.colorFromCar(self.carName)).setBgOpacity(0.7)
     
     def showFullName(self):
         strOffset = " "
@@ -385,14 +446,18 @@ class ACTower:
         self.numCars = Value()
         self.session=Value(-1)
         self.sessionTimeLeft=0
+        self.imported=False
+        self.TimeLeftUpdate=Value()
         self.lapsCompleted=Value()
         self.currentVehicule=Value(0)
         self.race_show_end = 0
+        self.driver_shown=0
         self.drivers_inited=False
         self.force_hidden=False
         self.leader_time=0
         self.tick=0  
         self.tick_race_mode=0
+        self.tick_update=0
         self.cursor=Value(False)
         self.max_num_cars = 18
         self.max_num_laps_stint = 8
@@ -482,8 +547,6 @@ class ACTower:
         
     
     def update_drivers(self,sim_info):
-        if self.numCars.hasChanged():
-            self.init_drivers()
         self.minlap_stint = 5
         show_stint_always = False
         if len(self.standings) <= 1:
@@ -537,14 +600,15 @@ class ACTower:
                 for l in self.stintLabels:
                     l.hide()
             for driver in self.drivers: 
-                c = ac.getCarState(driver.identifier,acsys.CS.BestLap)
-                l = ac.getCarState(driver.identifier,acsys.CS.LapCount)                  
+                c = driver.getBestLap()
+                #c = ac.getCarState(driver.identifier,acsys.CS.BestLap)
+                #l = ac.getCarState(driver.identifier,acsys.CS.LapCount)                  
                 driver.isAlive=bool(ac.isConnected(driver.identifier)) 
                 p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                 checkPos=0
                 if len(p) > 0:
                     checkPos=p[0] + 1
-                if c > 0 and (l > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:                    
+                if c > 0 and (driver.lapCount > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:                    
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.show()
                         driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
@@ -603,9 +667,7 @@ class ACTower:
             self.lbl_title_stint.hide()
             self.lbl_tire_stint.hide()
             for l in self.stintLabels:
-                l.hide()
-        if self.numCars.hasChanged():
-            self.init_drivers()        
+                l.hide()      
         self.driver_shown=0
         nb_drivers_alive=0
         cur_driver=0
@@ -634,7 +696,8 @@ class ACTower:
                 driver.race_standings_sector.setValue(0)
                 driver.race_current_sector.setValue(0)
             else:                    
-                bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
+                #bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
+                bl=driver.raceProgress
                 if bl >= 0.06 and bl <= self.numberOfLaps and self.sectorIsValid(bl,driver):
                     driver.race_current_sector.setValue(math.floor(bl*100))                
                 elif bl < 0.06 and len(driver.race_gaps) < 30:
@@ -786,6 +849,47 @@ class ACTower:
             for driver in self.drivers: 
                 driver.hide()   
                
+    def getStandingsFromServer(self):
+        self.imported=True
+        try:
+            server_ip=ac.getServerIP()
+            if server_ip != '':
+                conn=http.client.HTTPConnection(ac.getServerIP(),port=ac.getServerHttpPort())
+                conn.request("GET", "/ENTRY")
+            
+                response = conn.getresponse()
+                data1 = response.read()
+                #ac.console(str(response.status) +"," +str(response.reason))
+                #ac.console(str(data1))
+                
+                parser = MyHTMLParser()
+                parser.feed(str(data1))
+                data2=parser.data
+                data2.pop(0)
+                for d in data2:               
+                    bl=self.convertTime(d[5])
+                    #if bl > 0:
+                    ac.log("------------------")
+                    ac.log(str(d[1])+";"+str(d[5])+";"+str(bl))
+                    for driver in self.drivers:
+                        if str(d[1]) == driver.fullName.value and str(d[2]) == driver.carName:
+                            ac.log("-Found") 
+                            driver.bestLapServer=bl
+                            break
+                        
+                for driver in self.drivers:
+                    ac.log(driver.fullName.value)
+            #TODO: vars
+        except:
+            Log.w("Error tower")  
+        
+    def convertTime(self,time): 
+        t=str(time).split(':')
+        if len(t) == 3 and int(t[0]) < 16000:# != "16666":#16666:39:999
+            return int(t[2]) + int(t[1])*1000 + int(t[0])*60000
+        return 0   
+       
+        
     def manageWindow(self):
         pt=POINT()
         result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
@@ -827,7 +931,9 @@ class ACTower:
             self.session.setValue(-1)
             self.session.setValue(sim_info.graphics.session)
         self.manageWindow()
-        self.numCars.setValue(ac.getCarsCount()) 
+        self.numCars.setValue(ac.getCarsCount())
+        if self.numCars.hasChanged():
+            self.init_drivers()
         self.sessionTimeLeft=sim_info.graphics.sessionTimeLeft
         if sim_info_status != 3:
             self.animate(self.sessionTimeLeft)
@@ -836,59 +942,69 @@ class ACTower:
             #LIVE             
             if self.session.value < 2  :                
                 #Qualify - Practise
-                
-                #stint view
-                LapCount=ac.getCarState(0,acsys.CS.LapCount)
-                self.curLapCount.setValue(LapCount)
-                if sim_info.physics.numberOfTyresOut >= 4 :
-                    self.lastLapInvalidated = LapCount
-                if self.curLapCount.hasChanged():
-                    self.iLastTime.setValue(ac.getCarState(0,acsys.CS.LastLap))
-                    if self.iLastTime.hasChanged():                
-                        #self.curDriverLaps.append(Laps(self.curLapCount.value-1, ac.getCarState(0,acsys.CS.LastLap)==sim_info.graphics.iLastTime, sim_info.graphics.iLastTime))  
-                        self.curDriverLaps.append(Laps(self.curLapCount.value-1, self.lastLapInvalidated!=LapCount-1, sim_info.graphics.iLastTime))                  
-                        if len(self.curDriverLaps) > 5 and len(self.curDriverLaps) % 2 == 0:
-                            self.minlap_stint = len(self.curDriverLaps) + 5
-                        if len(self.curDriverLaps) >= self.minlap_stint:
-                            self.stint_visible_end = self.sessionTimeLeft - 30000 
-                            if self.stint_visible_end > 0 and self.stint_visible_end < 90000:                        
-                                if self.sessionTimeLeft - 90000 < 5000:
-                                    self.stint_visible_end=0
-                                else:
-                                    self.stint_visible_end=90000   
-                    else: 
-                        self.curLapCount.changed = True
-                
-                
-                standings = []
-                self.driver_shown=0
-                for i in range(self.numCars.value): 
-                    bl=ac.getCarState(i,acsys.CS.BestLap)
-                    l = ac.getCarState(i,acsys.CS.LapCount)
-                    if bl > 0 and l > self.minLapCount and self.drivers[i].isAlive:
-                        standings.append((i,bl))                        
-                        self.driver_shown+=1
-                self.standings = sorted(standings, key=lambda student: student[1])  
-                t_update_drivers = time.time()           
-                self.update_drivers(sim_info)
-                t_update_drivers_end = time.time()
+                if not math.isinf(self.sessionTimeLeft):
+                    if not self.imported and self.drivers_inited:
+                        #self.getStandingsFromServer()
+                        thread_standings = threading.Thread(target=self.getStandingsFromServer)  
+                        thread_standings.daemon = True      
+                        thread_standings.start() 
+                        
+                    self.TimeLeftUpdate.setValue(int(self.sessionTimeLeft/500))
+                    if self.TimeLeftUpdate.hasChanged():
+                        #if tick
+                        #if not math.isinf(self.sessionTimeLeft) and int(self.sessionTimeLeft/100) % 18 == 0 and self.tick_update > tickLimit:
+                        #    self.tick_update = 0 
+                        #stint view
+                        LapCount=ac.getCarState(0,acsys.CS.LapCount)
+                        self.curLapCount.setValue(LapCount)
+                        if sim_info.physics.numberOfTyresOut >= 4 :
+                            self.lastLapInvalidated = LapCount
+                        if self.curLapCount.hasChanged():
+                            self.iLastTime.setValue(ac.getCarState(0,acsys.CS.LastLap))
+                            if self.iLastTime.hasChanged():                
+                                #self.curDriverLaps.append(Laps(self.curLapCount.value-1, ac.getCarState(0,acsys.CS.LastLap)==sim_info.graphics.iLastTime, sim_info.graphics.iLastTime))  
+                                self.curDriverLaps.append(Laps(self.curLapCount.value-1, self.lastLapInvalidated!=LapCount-1, sim_info.graphics.iLastTime))                  
+                                if len(self.curDriverLaps) > 5 and len(self.curDriverLaps) % 2 == 0:
+                                    self.minlap_stint = len(self.curDriverLaps) + 5
+                                if len(self.curDriverLaps) >= self.minlap_stint:
+                                    self.stint_visible_end = self.sessionTimeLeft - 30000 
+                                    if self.stint_visible_end > 0 and self.stint_visible_end < 90000:                        
+                                        if self.sessionTimeLeft - 90000 < 5000:
+                                            self.stint_visible_end=0
+                                        else:
+                                            self.stint_visible_end=90000   
+                            else: 
+                                self.curLapCount.changed = True
+                        
+                        
+                        standings = []
+                        for i in range(self.numCars.value): 
+                            self.drivers[i].bestLap=ac.getCarState(i,acsys.CS.BestLap)
+                            bl=self.drivers[i].getBestLap()
+                            self.drivers[i].lapCount = ac.getCarState(i,acsys.CS.LapCount)
+                            if bl > 0 and self.drivers[i].lapCount > self.minLapCount and self.drivers[i].isAlive:
+                                standings.append((i,bl))
+                        self.standings = sorted(standings, key=lambda student: student[1])  
+                        t_update_drivers = time.time()           
+                        self.update_drivers(sim_info)
+                        t_update_drivers_end = time.time()
                                
             elif self.session.value == 2 :               
                 #RACE
-                self.numberOfLaps=sim_info.graphics.numberOfLaps
+                if self.numberOfLaps == 0:
+                    self.numberOfLaps=sim_info.graphics.numberOfLaps
                 completed=0
                 standings = []
                 #new standings
                 for driver in self.drivers:
-                    bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
-                    if self.sectorIsValid(bl,driver):  
-                        
+                    driver.raceProgress=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
+                    if self.sectorIsValid(driver.raceProgress,driver):
                         if not driver.finished and driver.race_standings_sector.value >= self.numberOfLaps:
                             driver.race_standings_sector.setValue(self.numberOfLaps + (self.numCars.value - self.numCarsToFinish)/100)
                             self.numCarsToFinish+=1
                             driver.finished=True
                         elif not driver.finished:                  
-                            driver.race_standings_sector.setValue(bl)                            
+                            driver.race_standings_sector.setValue(driver.raceProgress)                            
                     if driver.race_standings_sector.value > 0:
                         standings.append((driver.identifier,driver.race_standings_sector.value))     
                        
@@ -940,6 +1056,8 @@ class ACTower:
         
         t_tower = time.time()            
         if t_tower-t_info > 0.008:
-            ac.console(str(t_tower-t_info) + " u_diver:" + str(t_update_drivers_end-t_update_drivers))
-            ac.log(str(t_tower-t_info) + " u_diver:" + str(t_update_drivers_end-t_update_drivers))
+            t_total=t_tower-t_info
+            t_total_d=t_update_drivers_end-t_update_drivers
+            ac.console(str(t_total) + " u_diver:" + str(t_total_d))
+            ac.log(str(t_total) + " u_diver:" + str(t_total_d))
     
