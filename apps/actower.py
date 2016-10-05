@@ -36,7 +36,9 @@ class MyHTMLParser(HTMLParser):
             
     def handle_data(self, data):
         if self.__class__.logging_html : 
-            self.__class__.tmp_data=data 
+            self.__class__.tmp_data=data
+            #ac.log(str(data))
+            #ac.log(str(type(data)))
             #.decode('unicode_escape').replace("\'", "'")
             #ac.console("data :" + str(data))
             #ac.log(str(data))
@@ -221,6 +223,8 @@ class Driver:
             self.completedLaps.setValue(0)
             self.last_lap_visible_end = 0
             self.time_highlight_end = 0
+            self.bestLap=0
+            self.bestLapServer=0
     
     def getBestLap(self,lap=False):
         if lap:
@@ -378,6 +382,7 @@ class Driver:
             self.fullName.setValue(ac.getDriverName(self.identifier))
             if self.fullName.hasChanged():
                 self.setName()
+                self.bestLapServer=0
                 
             
     def format_name_tlc(self,name):
@@ -604,6 +609,8 @@ class ACTower:
                 #c = ac.getCarState(driver.identifier,acsys.CS.BestLap)
                 #l = ac.getCarState(driver.identifier,acsys.CS.LapCount)                  
                 driver.isAlive=bool(ac.isConnected(driver.identifier)) 
+                if not driver.isAlive:
+                    driver.bestLapServer=0
                 p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                 checkPos=0
                 if len(p) > 0:
@@ -855,31 +862,29 @@ class ACTower:
             server_ip=ac.getServerIP()
             if server_ip != '':
                 conn=http.client.HTTPConnection(ac.getServerIP(),port=ac.getServerHttpPort())
-                conn.request("GET", "/ENTRY")
-            
+                conn.request("GET", "/ENTRY")            
                 response = conn.getresponse()
                 data1 = response.read()
-                #ac.console(str(response.status) +"," +str(response.reason))
-                #ac.console(str(data1))
+                conn.close()
                 
                 parser = MyHTMLParser()
-                parser.feed(str(data1))
+                parser.feed(data1.decode('utf-8',errors='ignore'))                
                 data2=parser.data
                 data2.pop(0)
+                
                 for d in data2:               
                     bl=self.convertTime(d[5])
-                    #if bl > 0:
-                    ac.log("------------------")
-                    ac.log(str(d[1])+";"+str(d[5])+";"+str(bl))
-                    for driver in self.drivers:
-                        if str(d[1]) == driver.fullName.value and str(d[2]) == driver.carName:
-                            ac.log("-Found") 
-                            driver.bestLapServer=bl
-                            break
-                        
-                for driver in self.drivers:
-                    ac.log(driver.fullName.value)
-            #TODO: vars
+                    if bl > 0:
+                        #ac.log("------------------")                    
+                        #ac.log(self.normalizeString(d[1])+";"+str(d[5])+";"+str(bl))
+                        for driver in self.drivers:  
+                            norm_d1 = self.normalizeString(d[1])                       
+                            if norm_d1 == self.normalizeString(driver.fullName.value) and str(d[2]) == driver.carName and bool(ac.isConnected(driver.identifier)):                            
+                                #ac.log("-Found:") 
+                                driver.bestLapServer=bl
+                                break
+                #ac.log("all done------------------") 
+                #ac.console("Data imported from server") 
         except:
             Log.w("Error tower")  
         
@@ -887,8 +892,10 @@ class ACTower:
         t=str(time).split(':')
         if len(t) == 3 and int(t[0]) < 16000:# != "16666":#16666:39:999
             return int(t[2]) + int(t[1])*1000 + int(t[0])*60000
-        return 0   
-       
+        return 0 
+    
+    def normalizeString(self, s):
+        return s.encode('ascii',errors='ignore').decode('utf-8')       
         
     def manageWindow(self):
         pt=POINT()
@@ -921,7 +928,7 @@ class ACTower:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False) 
                     
-    def onUpdate(self, deltaT, sim_info):    
+    def onUpdate(self, deltaT, sim_info):
         t_info = time.time()   
         t_update_drivers = 0  
         t_update_drivers_end = 0
