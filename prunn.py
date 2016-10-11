@@ -108,6 +108,7 @@ def acMain(ac_version):
 def acUpdate(deltaT):
     global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit
     configChanged=False
+    fl=0
     if configInit:     
         try:
             configChanged = config.onUpdate(deltaT,sim_info)
@@ -127,16 +128,17 @@ def acUpdate(deltaT):
             timer.onUpdate(deltaT,sim_info)
         except:
             Log.w("Error timer")
-    if infoInit:
-        try:
-            info.onUpdate(deltaT,sim_info)
-        except:
-            Log.w("Error info")
     if towerInit:
         try:
             tower.onUpdate(deltaT,sim_info)
+            fl=tower.getFastestLap()
         except:
             Log.w("Error tower")  
+    if infoInit:
+        try:
+            info.onUpdate(deltaT,sim_info,fl)
+        except:
+            Log.w("Error info")
     if speedInit:     
         try:
             speed.onUpdate(deltaT,sim_info)

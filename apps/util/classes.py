@@ -106,7 +106,13 @@ class POINT(ctypes.Structure):
 class Colors:
 	@staticmethod
 	def bmw():
+		#return rgb([42, 101, 198], bg = True)
+		return rgb([40, 152, 211], bg = True)
+	@staticmethod
+	def ford():
+		#return rgb([0, 165, 255], bg = True)
 		return rgb([62, 121, 218], bg = True)
+		#return rgb([2, 58, 117], bg = True)
 	@staticmethod
 	def mercedes():
 		return rgb([191, 191, 191], bg = True)
@@ -158,8 +164,10 @@ class Colors:
 	
 	@staticmethod
 	def colorFromCar(car):
-		if car.find("bmw")>=0 or car.find("ford")>=0 or car.find("shelby")>=0:
+		if car.find("bmw")>=0:
 			return Colors.bmw()
+		if car.find("ford")>=0 or car.find("shelby")>=0:
+			return Colors.ford()
 		if car.find("merc")>=0 or car.find("mazda")>=0:
 			return Colors.mercedes()
 		if car.find("ruf")>=0 or car.find("corvette")>=0 or car.find("lotus")>=0 or car.find("porsche")>=0:
@@ -243,6 +251,15 @@ class Label:
 			self.o_params["y"].setValue(y)
 			self.params["y"].setValue(y)
 			if self.params["y"].hasChanged():
+				ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
+		return self
+	
+	def setX(self, x, animated=False):
+		self.f_params["x"].setValue(x)
+		if not animated:
+			self.o_params["x"].setValue(x)
+			self.params["x"].setValue(x)
+			if self.params["x"].hasChanged():
 				ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
 		return self
 		

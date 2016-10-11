@@ -455,6 +455,7 @@ class ACTower:
         self.TimeLeftUpdate=Value()
         self.lapsCompleted=Value()
         self.currentVehicule=Value(0)
+        self.fastestLap=0
         self.race_show_end = 0
         self.driver_shown=0
         self.drivers_inited=False
@@ -895,7 +896,10 @@ class ACTower:
         return 0 
     
     def normalizeString(self, s):
-        return s.encode('ascii',errors='ignore').decode('utf-8')       
+        return s.encode('ascii',errors='ignore').decode('utf-8')   
+    
+    def getFastestLap(self):
+        return self.fastestLap    
         
     def manageWindow(self):
         pt=POINT()
@@ -985,12 +989,18 @@ class ACTower:
                         
                         
                         standings = []
+                        self.fastestLap=0
                         for i in range(self.numCars.value): 
                             self.drivers[i].bestLap=ac.getCarState(i,acsys.CS.BestLap)
                             bl=self.drivers[i].getBestLap()
                             self.drivers[i].lapCount = ac.getCarState(i,acsys.CS.LapCount)
                             if bl > 0 and self.drivers[i].lapCount > self.minLapCount and self.drivers[i].isAlive:
                                 standings.append((i,bl))
+                            #fastestLap for info widget
+                            if self.fastestLap == 0 or (bl > 0 and bl < self.fastestLap):               
+                                self.fastestLap=bl
+                                #self.fastestLapSectors = ac.getLastSplits(x)
+                            
                         self.standings = sorted(standings, key=lambda student: student[1])  
                         t_update_drivers = time.time()           
                         self.update_drivers(sim_info)
