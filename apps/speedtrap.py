@@ -119,7 +119,7 @@ class ACSpeedTrap:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
                     
-    def onUpdate(self, deltaT, sim_info):   
+    def onUpdate(self, sim_info):   
         self.session.setValue(sim_info.graphics.session)  
         sessionTimeLeft=sim_info.graphics.sessionTimeLeft
         sim_info_status=sim_info.graphics.status

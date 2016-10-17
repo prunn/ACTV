@@ -146,7 +146,7 @@ class ACTimer:
 				#pin outside
 				self.window.setBgOpacity(0).border(0) 
 		
-	def onUpdate(self, deltaT, sim_info):		
+	def onUpdate(self, sim_info):		
 		self.session_draw.setValue(sim_info.graphics.session)
 		self.manageWindow()
 		sim_info_status=sim_info.graphics.status

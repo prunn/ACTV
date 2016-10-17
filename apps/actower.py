@@ -37,19 +37,6 @@ class MyHTMLParser(HTMLParser):
     def handle_data(self, data):
         if self.__class__.logging_html : 
             self.__class__.tmp_data=data
-            #ac.log(str(data))
-            #ac.log(str(type(data)))
-            #.decode('unicode_escape').replace("\'", "'")
-            #ac.console("data :" + str(data))
-            #ac.log(str(data))
-            #self.__class__.line.append(data)
-            #self.__class__.b+=1
-            #.append
-            #if len(self.__class__.line) >= 7:
-            #    self.__class__.data.append(self.__class__.line)
-            #    self.__class__.line=[]
-            #    #self.__class__.b=0
-            #    ac.log("------------------")
             
            
 class Laps:
@@ -861,8 +848,9 @@ class ACTower:
         self.imported=True
         try:
             server_ip=ac.getServerIP()
-            if server_ip != '':
-                conn=http.client.HTTPConnection(ac.getServerIP(),port=ac.getServerHttpPort())
+            port=ac.getServerHttpPort()          
+            if server_ip != '' and port > 0:
+                conn=http.client.HTTPConnection(ac.getServerIP(),port=port)
                 conn.request("GET", "/ENTRY")            
                 response = conn.getresponse()
                 data1 = response.read()
@@ -932,7 +920,7 @@ class ACTower:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False) 
                     
-    def onUpdate(self, deltaT, sim_info):
+    def onUpdate(self, sim_info):
         t_info = time.time()   
         t_update_drivers = 0  
         t_update_drivers_end = 0

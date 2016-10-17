@@ -127,7 +127,7 @@ class Configuration:
         else:
             self.lbl_race_mode.setText("Full")
                         
-    def onUpdate(self, deltaT, sim_info):
+    def onUpdate(self, sim_info):
         self.window.setBgOpacity(0.6).border(0)
         self.session.setValue(sim_info.graphics.session)
         if self.__class__.configChanged and self.cfg_loaded:

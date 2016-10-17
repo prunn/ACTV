@@ -111,7 +111,7 @@ def acUpdate(deltaT):
     fl=0
     if configInit:     
         try:
-            configChanged = config.onUpdate(deltaT,sim_info)
+            configChanged = config.onUpdate(sim_info)
             if configChanged:
                 if timerInit:
                     timer.loadCFG()
@@ -125,23 +125,23 @@ def acUpdate(deltaT):
             Log.w("Error config")
     if timerInit:
         try:
-            timer.onUpdate(deltaT,sim_info)
+            timer.onUpdate(sim_info)
         except:
             Log.w("Error timer")
     if towerInit:
         try:
-            tower.onUpdate(deltaT,sim_info)
+            tower.onUpdate(sim_info)
             fl=tower.getFastestLap()
         except:
             Log.w("Error tower")  
     if infoInit:
         try:
-            info.onUpdate(deltaT,sim_info,fl)
+            info.onUpdate(sim_info,fl)
         except:
             Log.w("Error info")
     if speedInit:     
         try:
-            speed.onUpdate(deltaT,sim_info)
+            speed.onUpdate(sim_info)
         except:
             Log.w("Error speedtrap")
     

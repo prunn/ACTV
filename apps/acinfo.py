@@ -242,6 +242,7 @@ class ACInfo:
             self.lbl_timing.setText(self.lbl_timing_text.value)
     
     def visibilityRace(self):
+        self.nameOffsetValue.setValue(self.nameOffset)
         if self.lbl_driver_name_visible.hasChanged():         
             if self.lbl_driver_name_visible.value == 0:
                 self.lbl_driver_name.hide()
@@ -303,7 +304,7 @@ class ACInfo:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
         
-    def onUpdate(self, deltaT, sim_info, fl):
+    def onUpdate(self, sim_info, fl):
         self.session.setValue(sim_info.graphics.session)
         self.manageWindow()
         self.animate()
@@ -344,7 +345,7 @@ class ACInfo:
         if sim_info_status == 2:
             #LIVE
             strOffset = "  "
-            self.nameOffset=14
+            #self.nameOffset=14
             if self.session.value != 2 :
                 #NOT RACE
                 #qtime 
