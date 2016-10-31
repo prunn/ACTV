@@ -5,7 +5,7 @@ import functools
 import ctypes
 import time
 from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, raceGaps
 import http.client
 import encodings.idna
 import threading
@@ -299,13 +299,9 @@ class Driver:
         else:
             self.lbl_time.setText(self.format_time(time)).setColor(Colors.white(),True)
             
-    def optimise(self,sector):
-        if self.race_gaps:
-            result = []
-            for g in self.race_gaps:
-                if g.sector + 132 > sector:
-                    result.append(g)
-            self.race_gaps = result
+    def optimise(self):
+        if len(self.race_gaps) > 132:
+            del self.race_gaps[0:len(self.race_gaps)-132]
                
     def setPosition(self,position,leader,offset,battles,qual_mode):
         self.position.setValue(position)
@@ -420,11 +416,7 @@ class Driver:
         self.lbl_border.animate()  
         self.lbl_time.animate()  
         self.lbl_name.animate()
-             
-class raceGaps:
-    def __init__(self,sector,time):
-        self.sector = sector
-        self.time = time
+
         
 class ACTower:
 
@@ -640,7 +632,7 @@ class ACTower:
         
     def getMaxSector(self,driver):       
         if driver.race_gaps:
-            return driver.race_gaps[-1].sector        
+            return driver.race_gaps[-1].sector      
         return 0  
     
     def sectorIsValid(self,newSector,driver):
@@ -684,7 +676,7 @@ class ACTower:
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1   
             if bool(ac.isCarInPit(driver.identifier)) and not driver.finished:
-                driver.race_gaps = []           
+                driver.race_gaps = []      
             if self.sessionTimeLeft >= 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                    
                 driver.finished=False
                 self.numCarsToFinish=0
@@ -692,17 +684,16 @@ class ACTower:
                 driver.race_current_sector.setValue(0)
             else:                    
                 #bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
-                bl=driver.raceProgress
+                bl=driver.raceProgress  
                 if bl >= 0.06 and bl <= self.numberOfLaps and self.sectorIsValid(bl,driver):
-                    driver.race_current_sector.setValue(math.floor(bl*100))                
+                    driver.race_current_sector.setValue(math.floor(bl*100))             
                 elif bl < 0.06 and len(driver.race_gaps) < 30:
-                    driver.race_gaps = []   
+                    driver.race_gaps = []
                     driver.race_standings_sector.setValue(0)
                     driver.race_current_sector.setValue(0) 
                 
             if driver.race_current_sector.hasChanged():
-                driver.race_gaps.append(raceGaps(driver.race_current_sector.value, self.sessionTimeLeft))                
-                
+                driver.race_gaps.append(raceGaps(driver.race_current_sector.value, self.sessionTimeLeft))
             if driver.identifier == self.currentVehicule.value:
                 cur_driver=driver
                 cur_sector=driver.race_current_sector.value
@@ -724,7 +715,7 @@ class ACTower:
                     driverShown+=1
                 if driver.identifier == 0 or (gap < 5000 and cur_sector - self.getMaxSector(driver) < 15):  
                     driverShownMaxGap+=1 
-                driver.optimise(cur_sector) 
+                driver.optimise() 
         #ac.console("Mem size:" + str(memsize/1024) + " ko")
         if not driverShown > 1:
             driverShown=driverShownMaxGap
@@ -776,7 +767,7 @@ class ACTower:
                             elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft:
                                 lastlap = ac.getCarState(driver.identifier,acsys.CS.LastLap)
                                 driver.setTimeRaceBattle(lastlap,-1) 
-                            elif lapGap > 100:                            
+                            elif lapGap > 100:                        
                                 driver.setTimeRaceBattle(lapGap/100,first_driver.identifier,True)          
                                 driver.show()
                             else:
@@ -786,7 +777,7 @@ class ACTower:
                             driver.show(False)
                     else:
                         driver.hide()
-                    driver.optimise(cur_sector)
+                    driver.optimise()
             elif self.race_mode.value == 1:
                 for driver in self.drivers: 
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
@@ -1060,9 +1051,9 @@ class ACTower:
         
         
         t_tower = time.time()            
-        if t_tower-t_info > 0.008:
+        if t_tower-t_info > 0.006:
             t_total=t_tower-t_info
             t_total_d=t_update_drivers_end-t_update_drivers
-            ac.console(str(t_total) + " u_diver:" + str(t_total_d))
-            ac.log(str(t_total) + " u_diver:" + str(t_total_d))
+            #ac.console(str(t_total) + " u_diver:" + str(t_total_d))
+            #ac.log(str(t_total) + " u_diver:" + str(t_total_d))
     

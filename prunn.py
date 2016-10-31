@@ -36,6 +36,7 @@ try:
     from apps.acinfo import ACInfo
     from apps.actower import ACTower
     from apps.speedtrap import ACSpeedTrap
+    from apps.acdelta import ACDelta
     from apps.configuration import Configuration
     from apps.util.classes import Log
     sim_info = SimInfo()
@@ -50,15 +51,17 @@ info=0
 tower=0
 speed=0
 config=0
+delta=0
 
 timerInit=False
 infoInit=False
 towerInit=False
 speedInit=False
 configInit=False
+deltaInit=False
 
 def acMain(ac_version):
-    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit
+    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit,delta,deltaInit
     try:
         config=Configuration()
         configInit=True
@@ -83,7 +86,12 @@ def acMain(ac_version):
         speed=ACSpeedTrap()
         speedInit=True
     except:
-        Log.w("Error init speedtrap")  
+        Log.w("Error init speedtrap")
+    try:
+        delta=ACDelta()
+        deltaInit=True
+    except:
+        Log.w("Error init delta")
     '''
     try:
         fontName="Khula"
@@ -106,7 +114,7 @@ def acMain(ac_version):
 
 
 def acUpdate(deltaT):
-    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit
+    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit,delta,deltaInit
     configChanged=False
     fl=0
     if configInit:     
@@ -144,6 +152,11 @@ def acUpdate(deltaT):
             speed.onUpdate(sim_info)
         except:
             Log.w("Error speedtrap")
+    if deltaInit:     
+        try:
+            delta.onUpdate(sim_info)
+        except:
+            Log.w("Error delta")
     
 def acShutdown():    
     ac.console("shutting down actv")

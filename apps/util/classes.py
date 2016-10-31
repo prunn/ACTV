@@ -99,6 +99,10 @@ class Value:
 			return True
 		return False
 
+class raceGaps:
+	def __init__(self,sector,time):
+		self.sector = sector
+		self.time = time
 
 class POINT(ctypes.Structure):
 	_fields_ = [("x", ctypes.c_ulong), ("y", ctypes.c_ulong)]  
@@ -161,6 +165,9 @@ class Colors:
 	@staticmethod
 	def pitColor(bg = False):
 		return rgb([225, 225, 225], bg = bg)
+	@staticmethod
+	def orange(bg = False):
+		return rgb([250, 88, 0], bg = bg)
 	
 	@staticmethod
 	def colorFromCar(car):
@@ -495,7 +502,22 @@ class Button:
 		ac.setBackgroundTexture(self.button, texture)
 		return self
 		
-
+	def setText(self, text, hidden=False):
+		ac.setText(self.button, text)
+		return self
+	
+	def setAlign(self, align = "left"):
+		ac.setFontAlignment(self.button, align)
+		return self
+	
+	def setBgColor(self, color, animated=False):
+		ac.setBackgroundColor(self.button, *color)
+		#ac.setBackgroundOpacity(self.label, self.params["o"].value)
+		return self
+	
+	def setVisible(self, value):
+		ac.setVisible(self.button, value)
+		return self	
 #-#####################################################################################################################################-#
 
 class Log:
