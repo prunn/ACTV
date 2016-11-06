@@ -27,7 +27,6 @@ class ACDelta:
         self.currentLap=[]
         self.lastLap=[]
         self.deltaLoaded=False
-        self.waitingForLastLap=False
         self.thread_save=False
         self.highlight_end = 0
         #self.lbl_delta = Label(self.window.app,"+0.000").setSize(128, 36).setPos(0, 0).setFontSize(24).setAlign("right").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(1)
@@ -80,8 +79,8 @@ class ACDelta:
             except:
                 Log.w("Error tower")  
         
-        #ac.console("lap saved:" + str(referenceLapTime) + ","+str(len(referenceLap)))
-        #ac.log(str(time.time())+" lap saved:" + str(referenceLapTime) + ","+str(len(referenceLap)))
+            #ac.console("lap saved:" + str(referenceLapTime) + ","+str(len(referenceLap)))
+            #ac.log(str(time.time())+" lap saved:" + str(referenceLapTime) + ","+str(len(referenceLap)))
         
     def loadDelta(self):
         self.deltaLoaded=True
@@ -166,8 +165,7 @@ class ACDelta:
                 
     def resetData(self):
         self.currentLap=[]
-        self.lastLapIsValid=True 
-        self.waitingForLastLap=False
+        self.lastLapIsValid=True
         self.lapCount=0  
         self.highlight_end = 0
                     
@@ -187,9 +185,11 @@ class ACDelta:
         sim_info_status=sim_info.graphics.status
         if sim_info_status == 2: #LIVE
             sessionTimeLeft=sim_info.graphics.sessionTimeLeft
-            if math.isinf(sessionTimeLeft):# or sessionTimeLeft > 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
+            if math.isinf(sessionTimeLeft) :# or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
                 self.resetData() 
             elif self.session.value == 2 and sessionTimeLeft > 1800000:
+                self.resetData()
+            elif bool(ac.isCarInPitline(0)) or bool(ac.isCarInPit(0)):
                 self.resetData() 
             self.spline.setValue(round(ac.getCarState(0,acsys.CS.NormalizedSplinePosition),3))
             
@@ -198,18 +198,34 @@ class ACDelta:
             
             if self.spline.hasChanged():
                 self.laptime.setValue(round(ac.getCarState(0, acsys.CS.LapTime),3))
+                self.lastLapTime.setValue(ac.getCarState(0, acsys.CS.LastLap))
                 gap=self.getPerformanceGap(self.spline.value,self.laptime.value)
                 if gap != False:
                     self.performance.setValue(gap)
                 #new lap
-                if self.laptime.old > self.laptime.value and not self.waitingForLastLap:                        
-                    #ac.console("newlap----") 
+                if self.lastLapTime.hasChanged():                        
+                    #ac.console("newlap----")(self.laptime.old > self.laptime.value) or  
                     #ac.console("lastLap=currentLap---waiting " + str(self.laptime.old) + ":" + str(self.laptime.value))
                     #ac.log(str(time.time()) +" lastLap=currentLap---waiting " + str(self.laptime.old) + ":" + str(self.laptime.value))
                     self.lastLap=list(self.currentLap)
                     #self.lastLap=self.currentLap 
-                    self.waitingForLastLap=True
                     self.currentLap=[]
+                    if (self.referenceLapTime.value == 0 or self.lastLapTime.value < self.referenceLapTime.value) and self.lastLapIsValid and self.lastLapTime.value > 0 and self.lapCount < ac.getCarState(0, acsys.CS.LapCount):  
+                        self.referenceLapTime.setValue(self.lastLapTime.value)
+                        self.referenceLap=list(self.lastLap)
+                        #self.referenceLap=self.lastLap
+                        #ac.log(str(time.time()) +" referenceLap=lastlap --- lets save")
+                        #ac.console("referenceLap=lastlap --- lets save")
+                        thread_save = threading.Thread(target=self.saveDelta)  
+                        thread_save.daemon = True
+                        thread_save.start()
+                        #make it green for 5 sec
+                        self.highlight_end = sim_info.graphics.sessionTimeLeft - 6000
+                        self.lbl_lap.setColor(Colors.green(),True)
+                    #else:
+                    #    ac.log(str(time.time()) +" dismissed")
+                    self.lapCount=ac.getCarState(0, acsys.CS.LapCount)
+                    self.lastLapIsValid=True
                     
                 self.currentLap.append(raceGaps(self.spline.value, self.laptime.value))
                 #ac.console("--currentLap : " + str(len(self.currentLap)) + " --lastLap : " + str(len(self.lastLap)) + " --referenceLap : " + str(len(self.referenceLap)))
@@ -242,30 +258,5 @@ class ACDelta:
                 self.lbl_lap.setText(self.time_splitting(self.referenceLapTime.value,"yes"))
             if self.highlight_end == 0 or sessionTimeLeft < self.highlight_end:
                 self.lbl_lap.setColor(Colors.white(),True)
-                    
-        #last laptime does not change with lap end
-        if self.waitingForLastLap:
-            self.lastLapTime.setValue(ac.getCarState(0, acsys.CS.LastLap))
-            if self.lastLapTime.hasChanged():
-                #check for new best lap 
-                if (self.referenceLapTime.value == 0 or self.lastLapTime.value < self.referenceLapTime.value) and self.lastLapIsValid and self.lastLapTime.value > 0 and self.lapCount < ac.getCarState(0, acsys.CS.LapCount):  
-                    self.referenceLapTime.setValue(self.lastLapTime.value)
-                    self.referenceLap=list(self.lastLap)
-                    #self.referenceLap=self.lastLap
-                    #ac.log(str(time.time()) +" referenceLap=lastlap --- lets save")
-                    #ac.console("referenceLap=lastlap --- lets save")
-                    thread_save = threading.Thread(target=self.saveDelta)  
-                    thread_save.daemon = True
-                    thread_save.start()
-                    #make it green for 5 sec
-                    self.highlight_end = sim_info.graphics.sessionTimeLeft - 6000
-                    self.lbl_lap.setColor(Colors.green(),True)
-                #else:
-                #    ac.log(str(time.time()) +" dismissed")
-                self.lapCount=ac.getCarState(0, acsys.CS.LapCount)
-                self.waitingForLastLap=False
-                self.lastLapIsValid=True
-                        
-                        
-        
+    
     
