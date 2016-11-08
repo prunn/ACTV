@@ -12,7 +12,7 @@ class ACDelta:
     resetPressed=False
     # INITIALIZATION
     def __init__(self): 
-        self.window = Window(name="ACTV Delta", icon=False, width=268, height=114, texture="")
+        self.window = Window(name="ACTV Delta", icon=False, width=240, height=114, texture="")
         self.cursor=Value(False)
         self.session=Value(-1)
         self.performance=Value(0)
@@ -25,15 +25,15 @@ class ACDelta:
         self.lapCount=0
         self.lastLapIsValid=True
         self.currentLap=[]
-        self.lastLap=[]
+        #self.lastLap=[]
         self.deltaLoaded=False
         self.thread_save=False
         self.highlight_end = 0
         #self.lbl_delta = Label(self.window.app,"+0.000").setSize(128, 36).setPos(0, 0).setFontSize(24).setAlign("right").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(1)
         #self.lbl_lap = Label(self.window.app,"0.000").setSize(128, 32).setPos(0, 36).setFontSize(18).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(1)
-        self.lbl_delta = Label(self.window.app,"+0.000").setSize(114, 36).setPos(0, 0).setFontSize(26).setAlign("right").setVisible(1)
-        self.lbl_lap = Label(self.window.app,"0.000").setSize(114, 32).setPos(0, 36).setFontSize(18).setAlign("center").setVisible(1)
-        self.btn_reset = Button(self.window.app,self.onResetPress).setPos(32, 68).setSize(60, 20).setText("Reset").setAlign("center").setBgColor(rgb([255, 12, 12], bg = True)).setVisible(0)
+        self.lbl_delta = Label(self.window.app,"+0.000").setSize(154, 36).setPos(0, 0).setFontSize(26).setAlign("right").setVisible(1)
+        self.lbl_lap = Label(self.window.app,"0.000").setSize(240, 32).setPos(0, 36).setFontSize(18).setAlign("center").setVisible(1)
+        self.btn_reset = Button(self.window.app,self.onResetPress).setPos(90, 68).setSize(60, 20).setText("Reset").setAlign("center").setBgColor(rgb([255, 12, 12], bg = True)).setVisible(0)
         fontName="Segoe UI"
         if ac.initFont(0,fontName,0,0) > 0:
             self.lbl_delta.setFont(fontName,0,1)
@@ -206,14 +206,17 @@ class ACDelta:
                 if self.lastLapTime.hasChanged():                        
                     #ac.console("newlap----")(self.laptime.old > self.laptime.value) or  
                     #ac.console("lastLap=currentLap---waiting " + str(self.laptime.old) + ":" + str(self.laptime.value))
-                    #ac.log(str(time.time()) +" lastLap=currentLap---waiting " + str(self.laptime.old) + ":" + str(self.laptime.value))
-                    self.lastLap=list(self.currentLap)
-                    #self.lastLap=self.currentLap 
-                    self.currentLap=[]
+                    #ac.log(str(time.time()) +" lastLap=currentLap---waiting " + str(self.laptime.old) + ":" + str(self.laptime.value))                    
                     if (self.referenceLapTime.value == 0 or self.lastLapTime.value < self.referenceLapTime.value) and self.lastLapIsValid and self.lastLapTime.value > 0 and self.lapCount < ac.getCarState(0, acsys.CS.LapCount):  
                         self.referenceLapTime.setValue(self.lastLapTime.value)
-                        self.referenceLap=list(self.lastLap)
-                        #self.referenceLap=self.lastLap
+                        #self.referenceLap=list(self.lastLap)
+                        self.referenceLap=list(self.currentLap)
+                        if len(self.referenceLap) > 2000: # 2laps in
+                            ac.console("too many laps in reference----")
+                            ac.log("too many laps in reference----")
+                            how_much = math.floor(len(self.referenceLap)/1000)
+                            del self.referenceLap[0:math.floor(len(self.referenceLap)/how_much)]
+                        #self.referenceLap=self.lastLap#self.lastLap=list(self.currentLap)
                         #ac.log(str(time.time()) +" referenceLap=lastlap --- lets save")
                         #ac.console("referenceLap=lastlap --- lets save")
                         thread_save = threading.Thread(target=self.saveDelta)  
@@ -224,6 +227,8 @@ class ACDelta:
                         self.lbl_lap.setColor(Colors.green(),True)
                     #else:
                     #    ac.log(str(time.time()) +" dismissed")
+                    #self.lastLap=self.currentLap 
+                    self.currentLap=[]
                     self.lapCount=ac.getCarState(0, acsys.CS.LapCount)
                     self.lastLapIsValid=True
                     

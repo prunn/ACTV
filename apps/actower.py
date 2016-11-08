@@ -55,6 +55,7 @@ class Driver:
         self.isDisplayed = False
         self.firstDraw = False
         self.isAlive = False
+        self.pitBoxMode=False
         self.isLapLabel = isLapLabel
         self.qual_mode = Value(0)
         self.race_gaps = []
@@ -71,6 +72,7 @@ class Driver:
         self.race_standings_sector = Value(0)
         self.isInPit = Value(False)
         self.completedLaps = Value()
+        self.completedLapsChanged = False
         self.last_lap_visible_end = 0
         self.time_highlight_end = 0
         self.highlight = Value()
@@ -133,49 +135,61 @@ class Driver:
         self.lbl_border.setSize(self.rowHeight*2.8, 1).setPos(0, self.final_y + self.rowHeight-1)
         
         
-    def show(self,needsTLC=True):
+    def show(self,needsTLC=True):        
         if self.showingFullNames and needsTLC:
             self.setName()
         elif not self.showingFullNames and not needsTLC:
             self.showFullName()
-        if not self.isDisplayed:
-            if not self.isLapLabel:
-                if self.isInPit.value:
-                    self.lbl_pit.showText()
-                    self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
-                else:
-                    self.lbl_pit.hideText()  
-                    self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True) 
-            self.isDisplayed = True
+        if self.pitBoxMode:
+            if self.isInPit.value:
+                self.lbl_pit.showText()
+                self.lbl_name.setSize(self.rowHeight*15.6, self.rowHeight,True)
+            else:
+                self.lbl_pit.hideText()  
+                self.lbl_name.setSize(self.rowHeight*15, self.rowHeight,True) 
+        else:
+            if not self.isDisplayed:
+                if not self.isLapLabel:
+                    if self.isInPit.value:
+                        self.lbl_pit.showText()
+                        self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
+                    else:
+                        self.lbl_pit.hideText()  
+                        self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True) 
+                self.isDisplayed = True
         self.lbl_name.show()
         
         if needsTLC or self.isLapLabel:
-            self.lbl_time.showText()#.setVisible(1)
+            self.lbl_time.showText()
         self.lbl_border.show()
         if not self.isLapLabel:
-            self.lbl_position.show()            
-            if not bool(ac.isConnected(self.identifier)) or bool(ac.isCarInPitline(self.identifier)) or bool(ac.isCarInPit(self.identifier)) or ac.getCarState(self.identifier,acsys.CS.SpeedKMH) > 30:  
+            self.lbl_position.show() 
+            #pitValue = (bool(ac.isCarInPitline(self.identifier)) or bool(ac.isCarInPit(self.identifier)))
+            #self.isInPit.setValue(pitValue)           
+            if not self.isAlive or self.isInPit.value or ac.getCarState(self.identifier,acsys.CS.SpeedKMH) > 30:  
                 self.lbl_name.setColor(Colors.white(),True)  
             else:
                 self.lbl_name.setColor(Colors.yellow(),True)
             
     def updatePit(self,session_time):
-        pitValue = (bool(ac.isCarInPitline(self.identifier)) or bool(ac.isCarInPit(self.identifier)))
-        self.isInPit.setValue(pitValue)
         if not self.isLapLabel and self.isInPit.hasChanged():
             if self.isInPit.value:
                 self.pit_highlight_end = session_time - 5000
                 self.lbl_pit.showText()
-                self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
+                if not self.pitBoxMode:
+                    self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
             else:
                 self.lbl_pit.hideText()  
-                self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True) 
+                if not self.pitBoxMode:
+                    self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True) 
         if self.isInPit.value and (self.lbl_name.f_params["w"].value < self.rowHeight*5.6 or self.lbl_pit.f_params["a"].value < 1): 
             self.lbl_pit.showText() 
-            self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)  
+            if not self.pitBoxMode:
+                self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)  
         elif not self.isInPit.value and (self.lbl_name.f_params["w"].value > self.rowHeight*5 or self.lbl_pit.f_params["a"].value == 1): 
-            self.lbl_pit.hideText()   
-            self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True)   
+            self.lbl_pit.hideText()  
+            if not self.pitBoxMode: 
+                self.lbl_name.setSize(self.rowHeight*5, self.rowHeight,True) 
         #color
         if session_time == -1:
             self.pit_highlight_end=0
@@ -208,6 +222,7 @@ class Driver:
             self.race_standings_sector.setValue(0)
             self.race_gaps = []
             self.completedLaps.setValue(0)
+            self.completedLapsChanged=False
             self.last_lap_visible_end = 0
             self.time_highlight_end = 0
             self.bestLap=0
@@ -303,7 +318,11 @@ class Driver:
         if len(self.race_gaps) > 132:
             del self.race_gaps[0:len(self.race_gaps)-132]
                
-    def setPosition(self,position,leader,offset,battles,qual_mode):
+    def setPosition(self,position,offset,battles,qual_mode):
+        if not self.isLapLabel:
+            pitValue = (bool(ac.isCarInPitline(self.identifier)) or bool(ac.isCarInPit(self.identifier)))
+            self.isInPit.setValue(pitValue)          
+            
         self.position.setValue(position)
         self.position_offset.setValue(offset)
         if self.position.hasChanged() or self.position_offset.hasChanged():
@@ -439,6 +458,7 @@ class ACTower:
         self.driver_shown=0
         self.drivers_inited=False
         self.force_hidden=False
+        self.pitBoxMode=False
         self.leader_time=0
         self.tick=0  
         self.tick_race_mode=0
@@ -544,15 +564,36 @@ class ACTower:
             self.stint_visible_end=0
         #mode_changed = self.qual_mode.hasChanged()
         #self.minlap_stint = 2255 #disabled for now
-        if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and self.sessionTimeLeft >= self.stint_visible_end):
+        if self.pitBoxMode:
+            if self.lbl_title_stint.isVisible.value:
+                self.lbl_title_stint.hide()
+                self.lbl_tire_stint.hide()
+                for l in self.stintLabels:
+                    l.hide()
+            for driver in self.drivers:
+                driver.isAlive=bool(ac.isConnected(driver.identifier))
+                if driver.isAlive: 
+                    driver.pitBoxMode=True                    
+                    p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
+                    checkPos=0
+                    if len(p) > 0:
+                        checkPos=p[0] + 1
+                    else:
+                        checkPos = ac.getCarLeaderboardPosition(driver.identifier)
+                    if checkPos <= self.max_num_cars:     
+                        driver.setPosition(checkPos,0,False,self.qual_mode.value) 
+                        driver.updatePit(self.sessionTimeLeft)
+                    driver.show(False)
+                
+        elif (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and self.sessionTimeLeft >= self.stint_visible_end):
             #Lap stint mode
             for driver in self.drivers: 
-                if driver.identifier == 0:                    
-                    driver.show(False)
-                    #driver.showFullName()
+                driver.pitBoxMode=False
+                if driver.identifier == 0:
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                        
                     if len(p) > 0:
-                        driver.setPosition(p[0] + 1,self.standings[0][1],p[0],False,self.qual_mode.value)
+                        driver.setPosition(p[0] + 1,p[0],False,self.qual_mode.value)                    
+                    driver.show(False)
                     self.lbl_title_stint.show()
                     self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
                     self.lbl_tire_stint.show()                        
@@ -570,7 +611,7 @@ class ACTower:
                         else:
                             #lbl.final_y = 38 * (i+3)
                             self.stintLabels[j].setTimeStint(l.time,l.valid)
-                            self.stintLabels[j].setPosition(i+5,1,0,True,self.qual_mode.value) 
+                            self.stintLabels[j].setPosition(i+5,0,True,self.qual_mode.value) 
                             self.stintLabels[j].show(False)
                             #i+5,
                             i+=1    
@@ -585,9 +626,8 @@ class ACTower:
                 for l in self.stintLabels:
                     l.hide()
             for driver in self.drivers: 
-                c = driver.getBestLap()
-                #c = ac.getCarState(driver.identifier,acsys.CS.BestLap)
-                #l = ac.getCarState(driver.identifier,acsys.CS.LapCount)                  
+                driver.pitBoxMode=False
+                c = driver.getBestLap()                 
                 driver.isAlive=bool(ac.isConnected(driver.identifier)) 
                 if not driver.isAlive:
                     driver.bestLapServer=0
@@ -597,8 +637,8 @@ class ACTower:
                     checkPos=p[0] + 1
                 if c > 0 and (driver.lapCount > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:                    
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
+                        driver.setPosition(p[0] + 1,0,False,self.qual_mode.value) 
                         driver.show()
-                        driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
                         driver.setTime(c,self.standings[0][1],self.sessionTimeLeft,self.qual_mode.value) 
                         driver.updatePit(self.sessionTimeLeft)                          
                 else:
@@ -682,8 +722,7 @@ class ACTower:
                 self.numCarsToFinish=0
                 driver.race_standings_sector.setValue(0)
                 driver.race_current_sector.setValue(0)
-            else:                    
-                #bl=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)
+            else:
                 bl=driver.raceProgress  
                 if bl >= 0.06 and bl <= self.numberOfLaps and self.sectorIsValid(bl,driver):
                     driver.race_current_sector.setValue(math.floor(bl*100))             
@@ -702,9 +741,9 @@ class ACTower:
         driverShown=0
         driverShownMaxGap=0
         maxGap=2500
-        needsTLC=True
-        if self.lapsCompleted.value >= self.numberOfLaps:
-            needsTLC=False
+        #needsTLC=True
+        #if self.lapsCompleted.value >= self.numberOfLaps:
+        #    needsTLC=False
         #memsize=0
         #if mode == 0?
         if self.race_mode.value == 0:
@@ -742,18 +781,15 @@ class ACTower:
                 for driver in self.drivers:  
                     if self.race_mode.value == 1:
                         gap = self.gapToDriver(driver,first_driver,first_driver_sector)              
-                    p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                                           
-                    #driver.isAlive=bool(ac.isConnected(driver.identifier)) 
-                    c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
-                    driver.completedLaps.setValue(c) 
-                    if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
+                    p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
+                    if driver.completedLapsChanged and driver.completedLaps.value > 1:
                         driver.last_lap_visible_end = self.sessionTimeLeft - 5000
                     driver_max_sector = self.getMaxSector(driver)                      
                     if len(p) > 0  and p[0] < self.max_num_cars+display_offset and driver.race_current_sector.value > 5 and (p[0]<3 or p[0]-2 > display_offset):                        
                         if p[0]<3:
-                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
+                            driver.setPosition(p[0] + 1,best_pos-1,True,self.qual_mode.value) 
                         else:
-                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1+display_offset,True,self.qual_mode.value) 
+                            driver.setPosition(p[0] + 1,best_pos-1+display_offset,True,self.qual_mode.value) 
                         if self.race_mode.value == 1:                            
                             lapGap=self.getMaxSector(first_driver) - driver_max_sector
                             if driver.finished:        
@@ -782,14 +818,11 @@ class ACTower:
                 for driver in self.drivers: 
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                     if len(p) > 0  and p[0] < self.max_num_cars and driver.isDisplayed:
-                        #driver.isAlive=bool(ac.isConnected(driver.identifier)) 
-                        c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
-                        driver.completedLaps.setValue(c) 
-                        if driver.completedLaps.hasChanged() and driver.completedLaps.value > 1:
+                        if driver.completedLapsChanged and driver.completedLaps.value > 1:
                             driver.last_lap_visible_end = self.sessionTimeLeft - 5000
                         if driver.finished:                                
                             driver.show(False)
-                        elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive and not bool(ac.isCarInPitline(driver.identifier)) and not bool(ac.isCarInPit(driver.identifier)):
+                        elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive and not driver.isInPit.value:
                             lastlap = ac.getCarState(driver.identifier,acsys.CS.LastLap)
                             driver.setTimeRaceBattle(lastlap,-1) 
                     #else:
@@ -806,7 +839,7 @@ class ACTower:
                     if len(cur_driver.race_gaps) > 15 and (driver.identifier == cur_driver.identifier or (gap < maxGap and cur_sector - self.getMaxSector(driver) < 12)):
                         p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
                         if len(p) > 0:
-                            driver.setPosition(p[0] + 1,self.standings[0][1],best_pos-1,True,self.qual_mode.value) 
+                            driver.setPosition(p[0] + 1,best_pos-1,True,self.qual_mode.value) 
                             driver.setTimeRaceBattle(gap,cur_driver.identifier) 
                             driver.show()
                     else:
@@ -819,16 +852,14 @@ class ACTower:
             for driver in self.drivers:
                 if driver.isDisplayed:
                     self.driver_shown+=1
-            for driver in self.drivers: 
-                c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
-                driver.completedLaps.setValue(c)             
-                if c == self.lapsCompleted.value:
+            for driver in self.drivers:            
+                if driver.completedLaps.value == self.lapsCompleted.value:
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
-                    if len(p) > 0 and driver.completedLaps.hasChanged():
-                        driver.setPosition(p[0] + 1,self.standings[0][1],0,False,self.qual_mode.value) 
-                        driver.setTimeRace(c,self.leader_time,self.sessionTimeLeft)  
-                        if self.lapsCompleted.value == self.numberOfLaps:
-                            #driver.showFullName()    
+                    if len(p) > 0 and driver.completedLapsChanged:
+                        driver.setPosition(p[0] + 1,0,False,self.qual_mode.value) 
+                        driver.setTimeRace(driver.completedLaps.value,self.leader_time,self.sessionTimeLeft)  
+                        needsTLC=True
+                        if self.lapsCompleted.value >= self.numberOfLaps:    
                             needsTLC=False              
                         driver.show(needsTLC)
         else:   
@@ -927,23 +958,20 @@ class ACTower:
         self.sessionTimeLeft=sim_info.graphics.sessionTimeLeft
         if sim_info_status != 3:
             self.animate(self.sessionTimeLeft)
-        
+        self.currentVehicule.setValue(ac.getFocusedCar()) 
         if sim_info_status == 2 or (sim_info_status == 1 and self.session.value < 2):
             #LIVE             
-            if self.session.value < 2  :                
+            if self.session.value < 2  : 
+                #self.pitBoxMode = bool(ac.isCarInPit(self.currentVehicule.value))               
                 #Qualify - Practise
                 if not math.isinf(self.sessionTimeLeft):
                     if not self.imported and self.drivers_inited:
-                        #self.getStandingsFromServer()
                         thread_standings = threading.Thread(target=self.getStandingsFromServer)  
                         thread_standings.daemon = True      
                         thread_standings.start() 
                         
                     self.TimeLeftUpdate.setValue(int(self.sessionTimeLeft/500))
-                    if self.TimeLeftUpdate.hasChanged():
-                        #if tick
-                        #if not math.isinf(self.sessionTimeLeft) and int(self.sessionTimeLeft/100) % 18 == 0 and self.tick_update > tickLimit:
-                        #    self.tick_update = 0 
+                    if self.TimeLeftUpdate.hasChanged():                        
                         #stint view
                         LapCount=ac.getCarState(0,acsys.CS.LapCount)
                         self.curLapCount.setValue(LapCount)
@@ -951,8 +979,7 @@ class ACTower:
                             self.lastLapInvalidated = LapCount
                         if self.curLapCount.hasChanged():
                             self.iLastTime.setValue(ac.getCarState(0,acsys.CS.LastLap))
-                            if self.iLastTime.hasChanged():                
-                                #self.curDriverLaps.append(Laps(self.curLapCount.value-1, ac.getCarState(0,acsys.CS.LastLap)==sim_info.graphics.iLastTime, sim_info.graphics.iLastTime))  
+                            if self.iLastTime.hasChanged():
                                 self.curDriverLaps.append(Laps(self.curLapCount.value-1, self.lastLapInvalidated!=LapCount-1, sim_info.graphics.iLastTime))                  
                                 if len(self.curDriverLaps) > 5 and len(self.curDriverLaps) % 2 == 0:
                                     self.minlap_stint = len(self.curDriverLaps) + 5
@@ -987,16 +1014,23 @@ class ACTower:
                                
             elif self.session.value == 2 :               
                 #RACE
+                self.pitBoxMode=False
                 if self.numberOfLaps == 0:
                     self.numberOfLaps=sim_info.graphics.numberOfLaps
                 completed=0
                 standings = []
                 #new standings
                 for driver in self.drivers:
-                    driver.raceProgress=ac.getCarState(driver.identifier,acsys.CS.LapCount) + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
+                    c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
+                    driver.completedLaps.setValue(c) 
+                    driver.completedLapsChanged=driver.completedLaps.hasChanged()
+                    if c > completed:
+                        completed=c
+                    driver.raceProgress=c + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
                     if self.sectorIsValid(driver.raceProgress,driver):
-                        if not driver.finished and driver.race_standings_sector.value >= self.numberOfLaps:
-                            driver.race_standings_sector.setValue(self.numberOfLaps + (self.numCars.value - self.numCarsToFinish)/100)
+                        #or lapcount changed and leader finished
+                        if not driver.finished and (driver.race_standings_sector.value >= self.numberOfLaps or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
+                            driver.race_standings_sector.setValue(driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish)/100)
                             self.numCarsToFinish+=1
                             driver.finished=True
                         elif not driver.finished:                  
@@ -1004,16 +1038,19 @@ class ACTower:
                     if driver.race_standings_sector.value > 0:
                         standings.append((driver.identifier,driver.race_standings_sector.value))     
                        
-                self.currentVehicule.setValue(ac.getFocusedCar()) 
+                
                 self.lapsCompleted.setValue(completed) 
                 if len(standings) > 0:       
                     self.standings = sorted(standings, key=lambda student: student[1], reverse=True)
                     self.force_hidden=False
                 else: 
                     #backup standings
+                    completed=0
                     standings2 = []     
                     for i in range(self.numCars.value):  
                         c = ac.getCarState(i,acsys.CS.LapCount)
+                        #driver[i].completedLaps.setValue(c) 
+                        #driver[i].completedLapsChanged=driver[i].completedLaps.hasChanged()
                         if c > completed:
                             completed=c
                         bl=c + ac.getCarState(i,acsys.CS.NormalizedSplinePosition)
@@ -1021,6 +1058,7 @@ class ACTower:
                             standings2.append((i,bl))                             
                     self.standings = sorted(standings2, key=lambda student: student[1], reverse=True)
                     self.force_hidden=True
+                    self.lapsCompleted.setValue(completed) 
                 
                 #Debug code
                 '''
@@ -1034,7 +1072,8 @@ class ACTower:
                 t_update_drivers = time.time()  
                 self.update_drivers_race(sim_info)
                 t_update_drivers_end = time.time() 
-            elif self.session.value > 2:  # other session 
+            elif self.session.value > 2:  # other session                 
+                self.pitBoxMode=False
                 for driver in self.drivers: 
                     driver.hide() 
                 self.lbl_title_stint.hide()
@@ -1042,6 +1081,7 @@ class ACTower:
                 for l in self.stintLabels:
                     l.hide() 
         elif sim_info_status == 1: #Replay
+            self.pitBoxMode=False
             for driver in self.drivers: 
                 driver.hide() 
             self.lbl_title_stint.hide()
@@ -1054,6 +1094,6 @@ class ACTower:
         if t_tower-t_info > 0.006:
             t_total=t_tower-t_info
             t_total_d=t_update_drivers_end-t_update_drivers
-            #ac.console(str(t_total) + " u_diver:" + str(t_total_d))
-            #ac.log(str(t_total) + " u_diver:" + str(t_total_d))
+            ac.console(str(t_total) + " u_diver:" + str(t_total_d))
+            ac.log(str(t_total) + " u_diver:" + str(t_total_d))
     
