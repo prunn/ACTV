@@ -10,9 +10,11 @@ from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, 
         
 class ACDelta:
     resetPressed=False
+    configChanged=False
+    ui_row_height=38
     # INITIALIZATION
     def __init__(self): 
-        self.window = Window(name="ACTV Delta", icon=False, width=240, height=114, texture="")
+        self.window = Window(name="ACTV Delta", icon=False, width=240, height=184, texture="")
         self.cursor=Value(False)
         self.session=Value(-1)
         self.performance=Value(0)
@@ -25,25 +27,58 @@ class ACDelta:
         self.lapCount=0
         self.lastLapIsValid=True
         self.currentLap=[]
-        #self.lastLap=[]
         self.deltaLoaded=False
         self.thread_save=False
         self.highlight_end = 0
-        #self.lbl_delta = Label(self.window.app,"+0.000").setSize(128, 36).setPos(0, 0).setFontSize(24).setAlign("right").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(1)
-        #self.lbl_lap = Label(self.window.app,"0.000").setSize(128, 32).setPos(0, 36).setFontSize(18).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(1)
-        self.lbl_delta = Label(self.window.app,"+0.000").setSize(154, 36).setPos(0, 0).setFontSize(26).setAlign("right").setVisible(1)
-        self.lbl_lap = Label(self.window.app,"0.000").setSize(240, 32).setPos(0, 36).setFontSize(18).setAlign("center").setVisible(1)
+        self.rowHeight=Value(-1)
+        self.lbl_delta = Label(self.window.app,"+0.000").setSize(150, 36).setPos(0, 60).setFontSize(26).setAlign("right").setVisible(1)
+        self.lbl_lap = Label(self.window.app,"0.000").setSize(150, 32).setPos(0, 86).setFontSize(17).setAlign("right").setVisible(1)
         self.btn_reset = Button(self.window.app,self.onResetPress).setPos(90, 68).setSize(60, 20).setText("Reset").setAlign("center").setBgColor(rgb([255, 12, 12], bg = True)).setVisible(0)
+        self.spin_row_height = ac.addSpinner(self.window.app, "")
+        ac.setRange(self.spin_row_height, 20,48)
+        ac.setPosition(self.spin_row_height,20,28)
+        ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
+        ac.addOnValueChangeListener(self.spin_row_height, self.onSpinRowHeightChanged) 
+        ac.setVisible(self.spin_row_height, 0)
         fontName="Segoe UI"
         if ac.initFont(0,fontName,0,0) > 0:
             self.lbl_delta.setFont(fontName,0,1)
+        self.cfg = Config("apps/python/prunn/", "config.ini")
+        self.loadCFG()
             
-    
+    @staticmethod
+    def onSpinRowHeightChanged(value): 
+        ACDelta.ui_row_height = value
+        ACDelta.configChanged=True 
+        
     @staticmethod
     def onResetPress(a,b):
         ACDelta.resetPressed=True
                 
     # PUBLIC METHODS
+    def loadCFG(self):    
+        self.__class__.ui_row_height = self.cfg.get("DELTA", "delta_row_height", "int")
+        ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
+        self.reDrawSize()
+            
+    def saveCFG(self):
+        self.reDrawSize()
+        self.cfg.set("DELTA", "delta_row_height", self.__class__.ui_row_height)
+            
+    def reDrawSize(self):
+        if self.__class__.ui_row_height > 0:
+            self.rowHeight.setValue(self.__class__.ui_row_height)
+        else:
+            self.rowHeight.setValue(38)
+        if self.rowHeight.hasChanged():
+            fontSize=getFontSize(self.rowHeight.value)
+            fontSize2=getFontSize(self.rowHeight.value-16)
+            rowHeight2=self.rowHeight.value-16
+            #width=self.rowHeight*5
+            self.lbl_delta.setSize(rowHeight2/24*32 + 120, self.rowHeight.value).setFontSize(fontSize)        
+            self.lbl_lap.setSize(rowHeight2/24*32 + 120, rowHeight2).setPos(0, self.rowHeight.value + 54).setFontSize(fontSize2)        
+            self.btn_reset.setSize(self.rowHeight.value + 26, rowHeight2).setPos(90, self.rowHeight.value*2 + 48).setFontSize(fontSize2)   
+        
     def getDeltaFilePath(self):        
         trackFilePath = os.path.join(os.path.expanduser("~"), "Documents","Assetto Corsa","plugins","actv_deltas","default")
         if not os.path.exists(trackFilePath):
@@ -158,10 +193,12 @@ class ACDelta:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
                 self.btn_reset.setVisible(1)
+                ac.setVisible(self.spin_row_height, 1)
             else:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False) 
                 self.btn_reset.setVisible(0)
+                ac.setVisible(self.spin_row_height, 0)
                 
     def resetData(self):
         self.currentLap=[]
@@ -170,6 +207,9 @@ class ACDelta:
         self.highlight_end = 0
                     
     def onUpdate(self, sim_info):
+        if self.__class__.configChanged:
+            self.saveCFG()
+            self.__class__.configChanged = False
         if not self.deltaLoaded:
             thread_load = threading.Thread(target=self.loadDelta)  
             thread_load.daemon = True      

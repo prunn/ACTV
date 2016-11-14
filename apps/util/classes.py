@@ -492,6 +492,11 @@ class Button:
 		ac.setSize(self.button, self.width, self.height)
 		return self
 	
+	def setFontSize(self, fontSize):
+		self.fontSize = fontSize
+		ac.setFontSize(self.button, self.fontSize)
+		return self
+	
 	def setPos(self, x, y):
 		self.x = x
 		self.y = y

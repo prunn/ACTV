@@ -135,7 +135,7 @@ class Driver:
         self.lbl_border.setSize(self.rowHeight*2.8, 1).setPos(0, self.final_y + self.rowHeight-1)
         
         
-    def show(self,needsTLC=True):        
+    def show(self,needsTLC=True,race=True):        
         if self.showingFullNames and needsTLC:
             self.setName()
         elif not self.showingFullNames and not needsTLC:
@@ -150,7 +150,7 @@ class Driver:
         else:
             if not self.isDisplayed:
                 if not self.isLapLabel:
-                    if self.isInPit.value:
+                    if self.isInPit.value and not race:
                         self.lbl_pit.showText()
                         self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight,True)
                     else:
@@ -163,9 +163,7 @@ class Driver:
             self.lbl_time.showText()
         self.lbl_border.show()
         if not self.isLapLabel:
-            self.lbl_position.show() 
-            #pitValue = (bool(ac.isCarInPitline(self.identifier)) or bool(ac.isCarInPit(self.identifier)))
-            #self.isInPit.setValue(pitValue)           
+            self.lbl_position.show()          
             if not self.isAlive or self.isInPit.value or ac.getCarState(self.identifier,acsys.CS.SpeedKMH) > 30:  
                 self.lbl_name.setColor(Colors.white(),True)  
             else:
@@ -583,7 +581,7 @@ class ACTower:
                     if checkPos <= self.max_num_cars:     
                         driver.setPosition(checkPos,0,False,self.qual_mode.value) 
                         driver.updatePit(self.sessionTimeLeft)
-                    driver.show(False)
+                    driver.show(False,race=False)
                 
         elif (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and self.sessionTimeLeft >= self.stint_visible_end):
             #Lap stint mode
@@ -593,7 +591,7 @@ class ACTower:
                     p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier]                        
                     if len(p) > 0:
                         driver.setPosition(p[0] + 1,p[0],False,self.qual_mode.value)                    
-                    driver.show(False)
+                    driver.show(False,race=False)
                     self.lbl_title_stint.show()
                     self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
                     self.lbl_tire_stint.show()                        
@@ -638,7 +636,7 @@ class ACTower:
                 if c > 0 and (driver.lapCount > self.minLapCount or self.nextDriverIsShown(checkPos)) and driver.isAlive and checkPos <= self.max_num_cars:                    
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.setPosition(p[0] + 1,0,False,self.qual_mode.value) 
-                        driver.show()
+                        driver.show(race=False)
                         driver.setTime(c,self.standings[0][1],self.sessionTimeLeft,self.qual_mode.value) 
                         driver.updatePit(self.sessionTimeLeft)                          
                 else:
