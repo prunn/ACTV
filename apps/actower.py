@@ -56,6 +56,7 @@ class Driver:
         self.firstDraw = False
         self.isAlive = False
         self.pitBoxMode=False
+        self.movingUp=False
         self.isLapLabel = isLapLabel
         self.qual_mode = Value(0)
         self.race_gaps = []
@@ -75,6 +76,7 @@ class Driver:
         self.completedLapsChanged = False
         self.last_lap_visible_end = 0
         self.time_highlight_end = 0
+        self.position_highlight_end = 0
         self.highlight = Value()
         self.pit_highlight_end = 0
         self.pit_highlight = Value()
@@ -225,6 +227,7 @@ class Driver:
             self.time_highlight_end = 0
             self.bestLap=0
             self.bestLapServer=0
+            self.position_highlight_end = 0
     
     def getBestLap(self,lap=False):
         if lap:
@@ -295,6 +298,10 @@ class Driver:
             self.lbl_time.setText("PIT").setColor(Colors.yellow(),True)
         elif time == "DNF":           
             self.lbl_time.setText("DNF").setColor(Colors.red(),True)
+        elif time == "UP":           
+            self.lbl_time.setText(u"\u2303").setColor(Colors.green(),True)
+        elif time == "DOWN":           
+            self.lbl_time.setText(u"\u2304").setColor(Colors.red(),True)
         elif self.identifier==identifier or time == 600000:           
             self.lbl_time.setText("").setColor(Colors.white(),True)
         elif lap:
@@ -324,6 +331,12 @@ class Driver:
         self.position.setValue(position)
         self.position_offset.setValue(offset)
         if self.position.hasChanged() or self.position_offset.hasChanged():
+            if self.position.value < self.position.old:
+                self.movingUp=True
+            else:
+                self.movingUp=False
+            if self.position.old > 0:
+                self.position_highlight_end = True
             #move labels
             self.num_pos=position-1-offset
             self.final_y=self.num_pos*self.rowHeight
@@ -788,6 +801,8 @@ class ACTower:
                             driver.setPosition(p[0] + 1,best_pos-1,True,self.qual_mode.value) 
                         else:
                             driver.setPosition(p[0] + 1,best_pos-1+display_offset,True,self.qual_mode.value) 
+                        if driver.position_highlight_end == True:
+                            driver.position_highlight_end = self.sessionTimeLeft - 5000
                         if self.race_mode.value == 1:                            
                             lapGap=self.getMaxSector(first_driver) - driver_max_sector
                             if driver.finished:        
@@ -801,6 +816,12 @@ class ACTower:
                             elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft:
                                 lastlap = ac.getCarState(driver.identifier,acsys.CS.LastLap)
                                 driver.setTimeRaceBattle(lastlap,-1) 
+                            elif driver.position_highlight_end != 0 and driver.position_highlight_end < self.sessionTimeLeft:
+                                if driver.movingUp:
+                                    driver.setTimeRaceBattle("UP",first_driver.identifier)  
+                                else:     
+                                    driver.setTimeRaceBattle("DOWN",first_driver.identifier)     
+                                driver.show()
                             elif lapGap > 100:                        
                                 driver.setTimeRaceBattle(lapGap/100,first_driver.identifier,True)          
                                 driver.show()
@@ -838,6 +859,8 @@ class ACTower:
                         p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
                         if len(p) > 0:
                             driver.setPosition(p[0] + 1,best_pos-1,True,self.qual_mode.value) 
+                            if driver.position_highlight_end == True:
+                                driver.position_highlight_end = self.sessionTimeLeft - 5000
                             driver.setTimeRaceBattle(gap,cur_driver.identifier) 
                             driver.show()
                     else:
