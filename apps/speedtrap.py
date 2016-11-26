@@ -180,7 +180,7 @@ class ACSpeedTrap:
                         self.speedText="%.1f mph"%(self.curTopSpeedMPH.value)
                     else:
                         self.speedText="%.1f kph"%(self.curTopSpeed.value)
-                    self.time_end = sessionTimeLeft - 6000
+                    self.time_end = sessionTimeLeft - 9000
                     self.lbl_title.setText("S",hidden=True)
                     self.lbl_time.setText(self.speedText,hidden=True)
                     self.lbl_time.show()

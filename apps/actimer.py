@@ -78,7 +78,21 @@ class ACTimer:
 		self.lbl_session_info.setSize(self.rowHeight*4, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(fontSize)		
 		self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(fontSize)		
 		self.lbl_session_single.setSize(width, self.rowHeight).setFontSize(fontSize)		
-		self.lbl_session_border.setSize(width, 1).setPos(0, self.rowHeight+1)		
+		self.lbl_session_border.setSize(width, 1).setPos(0, self.rowHeight+1)	
+		if len(self.finish_labels) > 0:
+			i=0
+			j=0
+			height=self.rowHeight/3
+			for label in self.finish_labels:
+				label.setSize(height, height)
+				if i % 2 == 1 and j < 7:		
+					label.setPos(height + j*height*2, i*height)
+				elif i % 2 == 0:
+					label.setPos(j*height*2, i*height)
+				j+=1
+				if (i % 2 == 0 and j >= 8) or (i % 2 == 1 and j >= 7):
+					i+=1
+					j=0	
 
 	def setFont(self,fontName):
 		self.lbl_session_info.setFont(fontName,0,0)
@@ -100,9 +114,9 @@ class ACTimer:
 		self.lbl_session_title.setVisible(0)
 		self.lbl_session_border.setVisible(0)
 		self.lbl_session_single.setVisible(1)
-		self.lbl_session_single.setText("").setBgColor(rgb([255, 255, 255], bg = True)).setBgOpacity(0.76).setVisible(1)
-		if len(self.finish_labels) > 0:
-			for label in self.finish_labels:		
+		self.lbl_session_single.setText("").setBgColor(rgb([255, 255, 255], bg = True)).setBgOpacity(0.76).setVisible(1)		
+		if len(self.finish_labels) > 0:			
+			for label in self.finish_labels:				
 				label.setVisible(1)
 		else:
 			height=self.rowHeight/3

@@ -19,7 +19,15 @@ battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap f
 
 -
 ###Changelog
-1.0.0.0
+1.1.0
+code optimisation
+fetching times from server when joining online session(practise,qualif)
+added delta widget
+Tower: gained/lost position triangle
+Tower: cars finishing laps down
+Speedtrap: stays on a little longer
+
+1.0.0
 yellow timer flag
 name in tower is yellow when stopped on track
 changed hotkey(mode change) to ctrl+d
@@ -28,7 +36,7 @@ scrolling effect for tower in race(top 3 always shown, then driver remains displ
 added colors for nissan(purple),ktm/mclaren(orange),alpha romeo(forest green)
 replay beta working on practice qualify sessions
 
-0.9.6.0
+0.9.6
 Config : base row height
 Removed pinhack option and code(not needed anymore)
 Full tower with gaps - PIT and DNF(for player disconnected)

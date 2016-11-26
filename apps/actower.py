@@ -49,6 +49,7 @@ class Driver:
     def __init__(self,app,rowHeight,fontName,identifier,name,pos,isLapLabel=False):
         self.identifier=identifier
         self.rowHeight=rowHeight
+        self.race=False
         self.fontSize=getFontSize(self.rowHeight)
         strOffset = " "
         self.final_y = 0
@@ -127,7 +128,7 @@ class Driver:
         if self.isLapLabel:            
             self.lbl_name.setSize(self.rowHeight*6, self.rowHeight).setPos(0, self.final_y).setFontSize(fontSize)
         else:    
-            if self.isInPit.value:
+            if self.isInPit.value and not self.race:
                 self.lbl_name.setSize(self.rowHeight*5.6, self.rowHeight).setPos(self.rowHeight, self.final_y).setFontSize(fontSize)
             else:
                 self.lbl_name.setSize(self.rowHeight*5, self.rowHeight).setPos(self.rowHeight, self.final_y).setFontSize(fontSize)
@@ -137,7 +138,8 @@ class Driver:
         self.lbl_border.setSize(self.rowHeight*2.8, 1).setPos(0, self.final_y + self.rowHeight-1)
         
         
-    def show(self,needsTLC=True,race=True):        
+    def show(self,needsTLC=True,race=True): 
+        self.race=race
         if self.showingFullNames and needsTLC:
             self.setName()
         elif not self.showingFullNames and not needsTLC:
@@ -299,9 +301,9 @@ class Driver:
         elif time == "DNF":           
             self.lbl_time.setText("DNF").setColor(Colors.red(),True)
         elif time == "UP":           
-            self.lbl_time.setText(u"\u2303").setColor(Colors.green(),True)
+            self.lbl_time.setText(u"\u25B2").setColor(Colors.green(),True)
         elif time == "DOWN":           
-            self.lbl_time.setText(u"\u2304").setColor(Colors.red(),True)
+            self.lbl_time.setText(u"\u25BC").setColor(Colors.red(),True)
         elif self.identifier==identifier or time == 600000:           
             self.lbl_time.setText("").setColor(Colors.white(),True)
         elif lap:
@@ -774,7 +776,7 @@ class ACTower:
             if self.lapsCompleted.hasChanged():  
                 self.leader_time = self.sessionTimeLeft   
                 if self.lapsCompleted.value >= self.numberOfLaps:
-                    self.race_show_end = self.sessionTimeLeft - 360000                    
+                    self.race_show_end = self.sessionTimeLeft - 720000                    
                 else:     
                     self.race_show_end = self.sessionTimeLeft - 12000
         display_offset=0
@@ -861,9 +863,19 @@ class ACTower:
                             driver.setPosition(p[0] + 1,best_pos-1,True,self.qual_mode.value) 
                             if driver.position_highlight_end == True:
                                 driver.position_highlight_end = self.sessionTimeLeft - 5000
-                            driver.setTimeRaceBattle(gap,cur_driver.identifier) 
+                            if driver.position_highlight_end != 0 and driver.position_highlight_end < self.sessionTimeLeft:
+                                if driver.movingUp:
+                                    driver.setTimeRaceBattle("UP",cur_driver.identifier)  
+                                else:     
+                                    driver.setTimeRaceBattle("DOWN",cur_driver.identifier) 
+                            else:
+                                driver.setTimeRaceBattle(gap,cur_driver.identifier) 
                             driver.show()
                     else:
+                        p=[i for i, v in enumerate(self.standings) if v[0] == driver.identifier] 
+                        if len(p) > 0:
+                            driver.position.setValue(p[0] + 1)
+                            #driver.position.hasChanged()
                         driver.hide()
             self.tick+=1
                     
