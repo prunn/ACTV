@@ -50,6 +50,10 @@ class Driver:
         self.identifier=identifier
         self.rowHeight=rowHeight
         self.race=False
+        self.inPitFromPitLane=False
+        self.isInPitLane=Value(False)
+        self.isInPitLaneOld=False
+        self.isInPitBox=Value(False)
         self.fontSize=getFontSize(self.rowHeight)
         strOffset = " "
         self.final_y = 0
@@ -230,6 +234,7 @@ class Driver:
             self.bestLap=0
             self.bestLapServer=0
             self.position_highlight_end = 0
+            self.inPitFromPitLane=False
     
     def getBestLap(self,lap=False):
         if lap:
@@ -327,8 +332,17 @@ class Driver:
                
     def setPosition(self,position,offset,battles,qual_mode):
         if not self.isLapLabel:
-            pitValue = (bool(ac.isCarInPitline(self.identifier)) or bool(ac.isCarInPit(self.identifier)))
-            self.isInPit.setValue(pitValue)          
+            self.isInPitLane.setValue(bool(ac.isCarInPitline(self.identifier)))
+            self.isInPitBox.setValue(bool(ac.isCarInPit(self.identifier)))
+            pitValue = self.isInPitLane.value or self.isInPitBox.value            
+            self.isInPit.setValue(pitValue)    
+            if self.race:
+                if self.isInPitBox.hasChanged():
+                    if self.isInPitBox.value:
+                        self.inPitFromPitLane=self.isInPitLaneOld                        
+                    else:
+                        self.inPitFromPitLane=False
+                self.isInPitLaneOld=self.isInPitLane.value
             
         self.position.setValue(position)
         self.position_offset.setValue(offset)
@@ -728,8 +742,8 @@ class ACTower:
                 self.driver_shown+=1
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1   
-            if bool(ac.isCarInPit(driver.identifier)) and not driver.finished:
-                driver.race_gaps = []      
+            if driver.isInPitBox.value and not driver.finished and not driver.inPitFromPitLane:#bool(ac.isCarInPit(driver.identifier))
+                driver.race_gaps = []  
             if self.sessionTimeLeft >= 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                    
                 driver.finished=False
                 self.numCarsToFinish=0
@@ -1127,6 +1141,6 @@ class ACTower:
         if t_tower-t_info > 0.006:
             t_total=t_tower-t_info
             t_total_d=t_update_drivers_end-t_update_drivers
-            ac.console(str(t_total) + " u_diver:" + str(t_total_d))
-            ac.log(str(t_total) + " u_diver:" + str(t_total_d))
+            #ac.console(str(t_total) + " u_diver:" + str(t_total_d))
+            #ac.log(str(t_total) + " u_diver:" + str(t_total_d))
     
