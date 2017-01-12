@@ -27,10 +27,10 @@ class ACTimer:
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
 		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
-		self.lbl_session_title=Label(self.window.app,"P").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(0.64)
+		self.lbl_session_title=Label(self.window.app,"P").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.theme(bg = True)).setBgOpacity(0.64)
 		
 		self.lbl_session_single=Label(self.window.app,"Loading").setSize(190, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setColor(Colors.white()).setVisible(0)
-		self.lbl_session_border=Label(self.window.app,"").setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(1)
+		self.lbl_session_border=Label(self.window.app,"").setSize(154+self.rowHeight, 1).setPos(0, self.rowHeight+1).setBgColor(Colors.theme(bg = True)).setBgOpacity(0.7).setVisible(1)
 		
 		trackFilePath = "content/tracks/"+ ac.getTrackName(0) + "/ui/"
 		if ac.getTrackConfiguration(0) != "":
@@ -70,6 +70,8 @@ class ACTimer:
 		self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
 		if self.ui_row_height.hasChanged():
 			self.reDrawSize()
+		self.lbl_session_border.setBgColor(Colors.theme(bg = True),True)	
+		self.lbl_session_title.setBgColor(Colors.theme(bg = True),True)
 
 	def reDrawSize(self):
 		self.rowHeight=self.ui_row_height.value
@@ -200,8 +202,8 @@ class ACTimer:
 						else:
 							self.lbl_session_info.setBgColor(rgb([55, 55, 55], bg = True))
 							self.lbl_session_info.setColor(Colors.white(),True)	
-							self.lbl_session_border.setBgColor(Colors.red(bg = True),True)	
-							self.lbl_session_title.setBgColor(Colors.red(bg = True),True)
+							self.lbl_session_border.setBgColor(Colors.theme(bg = True),True)	
+							self.lbl_session_title.setBgColor(Colors.theme(bg = True),True)
 					self.lbl_session_border.animate()		
 					self.lbl_session_info.animate()
 					self.lbl_session_title.animate()
@@ -253,7 +255,7 @@ class ACTimer:
 					else:
 						self.lbl_session_single.setBgColor(rgb([55, 55, 55], bg = True),True)
 						self.lbl_session_single.setColor(Colors.white(),True)
-						self.lbl_session_border.setBgColor(Colors.red(bg = True),True)
+						self.lbl_session_border.setBgColor(Colors.theme(bg = True),True)
 				self.lbl_session_border.animate()		
 				self.lbl_session_single.animate()
 			else:

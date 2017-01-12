@@ -71,8 +71,8 @@ class ACInfo:
         self.lbl_timing=Label(self.window.app,"Loading").setSize(284, self.rowHeight).setPos(0, self.rowHeight).setFontSize(26).setAlign("left").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
         self.lbl_split=Label(self.window.app,"Loading").setSize(220, self.rowHeight).setPos(10, self.rowHeight).setFontSize(26).setAlign("right").setVisible(0)
         self.lbl_fastest_split=Label(self.window.app,"Loading").setSize(220, self.rowHeight).setPos(48, self.rowHeight).setFontSize(26).setAlign("right").setVisible(0)
-        self.info_position=Label(self.window.app,"0").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(1).setVisible(0)
-        self.info_position_lead=Label(self.window.app,"1").setSize(self.rowHeight, self.rowHeight).setPos(246, self.rowHeight).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(1).setVisible(0)
+        self.info_position=Label(self.window.app,"0").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.theme(bg = True)).setBgOpacity(1).setVisible(0)
+        self.info_position_lead=Label(self.window.app,"1").setSize(self.rowHeight, self.rowHeight).setPos(246, self.rowHeight).setFontSize(26).setAlign("center").setBgColor(Colors.theme(bg = True)).setBgOpacity(1).setVisible(0)
         car = ac.getCarName(0)        
         self.lbl_border=Label(self.window.app,"").setSize(284, 1).setPos(0, self.rowHeight).setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7).setVisible(0)
         self.loadCFG()
@@ -482,7 +482,7 @@ class ACInfo:
                             if pos > 1:
                                 self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg = True)).setBgOpacity(0.8)
                             else:
-                                self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg = True)).setBgOpacity(0.8)
+                                self.info_position.setColor(Colors.white()).setBgColor(Colors.theme(bg = True)).setBgOpacity(0.8)
                             self.info_position.setText(str(pos))
                             self.info_position.show()
                             
@@ -540,7 +540,7 @@ class ACInfo:
                         if pos > 1:
                             self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg = True)).setBgOpacity(1)
                         else:
-                            self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg = True)).setBgOpacity(1)
+                            self.info_position.setColor(Colors.white()).setBgColor(Colors.theme(bg = True)).setBgOpacity(1)
                         self.info_position.setText(str(pos)).show()   
                         self.lbl_position_text.setValue(str(pos))                
                             
@@ -613,7 +613,7 @@ class ACInfo:
                     if pos > 1:
                         self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg = True)).setBgOpacity(1)
                     else:
-                        self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg = True)).setBgOpacity(1)
+                        self.info_position.setColor(Colors.white()).setBgColor(Colors.theme(bg = True)).setBgOpacity(1)
                     self.info_position.setText(str(pos)).show() 
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
@@ -659,7 +659,7 @@ class ACInfo:
                 if pos > 1:
                     self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg = True)).setBgOpacity(0.8)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg = True)).setBgOpacity(0.8)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.theme(bg = True)).setBgOpacity(0.8)
                 self.info_position.setText(str(pos))
                 self.info_position.show()
                 self.nameOffset=self.rowHeight*49/36 #49
@@ -711,7 +711,7 @@ class ACInfo:
                 if pos > 1:
                     self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg = True)).setBgOpacity(1)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg = True)).setBgOpacity(1)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.theme(bg = True)).setBgOpacity(1)
                 self.info_position.setText(str(pos)).show() 
                 self.lbl_timing_visible.setValue(0)
                 self.lbl_fastest_split.hideText()

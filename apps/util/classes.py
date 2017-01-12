@@ -109,6 +109,11 @@ class POINT(ctypes.Structure):
 
 class Colors:
 	@staticmethod
+	def theme(bg = False):
+		#get theme color
+		#return rgb([40, 152, 211], bg = bg)
+		return rgb([191, 0, 0], bg = bg)
+	@staticmethod
 	def bmw():
 		#return rgb([42, 101, 198], bg = True)
 		return rgb([40, 152, 211], bg = True)
@@ -136,9 +141,6 @@ class Colors:
 	def alfa():
 		#return rgb([0, 154, 100], bg = True)
 		return rgb([54, 172, 68], bg = True)
-	@staticmethod
-	def default():
-		return rgb([191, 0, 0], bg = True)
 	@staticmethod
 	def white(bg = False):
 		return rgb([255, 255, 255], bg = bg)
@@ -191,7 +193,7 @@ class Colors:
 			return rgb([214, 112, 157], bg = True)
 		#if car.find("glickenhaus")>=0 or car.find("p4-5_2011")>=0:
 		#	return rgb([0, 0, 0], bg = True)
-		return Colors.default()	
+		return Colors.theme()	
 	
 	
 class Label:
@@ -518,6 +520,10 @@ class Button:
 	def setBgColor(self, color, animated=False):
 		ac.setBackgroundColor(self.button, *color)
 		#ac.setBackgroundOpacity(self.label, self.params["o"].value)
+		return self
+	
+	def setBgOpacity(self, opacity, animated=False):
+		ac.setBackgroundOpacity(self.button, opacity)
 		return self
 	
 	def setVisible(self, value):

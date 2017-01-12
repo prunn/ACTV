@@ -38,7 +38,7 @@ class ACSpeedTrap:
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
         self.lbl_title = Label(self.window.app,"").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.72).setVisible(0)
         self.lbl_time = Label(self.window.app,"").setSize(172, self.rowHeight).setPos(38, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64).setVisible(0)
-        self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(Colors.red(bg = True)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_border = Label(self.window.app,"").setSize(210, 1).setPos(0, 39).setBgColor(Colors.theme(bg = True)).setBgOpacity(0.7).setVisible(0)
         self.useMPH = False
         
         user_path = os.path.join(os.path.expanduser("~"), "Documents","Assetto Corsa","cfg")
@@ -61,6 +61,7 @@ class ACSpeedTrap:
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
         if self.ui_row_height.hasChanged():
             self.reDrawSize()
+        self.lbl_border.setBgColor(Colors.theme(bg = True))
         
     def reDrawSize(self):
         self.rowHeight=self.ui_row_height.value
