@@ -18,14 +18,15 @@ class Configuration:
     theme_red=191
     theme_green=0
     theme_blue=0
+    tower_highlight=0
     # INITIALIZATION
     def __init__(self):
         self.session=Value(-1)
         self.listen_active = True
         self.window = Window(name="ACTV Config", icon=True, width=251, height=480, texture="").setBgOpacity(0.6)   
         
-        self.btn_tab1 = Button(self.window.app,self.onTab1Press).setPos(0, -20).setSize(126, 20).setText("General").setAlign("center").setBgColor(rgb([255, 12, 12], bg = True))
-        self.btn_tab2 = Button(self.window.app,self.onTab2Press).setPos(126, -20).setSize(125, 20).setText("RGB").setAlign("center").setBgColor(rgb([12, 12, 12], bg = True))
+        self.btn_tab1 = Button(self.window.app,self.onTab1Press).setPos(0, -22).setSize(126, 22).setText("General").setAlign("center").setBgColor(rgb([255, 12, 12], bg = True))
+        self.btn_tab2 = Button(self.window.app,self.onTab2Press).setPos(126, -22).setSize(125, 22).setText("Colors").setAlign("center").setBgColor(rgb([12, 12, 12], bg = True))
                
         y=60
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
@@ -93,6 +94,15 @@ class Configuration:
         ac.setVisible(self.spin_theme_green, 0)
         ac.setVisible(self.spin_theme_blue, 0)
         
+        y+=80  
+        self.spin_tower_lap = ac.addSpinner(self.window.app, "Tower Highlight :")
+        ac.setRange(self.spin_tower_lap, 0,1)
+        ac.setPosition(self.spin_tower_lap,20,y)
+        ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
+        ac.addOnValueChangeListener(self.spin_tower_lap, self.onSpinTowerLapColorChanged)  
+        ac.setVisible(self.spin_tower_lap, 0)
+        self.lbl_tower_lap = Label(self.window.app,"Red").setSize(120, 26).setPos(186, y-28).setFontSize(12).setAlign("left").setVisible(0) 
+        
         self.cfg_loaded = False
         self.cfg = Config("apps/python/prunn/", "config.ini")
         self.loadCFG()
@@ -133,7 +143,10 @@ class Configuration:
             self.__class__.theme_green=0  
         self.__class__.theme_blue = self.cfg.get("SETTINGS", "blue", "int")
         if self.__class__.theme_blue == -1:
-            self.__class__.theme_blue=0            
+            self.__class__.theme_blue=0
+        self.__class__.tower_highlight = self.cfg.get("SETTINGS", "tower_highlight", "int")
+        if self.__class__.tower_highlight == -1:
+            self.__class__.tower_highlight=0          
             
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)        
@@ -144,13 +157,16 @@ class Configuration:
         ac.setValue(self.spin_theme_red, self.__class__.theme_red)
         ac.setValue(self.spin_theme_green, self.__class__.theme_green)
         ac.setValue(self.spin_theme_blue, self.__class__.theme_blue)
+        ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
         self.setLabelQual()
         self.setLabelRace()
+        self.setLabelTowerColor()
         self.cfg_loaded = True
         
     def saveCFG(self):
         self.setLabelRace()   
         self.setLabelQual()
+        self.setLabelTowerColor()
         self.cfg.set("SETTINGS", "race_mode", self.__class__.race_mode)   
         self.cfg.set("SETTINGS", "qual_mode", self.__class__.qual_mode) 
         self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)
@@ -160,6 +176,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "red", self.__class__.theme_red)
         self.cfg.set("SETTINGS", "green", self.__class__.theme_green)
         self.cfg.set("SETTINGS", "blue", self.__class__.theme_blue)
+        self.cfg.set("SETTINGS", "tower_highlight", self.__class__.tower_highlight)
     
     def setLabelQual(self):
         if self.__class__.qual_mode == 0:
@@ -174,6 +191,12 @@ class Configuration:
             self.lbl_race_mode.setText("Full-Gaps")
         else:
             self.lbl_race_mode.setText("Full")
+            
+    def setLabelTowerColor(self):
+        if self.__class__.tower_highlight == 0:
+            self.lbl_tower_lap.setText("Red")
+        else:
+            self.lbl_tower_lap.setText("Green")
     
     def changeTab(self):
         if self.__class__.currentTab==1:
@@ -182,6 +205,8 @@ class Configuration:
             ac.setVisible(self.spin_theme_red, 0)
             ac.setVisible(self.spin_theme_green, 0)
             ac.setVisible(self.spin_theme_blue, 0)
+            ac.setVisible(self.spin_tower_lap, 0)
+            self.lbl_tower_lap.setVisible(0)
             ac.setVisible(self.spin_race_mode, 1)
             ac.setVisible(self.spin_qual_mode, 1)
             ac.setVisible(self.spin_num_cars, 1)
@@ -197,6 +222,8 @@ class Configuration:
             ac.setVisible(self.spin_theme_red, 1)
             ac.setVisible(self.spin_theme_green, 1)
             ac.setVisible(self.spin_theme_blue, 1)
+            ac.setVisible(self.spin_tower_lap, 1)
+            self.lbl_tower_lap.setVisible(1)
             ac.setVisible(self.spin_race_mode, 0)
             ac.setVisible(self.spin_qual_mode, 0)
             ac.setVisible(self.spin_num_cars, 0)
@@ -281,7 +308,13 @@ class Configuration:
     def onBlueChanged(value):
         Configuration.theme_blue = value
         Configuration.configChanged=True 
-        
+    
+    @staticmethod
+    def onSpinTowerLapColorChanged(value):
+        ac.console(str(value))
+        Configuration.tower_highlight = value
+        Configuration.configChanged=True    
+         
     @staticmethod
     def onSpinRowHeightChanged(value): 
         Configuration.ui_row_height = value

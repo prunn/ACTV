@@ -70,8 +70,8 @@ class ACTimer:
 		self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
 		if self.ui_row_height.hasChanged():
 			self.reDrawSize()
-		self.lbl_session_border.setBgColor(Colors.theme(bg = True),True)	
-		self.lbl_session_title.setBgColor(Colors.theme(bg = True),True)
+		self.lbl_session_border.setBgColor(Colors.theme(bg = True, reload = True))	
+		self.lbl_session_title.setBgColor(Colors.theme(bg = True, reload = True))
 
 	def reDrawSize(self):
 		self.rowHeight=self.ui_row_height.value

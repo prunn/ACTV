@@ -61,7 +61,7 @@ class ACSpeedTrap:
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
         if self.ui_row_height.hasChanged():
             self.reDrawSize()
-        self.lbl_border.setBgColor(Colors.theme(bg = True))
+        self.lbl_border.setBgColor(Colors.theme(bg = True, reload = True))
         
     def reDrawSize(self):
         self.rowHeight=self.ui_row_height.value

@@ -108,11 +108,38 @@ class POINT(ctypes.Structure):
 	_fields_ = [("x", ctypes.c_ulong), ("y", ctypes.c_ulong)]  
 
 class Colors:
+	theme_red=-1
+	theme_green=-1
+	theme_blue=-1
+	theme_highlight=-1
 	@staticmethod
-	def theme(bg = False):
+	def theme(bg = False, reload = False):
 		#get theme color
+		if reload or Colors.theme_red < 0 or Colors.theme_green < 0 or Colors.theme_blue < 0:
+			cfg = Config("apps/python/prunn/", "config.ini")
+			Colors.theme_red = cfg.get("SETTINGS", "red", "int")
+			if Colors.theme_red < 0  or Colors.theme_red > 255 :
+				Colors.theme_red = 191
+			Colors.theme_green = cfg.get("SETTINGS", "green", "int")
+			if Colors.theme_green < 0  or Colors.theme_green > 255 :
+				Colors.theme_green = 0
+			Colors.theme_blue = cfg.get("SETTINGS", "blue", "int")
+			if Colors.theme_blue < 0 or Colors.theme_blue > 255 :
+				Colors.theme_blue = 0
 		#return rgb([40, 152, 211], bg = bg)
-		return rgb([191, 0, 0], bg = bg)
+		return rgb([Colors.theme_red, Colors.theme_green, Colors.theme_blue], bg = bg)
+	
+	@staticmethod
+	def highlight(bg = False, reload = False):
+		#get theme color
+		if reload or Colors.theme_highlight < 0:
+			cfg = Config("apps/python/prunn/", "config.ini")
+			Colors.theme_highlight = cfg.get("SETTINGS", "tower_highlight", "int")
+			if Colors.theme_highlight != 1 :
+				Colors.theme_highlight = 0
+		if Colors.theme_highlight == 1:
+			return Colors.green(bg = bg)
+		return Colors.red(bg = bg)
 	@staticmethod
 	def bmw():
 		#return rgb([42, 101, 198], bg = True)
@@ -137,6 +164,9 @@ class Colors:
 	@staticmethod
 	def nissan():
 		return rgb([175, 71, 169], bg = True)
+	@staticmethod
+	def ferrari():
+		return rgb([191, 0, 0], bg = True)
 	@staticmethod
 	def alfa():
 		#return rgb([0, 154, 100], bg = True)
@@ -173,6 +203,8 @@ class Colors:
 	
 	@staticmethod
 	def colorFromCar(car):
+		if car.find("ferrari")>=0:
+			return Colors.ferrari()
 		if car.find("bmw")>=0:
 			return Colors.bmw()
 		if car.find("ford")>=0 or car.find("shelby")>=0:
@@ -193,7 +225,7 @@ class Colors:
 			return rgb([214, 112, 157], bg = True)
 		#if car.find("glickenhaus")>=0 or car.find("p4-5_2011")>=0:
 		#	return rgb([0, 0, 0], bg = True)
-		return Colors.theme()	
+		return Colors.theme(bg = True)	
 	
 	
 class Label:

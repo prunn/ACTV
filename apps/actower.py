@@ -453,7 +453,7 @@ class Driver:
         self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < sessionTimeLeft)        
         if self.highlight.hasChanged() :          
             if self.highlight.value:
-                self.lbl_time.setColor(Colors.red(),True)
+                self.lbl_time.setColor(Colors.highlight(),True)
             else:
                 self.lbl_time.setColor(Colors.white(),True)        
         if not self.isLapLabel:
@@ -527,6 +527,7 @@ class ACTower:
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
         if self.ui_row_height.hasChanged():
             self.reDrawSize()
+        Colors.highlight(reload = True)
             
     def reDrawSize(self):
         self.rowHeight=self.ui_row_height.value
