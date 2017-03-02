@@ -22,7 +22,9 @@ class ACTimer:
 		self.session_draw=Value()
 		self.session_draw.setValue(-1)
 		self.ui_row_height = Value(-1)
-		self.numberOfLaps=0
+		self.numberOfLaps=-1
+		self.hasExtraLap=-1
+		self.numberOfLapsTimedRace=-1
 		self.rowHeight=36
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
@@ -156,6 +158,7 @@ class ACTimer:
 			self.cursor.setValue(False)		
 		
 		if self.cursor.hasChanged() or self.session_draw.hasChanged():
+			self.numberOfLapsTimedRace=-1
 			if self.cursor.value:
 				self.window.setBgOpacity(0.4).border(0)  
 			else:   
@@ -209,13 +212,20 @@ class ACTimer:
 					self.lbl_session_title.animate()
 			elif self.session.value == 2 :
 				completed=0
+				raceFinished=0
 				for x in range(ac.getCarsCount()): 
 					c = ac.getCarState(x,acsys.CS.LapCount)
 					if c > completed:
-						completed=c     
-				completed+=1    
-				if self.numberOfLaps==0:
+						completed=c
+					if ac.getCarState(x,acsys.CS.RaceFinished):
+						raceFinished=1  
+				completed+=1   
+				if self.numberOfLaps < 0:
 					self.numberOfLaps=sim_info.graphics.numberOfLaps
+				if self.hasExtraLap < 0:
+					self.hasExtraLap=sim_info.static.hasExtraLap
+				if self.hasExtraLap == 1 and sessionTimeLeft < 0 and self.numberOfLapsTimedRace < 0:
+					self.numberOfLapsTimedRace = completed + 1
 				if sessionTimeLeft > 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
 					if self.finish_initialised:
 						self.destoy_finish()
@@ -224,10 +234,10 @@ class ACTimer:
 					self.lbl_session_single.setVisible(1)
 					self.lbl_session_border.setVisible(1)
 					self.lbl_session_single.setText(self.trackName)
-				elif completed > self.numberOfLaps:
+				elif raceFinished > 0: #elif self.numberOfLaps > 0 and completed > self.numberOfLaps:
 					if not self.finish_initialised:
 						self.init_finish()
-				elif completed == self.numberOfLaps:
+				elif completed == self.numberOfLaps or (self.numberOfLaps == 0 and self.hasExtraLap == 0 and sessionTimeLeft < 0) or (self.hasExtraLap == 1 and completed == self.numberOfLapsTimedRace):
 					if self.finish_initialised:
 						self.destoy_finish()
 					self.lbl_session_info.setVisible(0)
@@ -242,11 +252,16 @@ class ACTimer:
 					self.lbl_session_title.setVisible(0)
 					self.lbl_session_single.setVisible(1)
 					self.lbl_session_border.setVisible(1)
-					if self.session.hasChanged():
-						self.lbl_session_info.setSize(self.rowHeight*4,  self.rowHeight).setPos(self.rowHeight, 0)
-						self.lbl_session_title.setSize(self.rowHeight, self.rowHeight)
-						self.lbl_session_title.setText("Lap")
-					self.lbl_session_single.setText("{0} / {1}".format(completed,self.numberOfLaps))
+					if self.hasExtraLap > 0:
+						txt_extra_lap = " +1 Lap"
+					else:
+						txt_extra_lap = ""
+					if self.numberOfLaps > 0:
+						self.lbl_session_single.setText("{0} / {1}".format(completed,self.numberOfLaps))
+					elif sessionTimeLeft > 0:
+						self.lbl_session_single.setText(self.time_splitting(sessionTimeLeft) + txt_extra_lap)
+					else:
+						self.lbl_session_single.setText("0:00" + txt_extra_lap)
 				if not self.finish_initialised:
 					if sim_info.graphics.flag == 2:
 						self.lbl_session_single.setBgColor(Colors.yellow(True),True)
