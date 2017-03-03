@@ -65,7 +65,7 @@ class Driver:
         self.isLapLabel = isLapLabel
         self.qual_mode = Value(0)
         self.race_gaps = []
-        self.finished=False
+        self.finished=Value(False)
         self.bestLap=0
         self.bestLapServer=0
         self.lapCount=0
@@ -220,7 +220,7 @@ class Driver:
         self.lbl_name.hide()            
         self.isDisplayed = False 
         if reset:  
-            self.finished=False
+            self.finished.setValue(False)
             self.isInPit.setValue(False)    
             self.firstDraw = False 
             self.setName()            
@@ -493,7 +493,7 @@ class ACTower:
         self.cursor=Value(False)
         self.max_num_cars = 18
         self.max_num_laps_stint = 8
-        self.numberOfLaps=0
+        self.numberOfLaps=-1
         self.race_mode = Value(0)
         self.qual_mode = Value(0)
         self.ui_row_height = Value(-1)
@@ -743,16 +743,16 @@ class ACTower:
                 self.driver_shown+=1
                 if len(p) > 0 and (best_pos == 0 or best_pos > p[0]+1):
                     best_pos=p[0]+1   
-            if driver.isInPitBox.value and not driver.finished and not driver.inPitFromPitLane:#bool(ac.isCarInPit(driver.identifier))
+            if driver.isInPitBox.value and not driver.finished.value and not driver.inPitFromPitLane:#bool(ac.isCarInPit(driver.identifier))
                 driver.race_gaps = []  
             if self.sessionTimeLeft >= 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                    
-                driver.finished=False
+                #driver.finished=False
                 self.numCarsToFinish=0
                 driver.race_standings_sector.setValue(0)
                 driver.race_current_sector.setValue(0)
             else:
                 bl=driver.raceProgress  
-                if bl >= 0.06 and bl <= self.numberOfLaps and self.sectorIsValid(bl,driver):
+                if bl >= 0.06 and not driver.finished.value and self.sectorIsValid(bl,driver):#bl <= self.numberOfLaps
                     driver.race_current_sector.setValue(math.floor(bl*100))             
                 elif bl < 0.06 and len(driver.race_gaps) < 30:
                     driver.race_gaps = []
@@ -790,7 +790,7 @@ class ACTower:
         if not driverShown > 1:
             if self.lapsCompleted.hasChanged():  
                 self.leader_time = self.sessionTimeLeft   
-                if self.lapsCompleted.value >= self.numberOfLaps:
+                if self.numCarsToFinish > 0 : #self.lapsCompleted.value >= self.numberOfLaps:
                     self.race_show_end = self.sessionTimeLeft - 720000                    
                 else:     
                     self.race_show_end = self.sessionTimeLeft - 12000
@@ -822,7 +822,7 @@ class ACTower:
                             driver.position_highlight_end = self.sessionTimeLeft - 5000
                         if self.race_mode.value == 1:                            
                             lapGap=self.getMaxSector(first_driver) - driver_max_sector
-                            if driver.finished:        
+                            if driver.finished.value:        
                                 driver.show(False)
                             elif not driver.isAlive:           
                                 driver.setTimeRaceBattle("DNF",first_driver.identifier)          
@@ -856,7 +856,7 @@ class ACTower:
                     if len(p) > 0  and p[0] < self.max_num_cars and driver.isDisplayed:
                         if driver.completedLapsChanged and driver.completedLaps.value > 1:
                             driver.last_lap_visible_end = self.sessionTimeLeft - 5000
-                        if driver.finished:                                
+                        if driver.finished.value:                                
                             driver.show(False)
                         elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive and not driver.isInPit.value:
                             lastlap = ac.getCarState(driver.identifier,acsys.CS.LastLap)
@@ -907,7 +907,7 @@ class ACTower:
                         driver.setPosition(p[0] + 1,0,False,self.qual_mode.value) 
                         driver.setTimeRace(driver.completedLaps.value,self.leader_time,self.sessionTimeLeft)  
                         needsTLC=True
-                        if self.lapsCompleted.value >= self.numberOfLaps:    
+                        if self.numCarsToFinish > 0 : #self.lapsCompleted.value >= self.numberOfLaps:    
                             needsTLC=False              
                         driver.show(needsTLC)
         else:   
@@ -1063,7 +1063,7 @@ class ACTower:
             elif self.session.value == 2 :               
                 #RACE
                 self.pitBoxMode=False
-                if self.numberOfLaps == 0:
+                if self.numberOfLaps < 0:
                     self.numberOfLaps=sim_info.graphics.numberOfLaps
                 completed=0
                 standings = []
@@ -1072,16 +1072,18 @@ class ACTower:
                     c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
                     driver.completedLaps.setValue(c) 
                     driver.completedLapsChanged=driver.completedLaps.hasChanged()
+                    driver.finished.setValue(ac.getCarState(driver.identifier,acsys.CS.RaceFinished)==1)
                     if c > completed:
                         completed=c
                     driver.raceProgress=c + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
                     if self.sectorIsValid(driver.raceProgress,driver):
                         #or lapcount changed and leader finished
-                        if not driver.finished and (driver.race_standings_sector.value >= self.numberOfLaps or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
+                        if driver.finished.hasChanged() and driver.finished.value: 
+                            #and (driver.race_standings_sector.value >= self.numberOfLaps or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
                             driver.race_standings_sector.setValue(driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish)/100)
                             self.numCarsToFinish+=1
-                            driver.finished=True
-                        elif not driver.finished:                  
+                            #driver.finished=True
+                        elif not driver.finished.value:                  
                             driver.race_standings_sector.setValue(driver.raceProgress)                            
                     if driver.race_standings_sector.value > 0:
                         standings.append((driver.identifier,driver.race_standings_sector.value))     
