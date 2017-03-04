@@ -19,6 +19,12 @@ battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap f
 
 -
 ###Changelog
+1.1.1
+Customizable Theme Color Base (RGB)
+Config qualif new lap color(Red-Green)
+Tower : detection if pitstop or respawned in pits
+Timed races support
+
 1.1.0
 code optimisation
 fetching times from server when joining online session(practise,qualif)
