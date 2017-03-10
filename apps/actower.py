@@ -745,7 +745,7 @@ class ACTower:
                     best_pos=p[0]+1   
             if driver.isInPitBox.value and not driver.finished.value and not driver.inPitFromPitLane:#bool(ac.isCarInPit(driver.identifier))
                 driver.race_gaps = []  
-            if self.sessionTimeLeft >= 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):                    
+            if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:                    
                 #driver.finished=False
                 self.numCarsToFinish=0
                 driver.race_standings_sector.setValue(0)

@@ -618,7 +618,7 @@ class ACInfo:
                     self.info_position.setText(str(pos)).show() 
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
-                elif self.visible_end == 0 or sessionTimeLeft < self.visible_end or sessionTimeLeft > 1800000:
+                elif self.visible_end == 0 or sessionTimeLeft < self.visible_end or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
                     self.lbl_driver_name_visible.setValue(0)
                     self.info_position.hide()
                     self.lbl_timing_visible.setValue(0)

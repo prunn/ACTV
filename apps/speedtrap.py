@@ -124,7 +124,7 @@ class ACSpeedTrap:
         self.session.setValue(sim_info.graphics.session)  
         sessionTimeLeft=sim_info.graphics.sessionTimeLeft
         sim_info_status=sim_info.graphics.status
-        if (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0) or sessionTimeLeft >= 1800000:  
+        if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:  
             self.resetVisibility() 
             self.time_end = 0
         self.manageWindow()

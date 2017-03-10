@@ -159,6 +159,8 @@ class ACTimer:
 		
 		if self.cursor.hasChanged() or self.session_draw.hasChanged():
 			self.numberOfLapsTimedRace=-1
+			self.hasExtraLap=-1
+			self.numberOfLaps=-1
 			if self.cursor.value:
 				self.window.setBgOpacity(0.4).border(0)  
 			else:   
@@ -226,7 +228,7 @@ class ACTimer:
 					self.hasExtraLap=sim_info.static.hasExtraLap
 				if self.hasExtraLap == 1 and sessionTimeLeft < 0 and self.numberOfLapsTimedRace < 0:
 					self.numberOfLapsTimedRace = completed + 1
-				if sessionTimeLeft > 1800000 or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
+				if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0: 
 					if self.finish_initialised:
 						self.destoy_finish()
 					self.lbl_session_info.setVisible(0)

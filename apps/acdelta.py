@@ -227,7 +227,7 @@ class ACDelta:
             sessionTimeLeft=sim_info.graphics.sessionTimeLeft
             if math.isinf(sessionTimeLeft) :# or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
                 self.resetData() 
-            elif self.session.value == 2 and sessionTimeLeft > 1800000:
+            elif self.session.value == 2 and sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
                 self.resetData()
             elif bool(ac.isCarInPitline(0)) or bool(ac.isCarInPit(0)):
                 self.resetData() 
