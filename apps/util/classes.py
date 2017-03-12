@@ -3,6 +3,8 @@ import ac
 import math
 import configparser
 import ctypes
+import os.path
+import json
 from apps.util.func import rgb
 
 
@@ -112,6 +114,8 @@ class Colors:
 	theme_green=-1
 	theme_blue=-1
 	theme_highlight=-1
+	dataCarsClasses=[]
+	carsClassesLoaded=False
 	@staticmethod
 	def theme(bg = False, reload = False):
 		#get theme color
@@ -140,6 +144,32 @@ class Colors:
 		if Colors.theme_highlight == 1:
 			return Colors.green(bg = bg)
 		return Colors.red(bg = bg)
+	
+	@staticmethod
+	def loadCarClasses():
+		Colors.dataCarsClasses=[]
+		loadedCars=[]
+		for i in range(ac.getCarsCount()):
+			carName=ac.getCarName(i)
+			if not carName in loadedCars:
+				loadedCars.append(carName)
+				filePath = "content/cars/"+ carName  + "/ui/ui_car.json"
+				if os.path.exists(filePath):
+					with open(filePath) as data_file:
+						d=data_file.read().replace('\r', '').replace('\n', '').replace('\t', '')
+						data = json.loads(d)
+						for t in data["tags"]:
+							if t[0]=="#":  
+								Colors.dataCarsClasses.append({"c" : carName, "t" : t[1:].lower()})
+		Colors.carsClassesLoaded=True
+	
+	@staticmethod
+	def getClassForCar(car):
+		for c in Colors.dataCarsClasses:
+			if c["c"]==car:
+				return c["t"]
+		return False
+		    
 	@staticmethod
 	def bmw():
 		#return rgb([42, 101, 198], bg = True)
@@ -200,9 +230,76 @@ class Colors:
 	@staticmethod
 	def orange(bg = False):
 		return rgb([250, 88, 0], bg = bg)
+	@staticmethod
+	def lmp1():
+		return rgb([205, 0, 0], bg = True)
+	@staticmethod
+	def gte():
+		return rgb([0, 150, 54], bg = True)
+	@staticmethod
+	def suv():
+		return rgb([10, 10, 10], bg = True)
+	@staticmethod
+	def hypercars():
+		return rgb([240, 212, 0], bg = True)
+	@staticmethod
+	def hypercarsR():
+		return rgb([67, 165, 0], bg = True)
+	@staticmethod
+	def supercars():
+		return rgb([54, 212, 181], bg = True)
 	
 	@staticmethod
-	def colorFromCar(car):
+	def colorFromCar(car,byclass=False):
+		if byclass:
+			if not Colors.carsClassesLoaded:
+				Colors.loadCarClasses()
+			cl = Colors.getClassForCar(car)
+			if cl != False:
+				tt=1
+				if cl == 'lmp1':
+					return Colors.lmp1()
+				if cl == 'lmp3':
+					return Colors.nissan()
+				if cl == 'proto c':
+					return Colors.ford()
+				if cl == 'gte-gt3':
+					return Colors.gte()
+				if cl == 'gt4':
+					return Colors.ktm()
+				if cl == 'suv':
+					return Colors.suv()
+				if cl == 'hypercars':
+					return Colors.hypercars()
+				if cl == 'hypercars r':
+					return Colors.hypercarsR()
+				if cl == 'supercars':
+					return Colors.supercars()
+				if cl == 'sportscars':
+					return rgb([214, 112, 157], bg = True)
+				'''
+				Vintage Supercars
+				Vintage GT
+				Vintage Touring
+				drift
+				small sports
+				90s touring
+				
+				458challenge
+				500AbarthAC
+				Maserati250F
+				Maserati250FT2
+				global cup
+				Porsche Cup
+				Lotus25
+				Lotus49
+				Lotus72D
+				Lotus98T
+				Lotus125
+				Lotus125S1
+				Fabarth
+				'''
+		
 		if car.find("ferrari")>=0:
 			return Colors.ferrari()
 		if car.find("bmw")>=0:

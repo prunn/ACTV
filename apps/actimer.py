@@ -26,6 +26,7 @@ class ACTimer:
 		self.hasExtraLap=-1
 		self.numberOfLapsTimedRace=-1
 		self.rowHeight=36
+		self.trackName=""
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
 		
 		self.lbl_session_info=Label(self.window.app,"Loading").setSize(154, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(26).setAlign("center").setBgColor(rgb([55, 55, 55], bg = True)).setBgOpacity(0.64)
@@ -42,20 +43,19 @@ class ACTimer:
 		if os.path.exists(trackFilePath):
 			with open(trackFilePath) as data_file:    
 				data = json.load(data_file)			
-			self.trackName = data["name"]
-			
-			if len(self.trackName) > 12:	
-				if self.trackName[12] == " " or self.trackName[12] == "-":
-					self.trackName = self.trackName[:12]
-				else:
-					self.trackName = self.trackName[:12]
-					#cut multiword
-					space = self.trackName.rfind(" ")
-					dash = self.trackName.rfind("-")
-					if space > 0:
-						self.trackName = self.trackName[:space]
-					elif dash > 0:
-						self.trackName = self.trackName[:dash]
+				self.trackName = data["name"]
+				if len(self.trackName) > 12:	
+					if self.trackName[12] == " " or self.trackName[12] == "-":
+						self.trackName = self.trackName[:12]
+					else:
+						self.trackName = self.trackName[:12]
+						#cut multiword
+						space = self.trackName.rfind(" ")
+						dash = self.trackName.rfind("-")
+						if space > 0:
+							self.trackName = self.trackName[:space]
+						elif dash > 0:
+							self.trackName = self.trackName[:dash]
 			
 		else:
 			self.trackName = ac.getTrackName(0)

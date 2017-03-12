@@ -256,9 +256,11 @@ class Driver:
         if self.isLapLabel:
             self.lbl_name.setText(strOffset+self.fullName.value)
         else:
-            self.lbl_name.setText(strOffset+self.format_name_tlc(self.fullName.value))        
-            #car = ac.getCarName(self.identifier) 
-            self.lbl_border.setBgColor(Colors.colorFromCar(self.carName)).setBgOpacity(0.7)
+            self.lbl_name.setText(strOffset+self.format_name_tlc(self.fullName.value))
+            self.setBorder()
+            
+    def setBorder(self):
+        self.lbl_border.setBgColor(Colors.colorFromCar(self.carName,ACTower.colorsByClass)).setBgOpacity(0.7)
     
     def showFullName(self):
         strOffset = " "
@@ -465,7 +467,7 @@ class Driver:
 
         
 class ACTower:
-
+    colorsByClass = False
     # INITIALIZATION
     def __init__(self): 
         self.rowHeight=36
@@ -525,9 +527,15 @@ class ACTower:
         self.race_mode.setValue(cfg.get("SETTINGS", "race_mode", "int"))
         self.qual_mode.setValue(cfg.get("SETTINGS", "qual_mode", "int")) 
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
+        if cfg.get("SETTINGS", "car_colors_by", "int") == 1:
+            self.__class__.colorsByClass = True
+        else:
+            self.__class__.colorsByClass = False
         if self.ui_row_height.hasChanged():
             self.reDrawSize()
         Colors.highlight(reload = True)
+        for driver in self.drivers:
+            driver.setBorder()
             
     def reDrawSize(self):
         self.rowHeight=self.ui_row_height.value
@@ -538,6 +546,7 @@ class ACTower:
         self.lbl_title_stint.setSize(self.rowHeight*6, height-2).setPos(0, self.rowHeight*4 - (height-2)).setFontSize(fontSize2)
         for driver in self.drivers:
             driver.reDrawSize(self.rowHeight)
+            driver.setBorder()
         for lbl in self.stintLabels:
             lbl.reDrawSize(self.rowHeight)
          
@@ -1080,7 +1089,7 @@ class ACTower:
                         #or lapcount changed and leader finished
                         if driver.finished.hasChanged() and driver.finished.value: 
                             #and (driver.race_standings_sector.value >= self.numberOfLaps or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
-                            driver.race_standings_sector.setValue(driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish)/100)
+                            driver.race_standings_sector.setValue(driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish)/1000)
                             self.numCarsToFinish+=1
                             #driver.finished=True
                         elif not driver.finished.value:                  

@@ -40,6 +40,7 @@ class ACInfo:
         self.lapCanBeInvalidated=True
         self.fastestLapBorderActive = False
         self.firstLapStarted=False
+        self.colorsByClass=Value(False)
         self.minLapCount=1
         self.sectorCount=-1
         self.lapTimesArray = []
@@ -74,7 +75,7 @@ class ACInfo:
         self.info_position=Label(self.window.app,"0").setSize(self.rowHeight, self.rowHeight).setPos(0, 0).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(1).setVisible(0)
         self.info_position_lead=Label(self.window.app,"1").setSize(self.rowHeight, self.rowHeight).setPos(246, self.rowHeight).setFontSize(26).setAlign("center").setBgColor(Colors.red(bg = True)).setBgOpacity(1).setVisible(0)
         car = ac.getCarName(0)        
-        self.lbl_border=Label(self.window.app,"").setSize(284, 1).setPos(0, self.rowHeight).setBgColor(Colors.colorFromCar(car)).setBgOpacity(0.7).setVisible(0)
+        self.lbl_border=Label(self.window.app,"").setSize(284, 1).setPos(0, self.rowHeight).setBgColor(Colors.colorFromCar(car,self.colorsByClass.value)).setBgOpacity(0.7).setVisible(0)
         self.loadCFG()
         self.info_position.setAnimationSpeed("o", 0.1)
         self.info_position_lead.setAnimationSpeed("o", 0.1)
@@ -90,6 +91,10 @@ class ACInfo:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
+        if cfg.get("SETTINGS", "car_colors_by", "int") == 1:
+            self.colorsByClass.setValue(True)
+        else:
+            self.colorsByClass.setValue(False)
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int")) 
         if self.ui_row_height.hasChanged():
             self.reDrawSize()
@@ -337,11 +342,14 @@ class ACInfo:
         
                             
         currentVehiculeChanged=self.currentVehicule.hasChanged()
+        if self.colorsByClass.hasChanged() and not self.fastestLapBorderActive:
+            car = ac.getCarName(self.currentVehicule.value)        
+            self.lbl_border.setBgColor(Colors.colorFromCar(car,self.colorsByClass.value)) 
                     
         if currentVehiculeChanged or (self.fastestLapBorderActive and sessionTimeLeft < self.visible_end-2000):
             self.fastestLapBorderActive = False
             car = ac.getCarName(self.currentVehicule.value)        
-            self.lbl_border.setBgColor(Colors.colorFromCar(car))           
+            self.lbl_border.setBgColor(Colors.colorFromCar(car,self.colorsByClass.value))           
             
         if sim_info_status == 2:
             #LIVE
@@ -593,7 +601,7 @@ class ACInfo:
                 if self.race_fastest_lap.hasChanged() and self.race_fastest_lap.value > 0:
                     self.fastestLapBorderActive = True
                     car = ac.getCarName(self.race_fastest_lap_driver.value)        
-                    self.lbl_border.setBgColor(Colors.colorFromCar(car))            
+                    self.lbl_border.setBgColor(Colors.colorFromCar(car,self.colorsByClass.value))            
                     self.visible_end = sessionTimeLeft - 8000
                     self.lbl_driver_name_visible.setValue(1)
                     self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.race_fastest_lap_driver.value)))
