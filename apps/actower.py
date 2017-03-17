@@ -488,6 +488,7 @@ class ACTower:
         self.drivers_inited=False
         self.force_hidden=False
         self.pitBoxMode=False
+        self.raceStarted=False
         self.leader_time=0
         self.tick=0  
         self.tick_race_mode=0
@@ -986,6 +987,7 @@ class ACTower:
             self.cursor.setValue(False)
         sessionChanged = self.session.hasChanged() 
         if sessionChanged:
+            self.raceStarted=False
             self.curDriverLaps=[]
             self.stint_visible_end=0
             for driver in self.drivers:
@@ -1077,25 +1079,29 @@ class ACTower:
                 completed=0
                 standings = []
                 #new standings
-                for driver in self.drivers:
-                    c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
-                    driver.completedLaps.setValue(c) 
-                    driver.completedLapsChanged=driver.completedLaps.hasChanged()
-                    driver.finished.setValue(ac.getCarState(driver.identifier,acsys.CS.RaceFinished)==1)
-                    if c > completed:
-                        completed=c
-                    driver.raceProgress=c + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
-                    if self.sectorIsValid(driver.raceProgress,driver):
-                        #or lapcount changed and leader finished
-                        if driver.finished.hasChanged() and driver.finished.value: 
-                            #and (driver.race_standings_sector.value >= self.numberOfLaps or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
-                            driver.race_standings_sector.setValue(driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish)/1000)
-                            self.numCarsToFinish+=1
-                            #driver.finished=True
-                        elif not driver.finished.value:                  
-                            driver.race_standings_sector.setValue(driver.raceProgress)                            
-                    if driver.race_standings_sector.value > 0:
-                        standings.append((driver.identifier,driver.race_standings_sector.value))     
+                #iTime < 10 lap=0 dont loop direct to backup standings
+                if not self.raceStarted and not (sim_info.graphics.iCurrentTime <= 12000 and sim_info.graphics.completedLaps == 0):
+                    self.raceStarted=True
+                if self.raceStarted:# 
+                    for driver in self.drivers:
+                        c = ac.getCarState(driver.identifier,acsys.CS.LapCount)
+                        driver.completedLaps.setValue(c) 
+                        driver.completedLapsChanged=driver.completedLaps.hasChanged()
+                        driver.finished.setValue(ac.getCarState(driver.identifier,acsys.CS.RaceFinished)==1)
+                        if c > completed:
+                            completed=c
+                        driver.raceProgress=c + ac.getCarState(driver.identifier,acsys.CS.NormalizedSplinePosition)                    
+                        if self.sectorIsValid(driver.raceProgress,driver):
+                            #or lapcount changed and leader finished
+                            if driver.finished.hasChanged() and driver.finished.value: 
+                                #and (driver.race_standings_sector.value >= self.numberOfLaps or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
+                                driver.race_standings_sector.setValue(driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish)/1000)
+                                self.numCarsToFinish+=1
+                                #driver.finished=True
+                            elif not driver.finished.value:                  
+                                driver.race_standings_sector.setValue(driver.raceProgress)                            
+                        if driver.race_standings_sector.value > 0:
+                            standings.append((driver.identifier,driver.race_standings_sector.value))     
                        
                 
                 self.lapsCompleted.setValue(completed) 

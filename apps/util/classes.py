@@ -236,18 +236,6 @@ class Colors:
 	@staticmethod
 	def gte():
 		return rgb([0, 150, 54], bg = True)
-	@staticmethod
-	def suv():
-		return rgb([10, 10, 10], bg = True)
-	@staticmethod
-	def hypercars():
-		return rgb([240, 212, 0], bg = True)
-	@staticmethod
-	def hypercarsR():
-		return rgb([67, 165, 0], bg = True)
-	@staticmethod
-	def supercars():
-		return rgb([54, 212, 181], bg = True)
 	
 	@staticmethod
 	def colorFromCar(car,byclass=False):
@@ -262,24 +250,26 @@ class Colors:
 				if cl == 'lmp3':
 					return Colors.nissan()
 				if cl == 'proto c':
-					return Colors.ford()
+					return rgb([11, 60, 136], bg = True)#blue plus fonce
 				if cl == 'gte-gt3':
 					return Colors.gte()
 				if cl == 'gt4':
 					return Colors.ktm()
 				if cl == 'suv':
-					return Colors.suv()
+					return rgb([10, 10, 10], bg = True)
 				if cl == 'hypercars':
-					return Colors.hypercars()
+					return rgb([240, 212, 0], bg = True)
 				if cl == 'hypercars r':
-					return Colors.hypercarsR()
+					return Colors.lamborghini()
 				if cl == 'supercars':
-					return Colors.supercars()
+					return rgb([97, 168, 219], bg = True)
 				if cl == 'sportscars':
+					return Colors.mercedes()
+				if cl == 'vintage Supercars':
 					return rgb([214, 112, 157], bg = True)
+				if cl == 'vintage gt':
+					return rgb([98, 203, 236], bg = True)#gulf
 				'''
-				Vintage Supercars
-				Vintage GT
 				Vintage Touring
 				drift
 				small sports
