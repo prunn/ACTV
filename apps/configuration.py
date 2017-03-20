@@ -12,6 +12,7 @@ class Configuration:
     race_mode=0
     qual_mode=0
     lapCanBeInvalidated=1
+    forceInfoVisible=0
     max_num_cars=18 
     max_num_laps_stint=8
     ui_row_height=36
@@ -37,7 +38,7 @@ class Configuration:
         ac.addOnValueChangeListener(self.spin_race_mode, self.onSpinRaceModeChanged) 
         self.lbl_race_mode = Label(self.window.app,"Auto").setSize(120, 26).setPos(186, y-28).setFontSize(12).setAlign("left").setVisible(1) 
         
-        y+=80
+        y+=70
         self.spin_qual_mode = ac.addSpinner(self.window.app, "Qual tower mode :")
         ac.setRange(self.spin_qual_mode, 0,1)
         ac.setPosition(self.spin_qual_mode,20,y)
@@ -45,32 +46,38 @@ class Configuration:
         ac.addOnValueChangeListener(self.spin_qual_mode, self.onSpinQualModeChanged) 
         self.lbl_qual_mode = Label(self.window.app,"Gaps").setSize(120, 26).setPos(186, y-28).setFontSize(12).setAlign("left").setVisible(1)       
           
-        y+=80  
+        y+=70  
         self.spin_num_cars = ac.addSpinner(self.window.app, "Number cars tower")
         ac.setRange(self.spin_num_cars, 6,28)
         ac.setPosition(self.spin_num_cars,20,y)
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.addOnValueChangeListener(self.spin_num_cars, self.onSpinNumCarsChanged)          
         
-        y+=80
+        y+=70
         self.spin_num_laps = ac.addSpinner(self.window.app, "Number laps stint mode")
         ac.setRange(self.spin_num_laps, 2,28)
         ac.setPosition(self.spin_num_laps,20,y)
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
         ac.addOnValueChangeListener(self.spin_num_laps, self.onSpinNumLapsChanged)   
         
-        y+=80 
+        y+=70 
         self.spin_row_height = ac.addSpinner(self.window.app, "Row height")
         ac.setRange(self.spin_row_height, 20,48)
         ac.setPosition(self.spin_row_height,20,y)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.addOnValueChangeListener(self.spin_row_height, self.onSpinRowHeightChanged)       
         
-        y+=60
+        y+=52
         self.chk_invalidated = ac.addCheckBox(self.window.app, "")
         ac.setPosition(self.chk_invalidated,20,y)
         ac.addOnCheckBoxChanged(self.chk_invalidated, self.onCheckInvalidatedChanged)
         self.lbl_title_invalidated = Label(self.window.app,"Lap can be invalidated").setSize(200, 26).setPos(65, y+1).setFontSize(16).setAlign("left").setVisible(1)
+        
+        y+=36
+        self.chk_force_info = ac.addCheckBox(self.window.app, "")
+        ac.setPosition(self.chk_force_info,20,y)
+        ac.addOnCheckBoxChanged(self.chk_force_info, self.onCheckForceInfoChanged)
+        self.lbl_title_force_info = Label(self.window.app,"Info always visible").setSize(200, 26).setPos(65, y+1).setFontSize(16).setAlign("left").setVisible(1)
         
         #RGB
         y=60
@@ -79,13 +86,13 @@ class Configuration:
         ac.setPosition(self.spin_theme_red,20,y)
         ac.setValue(self.spin_theme_red, self.__class__.theme_red)
         ac.addOnValueChangeListener(self.spin_theme_red, self.onRedChanged) 
-        y+=80
+        y+=70
         self.spin_theme_green = ac.addSpinner(self.window.app, "Green")
         ac.setRange(self.spin_theme_green, 0,255)
         ac.setPosition(self.spin_theme_green,20,y)
         ac.setValue(self.spin_theme_green, self.__class__.theme_green)
         ac.addOnValueChangeListener(self.spin_theme_green, self.onGreenChanged) 
-        y+=80
+        y+=70
         self.spin_theme_blue = ac.addSpinner(self.window.app, "Blue")
         ac.setRange(self.spin_theme_blue, 0,255)
         ac.setPosition(self.spin_theme_blue,20,y)
@@ -95,7 +102,7 @@ class Configuration:
         ac.setVisible(self.spin_theme_green, 0)
         ac.setVisible(self.spin_theme_blue, 0)
         
-        y+=80  
+        y+=70  
         self.spin_tower_lap = ac.addSpinner(self.window.app, "Tower Highlight :")
         ac.setRange(self.spin_tower_lap, 0,1)
         ac.setPosition(self.spin_tower_lap,20,y)
@@ -105,7 +112,7 @@ class Configuration:
         self.lbl_tower_lap = Label(self.window.app,"Red").setSize(120, 26).setPos(186, y-28).setFontSize(12).setAlign("left").setVisible(0) 
         
         #byClass
-        y+=80  
+        y+=70  
         self.spin_colors_by = ac.addSpinner(self.window.app, "Car colors by :")
         ac.setRange(self.spin_colors_by, 0,1)
         ac.setPosition(self.spin_colors_by,20,y)
@@ -131,6 +138,9 @@ class Configuration:
         self.__class__.lapCanBeInvalidated = self.cfg.get("SETTINGS", "lap_can_be_invalidated", "int") 
         if self.__class__.lapCanBeInvalidated == -1:
             self.__class__.lapCanBeInvalidated=1
+        self.__class__.forceInfoVisible = self.cfg.get("SETTINGS", "force_info_visible", "int") 
+        if self.__class__.forceInfoVisible == -1:
+            self.__class__.forceInfoVisible=0
         self.__class__.max_num_cars = self.cfg.get("SETTINGS", "num_cars_tower", "int") 
         if self.__class__.max_num_cars == -1:
             self.__class__.max_num_cars=18
@@ -169,6 +179,7 @@ class Configuration:
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.setValue(self.chk_invalidated,self.__class__.lapCanBeInvalidated)
+        ac.setValue(self.chk_force_info,self.__class__.forceInfoVisible)
         ac.setValue(self.spin_theme_red, self.__class__.theme_red)
         ac.setValue(self.spin_theme_green, self.__class__.theme_green)
         ac.setValue(self.spin_theme_blue, self.__class__.theme_blue)
@@ -188,6 +199,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "race_mode", self.__class__.race_mode)   
         self.cfg.set("SETTINGS", "qual_mode", self.__class__.qual_mode) 
         self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)
+        self.cfg.set("SETTINGS", "force_info_visible", self.__class__.forceInfoVisible)
         self.cfg.set("SETTINGS", "num_cars_tower", self.__class__.max_num_cars)    
         self.cfg.set("SETTINGS", "num_laps_stint", self.__class__.max_num_laps_stint) 
         self.cfg.set("SETTINGS", "ui_row_height", self.__class__.ui_row_height) 
@@ -240,7 +252,9 @@ class Configuration:
             ac.setVisible(self.spin_num_laps, 1)
             ac.setVisible(self.spin_row_height, 1)
             ac.setVisible(self.chk_invalidated, 1)
+            ac.setVisible(self.chk_force_info, 1)
             self.lbl_title_invalidated.setVisible(1)
+            self.lbl_title_force_info.setVisible(1)
             self.lbl_race_mode.setVisible(1)
             self.lbl_qual_mode.setVisible(1)
         else:
@@ -259,7 +273,9 @@ class Configuration:
             ac.setVisible(self.spin_num_laps, 0)
             ac.setVisible(self.spin_row_height, 0)
             ac.setVisible(self.chk_invalidated, 0)
+            ac.setVisible(self.chk_force_info, 0)
             self.lbl_title_invalidated.setVisible(0)
+            self.lbl_title_force_info.setVisible(0)
             self.lbl_race_mode.setVisible(0) 
             self.lbl_qual_mode.setVisible(0) 
                         
@@ -311,6 +327,11 @@ class Configuration:
     @staticmethod
     def onCheckInvalidatedChanged(name, state): 
         Configuration.lapCanBeInvalidated = state
+        Configuration.configChanged=True
+        
+    @staticmethod
+    def onCheckForceInfoChanged(name, state): 
+        Configuration.forceInfoVisible = state
         Configuration.configChanged=True
         
     @staticmethod

@@ -40,6 +40,7 @@ class ACInfo:
         self.lapCanBeInvalidated=True
         self.fastestLapBorderActive = False
         self.firstLapStarted=False
+        self.forceViewAlways=False
         self.colorsByClass=Value(False)
         self.minLapCount=1
         self.sectorCount=-1
@@ -91,6 +92,10 @@ class ACInfo:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
+        if cfg.get("SETTINGS", "force_info_visible", "int") == 1:
+            self.forceViewAlways = True
+        else:
+            self.forceViewAlways = False
         if cfg.get("SETTINGS", "car_colors_by", "int") == 1:
             self.colorsByClass.setValue(True)
         else:
@@ -611,10 +616,12 @@ class ACInfo:
                     self.info_position.hide() 
                     self.lbl_fastest_split.setText(self.time_splitting(self.race_fastest_lap.value,"yes")).showText()
                     
-                elif currentVehiculeChanged:  
-                    #driver info                  
-                    self.visible_end = sessionTimeLeft - 8000
+                elif currentVehiculeChanged or (self.forceViewAlways and not self.fastestLapBorderActive):  
+                    #driver info   
+                    if not self.forceViewAlways:             
+                        self.visible_end = sessionTimeLeft - 8000
                     self.lbl_driver_name_visible.setValue(1)
+                    #if currentVehiculeChanged:
                     self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.currentVehicule.value)))
                     self.nameOffset=self.rowHeight*49/36 #49
                     #pos = ac.getCarLeaderboardPosition(self.currentVehicule.value)

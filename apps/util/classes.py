@@ -250,7 +250,7 @@ class Colors:
 				if cl == 'lmp3':
 					return Colors.nissan()
 				if cl == 'proto c':
-					return rgb([11, 60, 136], bg = True)#blue plus fonce
+					return rgb([0, 86, 198], bg = True)#blue
 				if cl == 'gte-gt3':
 					return Colors.gte()
 				if cl == 'gt4':
@@ -265,29 +265,15 @@ class Colors:
 					return rgb([97, 168, 219], bg = True)
 				if cl == 'sportscars':
 					return Colors.mercedes()
-				if cl == 'vintage Supercars':
+				if cl == 'vintage supercars':
 					return rgb([214, 112, 157], bg = True)
 				if cl == 'vintage gt':
-					return rgb([98, 203, 236], bg = True)#gulf
+					return rgb([98, 203, 236], bg = True)
+				if cl == 'vintage touring':
+					return Colors.alfa()
 				'''
-				Vintage Touring
-				drift
 				small sports
 				90s touring
-				
-				458challenge
-				500AbarthAC
-				Maserati250F
-				Maserati250FT2
-				global cup
-				Porsche Cup
-				Lotus25
-				Lotus49
-				Lotus72D
-				Lotus98T
-				Lotus125
-				Lotus125S1
-				Fabarth
 				'''
 		
 		if car.find("ferrari")>=0:

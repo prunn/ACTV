@@ -62,6 +62,7 @@ class Driver:
         self.isAlive = False
         self.pitBoxMode=False
         self.movingUp=False
+        self.isCurrentVehicule=Value(False)
         self.isLapLabel = isLapLabel
         self.qual_mode = Value(0)
         self.race_gaps = []
@@ -348,13 +349,15 @@ class Driver:
             
         self.position.setValue(position)
         self.position_offset.setValue(offset)
-        if self.position.hasChanged() or self.position_offset.hasChanged():
-            if self.position.value < self.position.old:
-                self.movingUp=True
-            else:
-                self.movingUp=False
-            if self.position.old > 0:
-                self.position_highlight_end = True
+        position_changed=self.position.hasChanged()
+        if position_changed or self.position_offset.hasChanged() or self.isCurrentVehicule.hasChanged():
+            if position_changed:
+                if self.position.value < self.position.old:
+                    self.movingUp=True
+                else:
+                    self.movingUp=False
+                if self.position.old > 0:
+                    self.position_highlight_end = True
             #move labels
             self.num_pos=position-1-offset
             self.final_y=self.num_pos*self.rowHeight
@@ -383,28 +386,28 @@ class Driver:
                 self.lbl_name.setBgOpacity(0.72)          
                 if position==1:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.red(bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
+                        self.lbl_position.setBgColor(Colors.red(bg = True),True).setColor(Colors.white(),True).setBgOpacity(0.72)
                     self.lbl_time.setText(self.format_time(self.time.value))
-                elif battles and self.identifier == 0:
+                elif battles and self.isCurrentVehicule.value:#(self.identifier == 0 or )
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.72)
+                        self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red(),True).setBgOpacity(0.72)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True)).setColor(Colors.white()).setBgOpacity(0.72)
+                        self.lbl_position.setBgColor(rgb([12, 12, 12], bg = True),True).setColor(Colors.white(),True).setBgOpacity(0.72)
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
                         self.lbl_time.setText("+"+self.format_time(self.gap.value))
             else:
                 self.lbl_name.setBgOpacity(0.58)
-                if battles and self.identifier == 0:
+                if battles and self.isCurrentVehicule.value:#(self.identifier == 0 or) 
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.white(bg = True)).setColor(Colors.red()).setBgOpacity(0.68)
+                        self.lbl_position.setBgColor(Colors.white(bg = True),True).setColor(Colors.red(),True).setBgOpacity(0.68)
                     self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True)).setColor(Colors.white()).setBgOpacity(0.58)
+                        self.lbl_position.setBgColor(rgb([0, 0, 0], bg = True),True).setColor(Colors.white(),True).setBgOpacity(0.58)
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
@@ -441,6 +444,8 @@ class Driver:
         h,m=divmod(m,60) 
         #d,h=divmod(h,24) 
         d=ms % 1000
+        if math.isnan(s) or math.isnan(d) or math.isnan(m) or math.isnan(h):
+            return ""
         if h > 0:
             return "{0}:{1}:{2}.{3}".format(int(h), str(int(m)).zfill(2), str(int(s)).zfill(2), str(int(d)).zfill(3))
         elif m > 0:  
@@ -772,10 +777,13 @@ class ACTower:
             if driver.race_current_sector.hasChanged():
                 driver.race_gaps.append(raceGaps(driver.race_current_sector.value, self.sessionTimeLeft))
             if driver.identifier == self.currentVehicule.value:
+                driver.isCurrentVehicule.setValue(True)
                 cur_driver=driver
                 cur_sector=driver.race_current_sector.value
                 if len(p) > 0:
                     cur_driver_pos=p[0]+1 
+            else:
+                driver.isCurrentVehicule.setValue(False)
         driverShown=0
         driverShownMaxGap=0
         maxGap=2500
