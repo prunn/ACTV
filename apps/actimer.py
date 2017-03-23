@@ -17,14 +17,18 @@ class ACTimer:
 		self.replay_asc = False
 		self.replay_rgb=255
 		self.session=Value()
-		self.cursor=Value()
-		self.cursor.setValue(False)
-		self.session_draw=Value()
-		self.session_draw.setValue(-1)
+		self.cursor=Value(False)
+		self.session_draw=Value(-1)
 		self.ui_row_height = Value(-1)
 		self.numberOfLaps=-1
 		self.hasExtraLap=-1
 		self.numberOfLapsTimedRace=-1
+		self.sessionMaxTime=-1
+		self.pitWindowVisibleEnd=0
+		self.pitWindowStart=-1
+		self.pitWindowEnd=-1
+		self.pitWindowActive=False
+		self.numberOfLapsCompleted = Value(0)
 		self.rowHeight=36
 		self.trackName=""
 		self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
@@ -161,6 +165,11 @@ class ACTimer:
 			self.numberOfLapsTimedRace=-1
 			self.hasExtraLap=-1
 			self.numberOfLaps=-1
+			self.pitWindowStart=-1
+			self.pitWindowEnd=-1
+			self.sessionMaxTime=-1
+			self.pitWindowVisibleEnd=0
+			self.pitWindowActive=False
 			if self.cursor.value:
 				self.window.setBgOpacity(0.4).border(0)  
 			else:   
@@ -228,7 +237,34 @@ class ACTimer:
 					self.hasExtraLap=sim_info.static.hasExtraLap
 				if self.hasExtraLap == 1 and sessionTimeLeft < 0 and self.numberOfLapsTimedRace < 0:
 					self.numberOfLapsTimedRace = completed + 1
+				
+				#PitWindow
+				if self.pitWindowStart < 0:
+					self.pitWindowStart=sim_info.static.PitWindowStart
+					self.pitWindowEnd=sim_info.static.PitWindowEnd
+				if self.numberOfLaps > 0:
+					self.numberOfLapsCompleted.setValue(completed)
+					if self.numberOfLapsCompleted.hasChanged():
+						if self.numberOfLapsCompleted.value == self.pitWindowStart:
+							self.pitWindowVisibleEnd=sessionTimeLeft - 10000
+							self.pitWindowActive=True
+						elif self.numberOfLapsCompleted.value == self.pitWindowEnd:
+							self.pitWindowVisibleEnd=sessionTimeLeft - 10000
+							self.pitWindowActive=False
+				else:
+					if self.sessionMaxTime < 0:
+						self.sessionMaxTime=round(sessionTimeLeft,-3)
+					if not self.pitWindowActive and sessionTimeLeft <= self.sessionMaxTime - self.pitWindowStart*60*1000 and sessionTimeLeft >= self.sessionMaxTime - self.pitWindowEnd*60*1000:
+						self.pitWindowVisibleEnd=sessionTimeLeft - 10000
+						self.pitWindowActive=True
+					elif self.pitWindowActive and sessionTimeLeft < self.sessionMaxTime - self.pitWindowEnd*60*1000:
+						self.pitWindowVisibleEnd=sessionTimeLeft - 10000
+						self.pitWindowActive=False
+					
 				if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0: 
+					self.pitWindowVisibleEnd=0
+					self.pitWindowActive=False
+					self.sessionMaxTime=round(sessionTimeLeft,-3)
 					if self.finish_initialised:
 						self.destoy_finish()
 					self.lbl_session_info.setVisible(0)
@@ -239,6 +275,15 @@ class ACTimer:
 				elif raceFinished > 0: #elif self.numberOfLaps > 0 and completed > self.numberOfLaps:
 					if not self.finish_initialised:
 						self.init_finish()
+				elif self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < sessionTimeLeft:
+					self.lbl_session_info.setVisible(0)
+					self.lbl_session_title.setVisible(0)
+					self.lbl_session_single.setVisible(1)
+					self.lbl_session_border.setVisible(1)
+					if self.pitWindowActive:
+						self.lbl_session_single.setText("Pits open")
+					else:
+						self.lbl_session_single.setText("Pits closed")
 				elif completed == self.numberOfLaps or (self.numberOfLaps == 0 and self.hasExtraLap == 0 and sessionTimeLeft < 0) or (self.hasExtraLap == 1 and completed == self.numberOfLapsTimedRace):
 					if self.finish_initialised:
 						self.destoy_finish()

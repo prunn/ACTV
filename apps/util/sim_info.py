@@ -148,7 +148,8 @@ class SPageFileGraphic(ctypes.Structure):
         ('flag', AC_FLAG_TYPE),
         ('idealLineOn', c_int32),
         ('isInPitLine', c_int32),
-        ('surfaceGrip', c_float)
+        ('surfaceGrip', c_float),
+        ('MandatoryPitDone', c_int32)
     ]
 
 
@@ -194,7 +195,11 @@ class SPageFileStatic(ctypes.Structure):
         ('trackConfiguration', c_wchar * 33),
         ('ersMaxJ', c_float),
         ('isTimedRace', c_int32),
-        ('hasExtraLap', c_int32)
+        ('hasExtraLap', c_int32),
+        ('carSkin', c_wchar * 33),
+        ('reversedGridPositions', c_int32),
+        ('PitWindowStart', c_int32),
+        ('PitWindowEnd', c_int32)
     ]
 
 
