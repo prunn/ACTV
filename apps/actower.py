@@ -272,7 +272,10 @@ class Driver:
         else:
             self.lbl_name.setText(strOffset+self.format_last_name(self.fullName.value))
             
-    def setTime(self,time,leader,session_time,mode):
+    def setTime(self, time, leader, session_time, mode):
+        if self.highlight.value:
+            if mode == 0:
+                mode = 1
         self.qual_mode.setValue(mode)
         self.time.setValue(time)
         self.gap.setValue(time-leader)
@@ -510,13 +513,17 @@ class ACTower:
         self.minLapCount=1
         self.curLapCount=Value()
         self.stint_visible_end=0
+        self.title_mode_visible_end=0
         self.curDriverLaps=[]
         self.lastLapInvalidated=-1
         self.minlap_stint = 5
         self.iLastTime=Value()
         self.lbl_title_stint = Label(self.window.app,"Current Stint").setSize(self.rowHeight*6, self.rowHeight-4).setPos(0, self.rowHeight*4 - self.rowHeight-6).setFontSize(23).setAlign("center").setBgColor(rgb([12, 12, 12], bg = True)).setBgOpacity(0.8).setVisible(0)
         self.lbl_tire_stint = Label(self.window.app,"").setSize(self.rowHeight*6, self.rowHeight).setPos(0, self.rowHeight*4 - (self.rowHeight-4)).setFontSize(24).setAlign("center").setBgColor(rgb([32, 32, 32], bg = True)).setBgOpacity(0.58).setVisible(0)
-        
+        self.lbl_title_mode = Label(self.window.app, "Mode")\
+            .setSize(self.rowHeight * 6,self.rowHeight - 4)\
+            .setPos(0, -(self.rowHeight - 4)).setFontSize(23).setAlign("center")\
+            .setBgColor(Colors.theme(bg=True)).setBgOpacity(0.8).setVisible(0)
         track=ac.getTrackName(0)
         config=ac.getTrackConfiguration(0)
         if track.find("ks_nordschleife")>=0 and config.find("touristenfahrten")>=0:
@@ -550,6 +557,7 @@ class ACTower:
         fontSize2=getFontSize(height-2)
         self.lbl_tire_stint.setSize(self.rowHeight*6, height).setPos(0, self.rowHeight).setFontSize(fontSize)
         self.lbl_title_stint.setSize(self.rowHeight*6, height-2).setPos(0, self.rowHeight*4 - (height-2)).setFontSize(fontSize2)
+        self.lbl_title_mode.setBgColor(Colors.theme(bg=True)).setSize(self.rowHeight*6, height-2).setPos(0,  -(height-2)).setFontSize(fontSize2)
         for driver in self.drivers:
             driver.reDrawSize(self.rowHeight)
             driver.setBorder()
@@ -560,11 +568,13 @@ class ACTower:
     def setFont(self,fontName):
         self.lbl_title_stint.setFont(fontName,0,0)
         self.lbl_tire_stint.setFont(fontName,0,0) 
+        self.lbl_title_mode.setFont(fontName,0,0)
         self.fontName=fontName
         
     def animate(self,sessionTimeLeft):
         self.lbl_title_stint.animate()
         self.lbl_tire_stint.animate()  
+        self.lbl_title_mode.animate()
         for driver in self.drivers:
             driver.animate(sessionTimeLeft)
         for lbl in self.stintLabels:
@@ -606,6 +616,16 @@ class ACTower:
             self.curDriverLaps=[]
             self.stint_visible_end=0
         #mode_changed = self.qual_mode.hasChanged()
+        if self.qual_mode.hasChanged():
+            if self.qual_mode.value == 0:
+                self.lbl_title_mode.setText("Gaps")
+            else:
+                self.lbl_title_mode.setText("Times")
+            self.title_mode_visible_end = self.sessionTimeLeft - 6000
+        if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
+            self.lbl_title_mode.show()
+        else:
+            self.lbl_title_mode.hide()
         #self.minlap_stint = 2255 #disabled for now
         if self.pitBoxMode:
             if self.lbl_title_stint.isVisible.value:
@@ -746,6 +766,18 @@ class ACTower:
         first_driver_sector=0
         cur_sector=0
         best_pos=0
+        if self.race_mode.hasChanged():
+            if self.race_mode.value == 0:
+                self.lbl_title_mode.setText("Auto")
+            elif self.race_mode.value == 1:
+                self.lbl_title_mode.setText("Full-Gaps")
+            else:
+                self.lbl_title_mode.setText("Full")
+            self.title_mode_visible_end = self.sessionTimeLeft - 6000
+        if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
+            self.lbl_title_mode.show()
+        else:
+            self.lbl_title_mode.hide()
         for driver in self.drivers:
             driver.isAlive=bool(ac.isConnected(driver.identifier))
             if driver.isAlive:
@@ -998,6 +1030,7 @@ class ACTower:
             self.raceStarted=False
             self.curDriverLaps=[]
             self.stint_visible_end=0
+            self.title_mode_visible_end = 0
             for driver in self.drivers:
                 driver.hide(True)
        
