@@ -18,11 +18,12 @@
 ******************************************************************************
 ***************************************************************************'''
 import ac
-import sys,traceback
+import sys
+import traceback
 import os
 import platform
 
-try:      
+try:
     if platform.architecture()[0] == "64bit":
         sysdir = "prunn_dll_x64"
     else:
@@ -46,50 +47,51 @@ except:
     for line in lines:               
         ac.log(line)
         
-timer=0
-info=0
-tower=0
-speed=0
-config=0
-delta=0
+timer = 0
+info = 0
+tower = 0
+speed = 0
+config = 0
+delta = 0
 
-timerInit=False
-infoInit=False
-towerInit=False
-speedInit=False
-configInit=False
-deltaInit=False
+timerInit = False
+infoInit = False
+towerInit = False
+speedInit = False
+configInit = False
+deltaInit = False
+
 
 def acMain(ac_version):
-    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit,delta,deltaInit
+    global timer, info, tower, speed, timerInit, infoInit, towerInit, speedInit, config, configInit, delta, deltaInit
     try:
-        config=Configuration()
-        configInit=True
+        config = Configuration()
+        configInit = True
     except:
         Log.w("Error init config") 
     try:
-        timer=ACTimer()
-        timerInit=True
+        timer = ACTimer()
+        timerInit = True
     except:
         Log.w("Error init timer")
     try:
-        info=ACInfo()
-        infoInit=True
+        info = ACInfo()
+        infoInit = True
     except:
         Log.w("Error init info")
     try:
-        tower=ACTower()
-        towerInit=True
+        tower = ACTower()
+        towerInit = True
     except:
         Log.w("Error init tower") 
     try:
-        speed=ACSpeedTrap()
-        speedInit=True
+        speed = ACSpeedTrap()
+        speedInit = True
     except:
         Log.w("Error init speedtrap")
     try:
-        delta=ACDelta()
-        deltaInit=True
+        delta = ACDelta()
+        deltaInit = True
     except:
         Log.w("Error init delta")
     '''
@@ -98,13 +100,13 @@ def acMain(ac_version):
         #fontName="Noto Sans UI Light"
         if ac.initFont(0,fontName,0,0) > 0:
             if timerInit:
-                timer.setFont(fontName)
+                timer.set_font(fontName)
             if infoInit:
-                info.setFont(fontName)
+                info.set_font(fontName)
             if towerInit:
-                tower.setFont(fontName)
+                tower.set_font(fontName)
             if speedInit:    
-                speed.setFont(fontName)
+                speed.set_font(fontName)
         else:
             ac.console("font init failed")
     except:
@@ -114,51 +116,49 @@ def acMain(ac_version):
 
 
 def acUpdate(deltaT):
-    global timer,info,tower,speed,timerInit,infoInit,towerInit,speedInit,config,configInit,delta,deltaInit
-    configChanged=False
-    fl=0
+    global timer, info, tower, speed, timerInit, infoInit, towerInit, speedInit, config, configInit, delta, deltaInit
+    fl = 0
     if configInit:     
         try:
-            configChanged = config.onUpdate(sim_info)
-            if configChanged:
+            config_changed = config.on_update(sim_info)
+            if config_changed:
                 if timerInit:
-                    timer.loadCFG()
+                    timer.load_cfg()
                 if infoInit:
-                    info.loadCFG()
+                    info.load_cfg()
                 if towerInit:
-                    tower.loadCFG()
+                    tower.load_cfg()
                 if speedInit:    
-                    speed.loadCFG()
+                    speed.load_cfg()
         except:
             Log.w("Error config")
     if timerInit:
         try:
-            timer.onUpdate(sim_info)
+            timer.on_update(sim_info)
         except:
             Log.w("Error timer")
     if towerInit:
         try:
-            tower.onUpdate(sim_info)
-            fl=tower.getFastestLap()
+            tower.on_update(sim_info)
+            fl = tower.get_fastest_lap()
         except:
             Log.w("Error tower")  
     if infoInit:
         try:
-            info.onUpdate(sim_info,fl)
+            info.on_update(sim_info, fl)
         except:
             Log.w("Error info")
     if speedInit:     
         try:
-            speed.onUpdate(sim_info)
+            speed.on_update(sim_info)
         except:
             Log.w("Error speedtrap")
     if deltaInit:     
         try:
-            delta.onUpdate(sim_info)
+            delta.on_update(sim_info)
         except:
             Log.w("Error delta")
-    
+
+
 def acShutdown():    
     ac.console("shutting down actv")
-
-    

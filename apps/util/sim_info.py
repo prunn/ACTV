@@ -53,6 +53,7 @@ AC_WHITE_FLAG = 4
 AC_CHECKERED_FLAG = 5
 AC_PENALTY_FLAG = 6
 
+
 class SPageFilePhysics(ctypes.Structure):
     _pack_ = 4
     _fields_ = [
