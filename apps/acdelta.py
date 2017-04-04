@@ -107,7 +107,7 @@ class ACDelta:
             track_file_path += "/" + ac.getTrackName(0)
         if ac.getTrackConfiguration(0) != "":
             track_file_path += "_" + ac.getTrackConfiguration(0)
-            track_file_path += "_" + ac.getCarName(0) + ".delta"
+        track_file_path += "_" + ac.getCarName(0) + ".delta"
         return track_file_path
     
     def save_delta(self):

@@ -54,6 +54,7 @@ class Driver:
         self.identifier = identifier
         self.rowHeight = row_height
         self.race = False
+        self.hasStartedRace = False
         self.inPitFromPitLane = False
         self.isInPitLane = Value(False)
         self.isInPitLaneOld = False
@@ -282,6 +283,7 @@ class Driver:
             self.bestLapServer = 0
             self.position_highlight_end = 0
             self.inPitFromPitLane = False
+            self.hasStartedRace = False
 
     def get_best_lap(self, lap=False):
         if lap:
@@ -862,6 +864,11 @@ class ACTower:
                     best_pos = p[0] + 1
             if driver.isInPitBox.value and not driver.finished.value and not driver.inPitFromPitLane:
                 driver.race_gaps = []
+                if driver.race_standings_sector.value < 1:
+                    #driver.race_standings_sector.setValue(math.floor(driver.race_standings_sector.value))
+                    #driver.race_current_sector.setValue(math.floor(driver.race_current_sector.value))
+                    driver.race_standings_sector.setValue(0)
+                    driver.race_current_sector.setValue(0)
             if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
                 # driver.finished=False
                 self.numCarsToFinish = 0
@@ -889,9 +896,9 @@ class ACTower:
         driver_shown = 0
         driver_shown_max_gap = 0
         max_gap = 2500
-        # needsTLC=True
+        # needs_tlc=True
         # if self.lapsCompleted.value >= self.numberOfLaps:
-        #    needsTLC=False
+        #    needs_tlc=False
         # memsize=0
         # if mode == 0?
         if self.race_mode.value == 0:
@@ -1030,10 +1037,10 @@ class ACTower:
                     if len(p) > 0 and driver.completedLapsChanged:
                         driver.set_position(p[0] + 1, 0, False, self.qual_mode.value)
                         driver.set_time_race(driver.completedLaps.value, self.leader_time, self.sessionTimeLeft)
-                        needsTLC = True
+                        needs_tlc = True
                         if self.numCarsToFinish > 0:  # self.lapsCompleted.value >= self.numberOfLaps:
-                            needsTLC = False
-                        driver.show(needsTLC)
+                            needs_tlc = False
+                        driver.show(needs_tlc)
         else:
             for driver in self.drivers:
                 driver.hide()
@@ -1104,7 +1111,12 @@ class ACTower:
                 driver.hide(True)
 
         if self.cursor.hasChanged() or session_changed:
-            if self.cursor.value:
+            show = True
+            for driver in self.drivers:
+                if driver.isDisplayed:
+                    show = False
+                    break
+            if self.cursor.value and show:
                 self.window.setBgOpacity(0.4).border(0)
                 self.window.showTitle(True)
             else:
@@ -1214,7 +1226,9 @@ class ACTower:
                                 # driver.finished=True
                             elif not driver.finished.value:
                                 driver.race_standings_sector.setValue(driver.raceProgress)
-                        if driver.race_standings_sector.value > 0:
+                        if not driver.hasStartedRace and (len(driver.race_gaps) > 2 or driver.race_standings_sector.value > 1):
+                            driver.hasStartedRace = True
+                        if driver.race_standings_sector.value > 0 and driver.hasStartedRace:
                             standings.append((driver.identifier, driver.race_standings_sector.value))
 
                 self.lapsCompleted.setValue(completed)
@@ -1239,13 +1253,15 @@ class ACTower:
                     self.lapsCompleted.setValue(completed)
                 '''
                 # Debug code
-                o=1
-                for i,s in self.standings:
+                o = 1
+                for i, s in self.standings:
                     if o <= 10:
-                        ac.console("standings:" + str(o) + "-" + ac.getDriverName(i) +
-                         " id:" + str(i) + " sector:" + str(s))
-                    o=o+1
+                        ac.console("standings:" + str(o) + "-" + ac.getDriverName(i) + " id:" + str(i) + " sector:" + str(s))
+                    o = o + 1
                 ac.console("---------------------------------") 
+                for driver in self.drivers:
+                    ac.console("standings:" + str(len(driver.race_gaps)) + "-" + driver.fullName.value + " lapCount:" + str(driver.lapCount) + " pro:" + str(driver.raceProgress))
+
                 '''
                 t_update_drivers = time.time()
                 self.update_drivers_race(sim_info)
