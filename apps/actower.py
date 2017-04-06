@@ -284,6 +284,7 @@ class Driver:
             self.position_highlight_end = 0
             self.inPitFromPitLane = False
             self.hasStartedRace = False
+            self.isInPitBox.setValue(False)
 
     def get_best_lap(self, lap=False):
         if lap:
@@ -810,8 +811,7 @@ class ACTower:
         return 0
 
     def sector_is_valid(self, new_sector, driver):
-        if len(driver.race_gaps) == 0 and self.sessionTimeLeft < 1760000 and not bool(
-                ac.isCarInPitline(driver.identifier)) and not bool(ac.isCarInPit(driver.identifier)):
+        if len(driver.race_gaps) == 0 and self.sessionTimeLeft < 1760000 and not bool(ac.isCarInPitline(driver.identifier)) and not bool(ac.isCarInPit(driver.identifier)):
             return True
         if new_sector * 100 < driver.race_current_sector.value:
             return False
@@ -865,8 +865,6 @@ class ACTower:
             if driver.isInPitBox.value and not driver.finished.value and not driver.inPitFromPitLane:
                 driver.race_gaps = []
                 if driver.race_standings_sector.value < 1:
-                    #driver.race_standings_sector.setValue(math.floor(driver.race_standings_sector.value))
-                    #driver.race_current_sector.setValue(math.floor(driver.race_current_sector.value))
                     driver.race_standings_sector.setValue(0)
                     driver.race_current_sector.setValue(0)
             if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
@@ -1259,9 +1257,11 @@ class ACTower:
                         ac.console("standings:" + str(o) + "-" + ac.getDriverName(i) + " id:" + str(i) + " sector:" + str(s))
                     o = o + 1
                 ac.console("---------------------------------") 
+                
                 for driver in self.drivers:
-                    ac.console("standings:" + str(len(driver.race_gaps)) + "-" + driver.fullName.value + " lapCount:" + str(driver.lapCount) + " pro:" + str(driver.raceProgress))
-
+                    if not driver.hasStartedRace:
+                        ac.log("standings:" + str(len(driver.race_gaps)) + "-" + driver.fullName.value + " pro:" + str(driver.raceProgress) + " s:" + str(driver.hasStartedRace))
+                        ac.console("standings:" + str(len(driver.race_gaps)) + "-" + driver.fullName.value + " pro:" + str(driver.raceProgress) + " s:" + str(driver.hasStartedRace))
                 '''
                 t_update_drivers = time.time()
                 self.update_drivers_race(sim_info)
