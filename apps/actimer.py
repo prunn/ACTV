@@ -50,6 +50,15 @@ class ACTimer:
         self.lbl_session_border = Label(self.window.app, "")\
             .setSize(154 + self.rowHeight, 1).setPos(0, self.rowHeight + 1)\
             .setBgColor(Colors.theme(bg=True)).setBgOpacity(0.7).setVisible(1)
+        self.lbl_pit_window_bg = Label(self.window.app, "")\
+            .setSize(0, self.rowHeight).setPos(0, -self.rowHeight)\
+            .setFontSize(26).setBgColor(rgb([55, 55, 55], bg=True))\
+            .setBgOpacity(0.64).setVisible(0)
+        self.lbl_pit_window_text = Label(self.window.app, "Loading")\
+            .setSize(160, self.rowHeight).setPos(0, -self.rowHeight)\
+            .setFontSize(26).setAlign("center")\
+            .setBgOpacity(0).setColor(Colors.white()).setVisible(0)
+
 
         track_file_path = "content/tracks/" + ac.getTrackName(0) + "/ui/"
         if ac.getTrackConfiguration(0) != "":
@@ -98,6 +107,10 @@ class ACTimer:
         self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
         self.lbl_session_single.setSize(width, self.rowHeight).setFontSize(font_size)
         self.lbl_session_border.setSize(width, 1).setPos(0, self.rowHeight + 1)
+        #self.lbl_pit_window_text.setPos(width, 2).setSize(self.rowHeight * 3, self.rowHeight).setFontSize(font_size-2)
+        self.lbl_pit_window_text.setPos(0, -self.rowHeight+2).setSize(width, self.rowHeight).setFontSize(font_size-2)
+        #self.lbl_pit_window_bg.setPos(width, 0)
+        self.lbl_pit_window_bg.setPos(0, -self.rowHeight)
         if len(self.finish_labels) > 0:
             i = 0
             j = 0
@@ -117,6 +130,7 @@ class ACTimer:
         self.lbl_session_info.setFont(font_name, 0, 0)
         self.lbl_session_title.setFont(font_name, 0, 0)
         self.lbl_session_single.setFont(font_name, 0, 0)
+        self.lbl_pit_window_text.setFont(font_name, 0, 0)
 
     def time_splitting(self, ms):
         s = ms / 1000
@@ -199,12 +213,16 @@ class ACTimer:
         self.session_draw.setValue(sim_info.graphics.session)
         self.manage_window()
         sim_info_status = sim_info.graphics.status
+        self.lbl_pit_window_text.animate()
+        self.lbl_pit_window_bg.animate()
         if sim_info_status == 2:  # LIVE
             if self.replay_initialised:
                 self.lbl_session_single.setColor(rgb([255, 255, 255]))
             self.session.setValue(self.session_draw.value)
             session_time_left = sim_info.graphics.sessionTimeLeft
             if self.session.value < 2:
+                self.lbl_pit_window_text.hideText()
+                self.lbl_pit_window_bg.setVisible(0)
                 # 0 to -5000 show finish
                 if 0 > session_time_left > -5000:
                     if not self.finish_initialised:
@@ -237,7 +255,6 @@ class ACTimer:
                             self.lbl_session_info.setColor(Colors.white(), True)
                             self.lbl_session_border.setBgColor(Colors.theme(bg=True), True)
                             self.lbl_session_title.setBgColor(Colors.theme(bg=True), True)
-                    self.lbl_session_border.animate()
                     self.lbl_session_info.animate()
                     self.lbl_session_title.animate()
             elif self.session.value == 2:
@@ -265,20 +282,37 @@ class ACTimer:
                     self.numberOfLapsCompleted.setValue(completed)
                     if self.numberOfLapsCompleted.hasChanged():
                         if self.numberOfLapsCompleted.value == self.pitWindowStart:
-                            self.pitWindowVisibleEnd = session_time_left - 10000
+                            self.pitWindowVisibleEnd = session_time_left - 8000
                             self.pitWindowActive = True
                         elif self.numberOfLapsCompleted.value == self.pitWindowEnd:
-                            self.pitWindowVisibleEnd = session_time_left - 10000
+                            self.pitWindowVisibleEnd = session_time_left - 8000
                             self.pitWindowActive = False
                 else:
                     if self.sessionMaxTime < 0:
                         self.sessionMaxTime = round(session_time_left, -3)
                     if not self.pitWindowActive and session_time_left <= self.sessionMaxTime - self.pitWindowStart * 60 * 1000 and session_time_left >= self.sessionMaxTime - self.pitWindowEnd * 60 * 1000:
-                        self.pitWindowVisibleEnd = session_time_left - 10000
+                        self.pitWindowVisibleEnd = session_time_left - 8000
                         self.pitWindowActive = True
                     elif self.pitWindowActive and session_time_left < self.sessionMaxTime - self.pitWindowEnd * 60 * 1000:
-                        self.pitWindowVisibleEnd = session_time_left - 10000
+                        self.pitWindowVisibleEnd = session_time_left - 8000
                         self.pitWindowActive = False
+                if self.pitWindowActive:
+                    self.lbl_pit_window_bg.setSize(self.rowHeight * 5, self.rowHeight-1, True).setVisible(1)
+                    if self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
+                        self.lbl_pit_window_text.setColor(Colors.green(), True)
+                    elif sim_info.graphics.MandatoryPitDone:
+                        self.lbl_pit_window_text.setColor(rgb([172, 172, 172]), True)
+                    else:
+                        self.lbl_pit_window_text.setColor(Colors.white(), True)
+                    self.lbl_pit_window_text.setText("Pits open")
+                    self.lbl_pit_window_text.showText()
+                elif self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
+                    self.lbl_pit_window_bg.setSize(self.rowHeight * 5, self.rowHeight-1, True).setVisible(1)
+                    self.lbl_pit_window_text.setText("Pits closed").setColor(Colors.red(), True)
+                    self.lbl_pit_window_text.showText()
+                else:
+                    self.lbl_pit_window_text.hideText()
+                    self.lbl_pit_window_bg.setSize(self.rowHeight * 5, 0,  True).setVisible(1)
 
                 if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
                     self.pitWindowVisibleEnd = 0
@@ -294,18 +328,7 @@ class ACTimer:
                 elif race_finished > 0:  # elif self.numberOfLaps > 0 and completed > self.numberOfLaps:
                     if not self.finish_initialised:
                         self.init_finish()
-                elif self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
-                    self.lbl_session_info.setVisible(0)
-                    self.lbl_session_title.setVisible(0)
-                    self.lbl_session_single.setVisible(1)
-                    self.lbl_session_border.setVisible(1)
-                    if self.pitWindowActive:
-                        self.lbl_session_single.setText("Pits open")
-                    else:
-                        self.lbl_session_single.setText("Pits closed")
-                elif completed == self.numberOfLaps or (
-                            self.numberOfLaps == 0 and self.hasExtraLap == 0 and session_time_left < 0) or (
-                        self.hasExtraLap == 1 and completed == self.numberOfLapsTimedRace):
+                elif completed == self.numberOfLaps or (self.numberOfLaps == 0 and self.hasExtraLap == 0 and session_time_left < 0) or (self.hasExtraLap == 1 and completed == self.numberOfLapsTimedRace):
                     if self.finish_initialised:
                         self.destroy_finish()
                     self.lbl_session_info.setVisible(0)
@@ -346,6 +369,7 @@ class ACTimer:
                 self.lbl_session_title.setVisible(0)
                 self.lbl_session_single.setVisible(0)
                 self.lbl_session_border.setVisible(0)
+                self.lbl_pit_window_text.hideText()
 
         elif sim_info_status == 1:
             replay_time_multiplier = sim_info.graphics.replayTimeMultiplier
@@ -353,8 +377,10 @@ class ACTimer:
                 self.destroy_finish()
             self.lbl_session_info.setVisible(0)
             self.lbl_session_title.setVisible(0)
+            self.lbl_pit_window_bg.setVisible(0)
             self.lbl_session_border.setVisible(1)
             self.lbl_session_single.setVisible(1)
+            self.lbl_pit_window_text.hideText()
             self.replay_initialised = True
             self.lbl_session_single.setColor(rgb([self.replay_rgb, self.replay_rgb, self.replay_rgb]))
             if self.replay_asc and replay_time_multiplier > 0:

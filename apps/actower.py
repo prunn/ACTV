@@ -64,7 +64,7 @@ class Driver:
         self.final_y = 0
         self.isDisplayed = False
         self.firstDraw = False
-        self.isAlive = False
+        self.isAlive = Value(False)
         self.pitBoxMode = False
         self.movingUp = False
         self.isCurrentVehicule = Value(False)
@@ -219,7 +219,9 @@ class Driver:
         self.lbl_border.show()
         if not self.isLapLabel:
             self.lbl_position.show()
-            if not self.isAlive or self.isInPit.value or ac.getCarState(self.identifier, acsys.CS.SpeedKMH) > 30:
+            if not self.isAlive.value and not self.finished.value:
+                self.lbl_name.setColor(Colors.grey(), True)
+            elif self.isInPit.value or ac.getCarState(self.identifier, acsys.CS.SpeedKMH) > 30 or self.finished.value:
                 self.lbl_name.setColor(Colors.white(), True)
             else:
                 self.lbl_name.setColor(Colors.yellow(), True)
@@ -359,7 +361,7 @@ class Driver:
         if time == "PIT":
             self.lbl_time.setText("PIT").setColor(Colors.yellow(), True)
         elif time == "DNF":
-            self.lbl_time.setText("DNF").setColor(Colors.red(), True)
+            self.lbl_time.setText("DNF").setColor(Colors.dnf(), True)
         elif time == "UP":
             self.lbl_time.setText(u"\u25B2").setColor(Colors.green(), True)
         elif time == "DOWN":
@@ -402,7 +404,7 @@ class Driver:
         self.position.setValue(position)
         self.position_offset.setValue(offset)
         position_changed = self.position.hasChanged()
-        if position_changed or self.position_offset.hasChanged() or self.isCurrentVehicule.hasChanged():
+        if position_changed or self.position_offset.hasChanged() or self.isCurrentVehicule.hasChanged() or self.isAlive.hasChanged():
             if position_changed:
                 if self.position.value < self.position.old:
                     self.movingUp = True
@@ -435,45 +437,83 @@ class Driver:
             self.lbl_time.setPos(self.rowHeight, self.final_y, True)
             self.lbl_border.setPos(0, self.final_y + self.rowHeight - 1, True)
             if position % 2 == 1:
-                self.lbl_name.setBgOpacity(0.72)
+                if self.isAlive.value:
+                    self.lbl_name.setBgOpacity(0.72)
+                else:
+                    self.lbl_name.setBgOpacity(0.52)
                 if position == 1:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.red(bg=True), True).setColor(Colors.white(),
-                                                                                         True).setBgOpacity(0.72)
-                    self.lbl_time.setText(self.format_time(self.time.value))
-                elif battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or )
+                        self.lbl_position.setBgColor(Colors.red(bg=True), True)\
+                            .setColor(Colors.white(), True)\
+                            .setBgOpacity(0.72)
+                    #self.lbl_time.setText(self.format_time(self.time.value))
+                elif battles and self.isCurrentVehicule.value:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.white(bg=True)).setColor(Colors.red(), True).setBgOpacity(
-                            0.72)
-                    self.lbl_time.setText(self.format_time(self.time.value))
+                        self.lbl_position.setBgColor(Colors.white(bg=True))\
+                            .setColor(Colors.red(), True).setBgOpacity(0.72)
+                    #self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(rgb([12, 12, 12], bg=True), True).setColor(Colors.white(),
-                                                                                                True).setBgOpacity(0.72)
+                        if self.isAlive.value:
+                            self.lbl_position.setBgColor(rgb([12, 12, 12], bg=True), True)\
+                                .setColor(Colors.white(), True)\
+                                .setBgOpacity(0.72)
+                        else:
+                            self.lbl_position.setBgColor(rgb([12, 12, 12], bg=True), True)\
+                                .setColor(Colors.grey(), True)\
+                                .setBgOpacity(0.62)
+                    '''
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
                         self.lbl_time.setText("+" + self.format_time(self.gap.value))
+                    '''
             else:
-                self.lbl_name.setBgOpacity(0.58)
+                if self.isAlive.value:
+                    self.lbl_name.setBgOpacity(0.58)
+                else:
+                    self.lbl_name.setBgOpacity(0.44)
                 if battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or)
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.white(bg=True), True).setColor(Colors.red(),
-                                                                                           True).setBgOpacity(0.68)
-                    self.lbl_time.setText(self.format_time(self.time.value))
+                        self.lbl_position.setBgColor(Colors.white(bg=True), True)\
+                            .setColor(Colors.red(), True)\
+                            .setBgOpacity(0.68)
+                    #self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(rgb([0, 0, 0], bg=True), True).setColor(Colors.white(),
-                                                                                             True).setBgOpacity(0.58)
+                        if self.isAlive.value:
+                            self.lbl_position.setBgColor(rgb([0, 0, 0], bg=True), True)\
+                                .setColor(Colors.white(), True)\
+                                .setBgOpacity(0.58)
+                        else:
+                            self.lbl_position.setBgColor(rgb([0, 0, 0], bg=True), True)\
+                                .setColor(Colors.grey(), True)\
+                                .setBgOpacity(0.52)
+                    '''
                     if qual_mode == 1:
                         self.lbl_time.setText(self.format_time(self.time.value))
                     else:
                         self.lbl_time.setText("+" + self.format_time(self.gap.value))
+                    '''
         if not self.isLapLabel:
             self.fullName.setValue(ac.getDriverName(self.identifier))
             if self.fullName.hasChanged():
+                # Reset
+                self.finished.setValue(False)
                 self.set_name()
+                self.race_current_sector.setValue(0)
+                self.race_standings_sector.setValue(0)
+                self.race_gaps = []
+                self.completedLaps.setValue(0)
+                self.completedLapsChanged = False
+                self.last_lap_visible_end = 0
+                self.time_highlight_end = 0
+                self.bestLap = 0
                 self.bestLapServer = 0
+                self.position_highlight_end = 0
+                self.inPitFromPitLane = False
+                self.hasStartedRace = False
+                self.isInPitBox.setValue(False)
 
     def format_name_tlc(self, name):
         space = name.find(" ")
@@ -703,8 +743,8 @@ class ACTower:
                 for l in self.stintLabels:
                     l.hide()
             for driver in self.drivers:
-                driver.isAlive = bool(ac.isConnected(driver.identifier))
-                if driver.isAlive:
+                driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
+                if driver.isAlive.value:
                     driver.pitBoxMode = True
                     p = [i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                     # check_pos = 0
@@ -763,14 +803,14 @@ class ACTower:
             for driver in self.drivers:
                 driver.pitBoxMode = False
                 c = driver.get_best_lap()
-                driver.isAlive = bool(ac.isConnected(driver.identifier))
-                if not driver.isAlive:
+                driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
+                if not driver.isAlive.value:
                     driver.bestLapServer = 0
                 p = [i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                 check_pos = 0
                 if len(p) > 0:
                     check_pos = p[0] + 1
-                if c > 0 and (driver.lapCount > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive and check_pos <= self.max_num_cars:
+                if c > 0 and (driver.lapCount > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value and check_pos <= self.max_num_cars:
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.set_position(p[0] + 1, 0, False, self.qual_mode.value)
                         driver.show(race=False)
@@ -851,8 +891,8 @@ class ACTower:
         else:
             self.lbl_title_mode.hide()
         for driver in self.drivers:
-            driver.isAlive = bool(ac.isConnected(driver.identifier))
-            if driver.isAlive:
+            driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
+            if driver.isAlive.value:
                 nb_drivers_alive += 1
             p = [i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
             if len(p) > 0 and p[0] == 0:
@@ -952,7 +992,7 @@ class ACTower:
                             lapGap = self.get_max_sector(first_driver) - driver_max_sector
                             if driver.finished.value:
                                 driver.show(False)
-                            elif not driver.isAlive:
+                            elif not driver.isAlive.value:
                                 driver.set_time_race_battle("DNF", first_driver.identifier)
                                 driver.show()
                             elif bool(ac.isCarInPitline(driver.identifier)) or bool(ac.isCarInPit(driver.identifier)):
@@ -986,7 +1026,7 @@ class ACTower:
                             driver.last_lap_visible_end = self.sessionTimeLeft - 5000
                         if driver.finished.value:
                             driver.show(False)
-                        elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive and not driver.isInPit.value:
+                        elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive.value and not driver.isInPit.value:
                             lastlap = ac.getCarState(driver.identifier, acsys.CS.LastLap)
                             driver.set_time_race_battle(lastlap, -1)
                             # else:
@@ -1180,7 +1220,7 @@ class ACTower:
                             self.drivers[i].bestLap = ac.getCarState(i, acsys.CS.BestLap)
                             bl = self.drivers[i].get_best_lap()
                             self.drivers[i].lapCount = ac.getCarState(i, acsys.CS.LapCount)
-                            if bl > 0 and self.drivers[i].lapCount > self.minLapCount and self.drivers[i].isAlive:
+                            if bl > 0 and self.drivers[i].lapCount > self.minLapCount and self.drivers[i].isAlive.value:
                                 standings.append((i, bl))
                             # fastestLap for info widget
                             if self.fastestLap == 0 or (bl > 0 and bl < self.fastestLap):

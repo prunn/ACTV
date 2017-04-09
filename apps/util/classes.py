@@ -229,6 +229,10 @@ class Colors:
         return rgb([191, 0, 0], bg=bg)
 
     @staticmethod
+    def dnf(bg=False):
+        return rgb([168, 48, 48], bg=bg)
+
+    @staticmethod
     def green(bg=False):
         return rgb([32, 192, 31], bg=bg)
 

@@ -36,7 +36,7 @@ class Configuration:
             .setPos(126, -22).setSize(125, 22).setText("Colors")\
             .setAlign("center").setBgColor(rgb([12, 12, 12], bg=True))
 
-        y = 60
+        y = 50
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
         ac.setRange(self.spin_race_mode, 0, 2)
         ac.setPosition(self.spin_race_mode, 20, y)
@@ -98,7 +98,7 @@ class Configuration:
             .setVisible(1)
 
         # RGB
-        y = 60
+        y = 50
         self.spin_theme_red = ac.addSpinner(self.window.app, "Red")
         ac.setRange(self.spin_theme_red, 0, 255)
         ac.setPosition(self.spin_theme_red, 20, y)
