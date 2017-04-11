@@ -175,6 +175,42 @@ class Colors:
         return False
 
     @staticmethod
+    def background():
+        return rgb([55, 55, 55], bg=True)
+
+    @staticmethod
+    def background_dark():
+        return rgb([20, 20, 20], bg=True)
+
+    @staticmethod
+    def background_tower():
+        return rgb([32, 32, 32], bg=True)
+
+    @staticmethod
+    def background_first():
+        return rgb([192, 0, 0], bg=True)
+
+    @staticmethod
+    def background_tower_position():
+        return rgb([12, 12, 12], bg=True)
+
+    @staticmethod
+    def background_tower_position_even():
+        return rgb([0, 0, 0], bg=True)
+
+    @staticmethod
+    def background_tower_position_highlight():
+        return rgb([255, 255, 255], bg=True)
+
+    @staticmethod
+    def background_info_position():
+        return rgb([112, 112, 112], bg=True)
+
+    @staticmethod
+    def background_speedtrap():
+        return rgb([12, 12, 12], bg=True)
+
+    @staticmethod
     def bmw():
         # return rgb([42, 101, 198], bg = True)
         return rgb([40, 152, 211], bg=True)

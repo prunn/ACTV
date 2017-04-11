@@ -63,7 +63,7 @@ class ACInfo:
         self.lbl_driver_name = Label(self.window.app, "")\
             .setSize(284, self.rowHeight)\
             .setPos(0, 0)\
-            .setBgColor(rgb([20, 20, 20], bg=True))\
+            .setBgColor(Colors.background_dark())\
             .setBgOpacity(0.8).setVisible(0)
         self.lbl_driver_name2 = Label(self.window.app, "Loading")\
             .setSize(284, self.rowHeight)\
@@ -83,7 +83,7 @@ class ACInfo:
             .setSize(284, self.rowHeight)\
             .setPos(0, self.rowHeight)\
             .setFontSize(26).setAlign("left")\
-            .setBgColor(rgb([55, 55, 55], bg=True))\
+            .setBgColor(Colors.background())\
             .setBgOpacity(0.64)\
             .setVisible(0)
         self.lbl_split = Label(self.window.app, "Loading")\
@@ -100,14 +100,14 @@ class ACInfo:
             .setSize(self.rowHeight, self.rowHeight).setPos(0, 0)\
             .setFontSize(26)\
             .setAlign("center")\
-            .setBgColor(Colors.red(bg=True))\
+            .setBgColor(Colors.background_first())\
             .setBgOpacity(1).setVisible(0)
         self.info_position_lead = Label(self.window.app, "1")\
             .setSize(self.rowHeight, self.rowHeight)\
             .setPos(246, self.rowHeight)\
             .setFontSize(26)\
             .setAlign("center")\
-            .setBgColor(Colors.red(bg=True))\
+            .setBgColor(Colors.background_first())\
             .setBgOpacity(1).setVisible(0)
         car = ac.getCarName(0)
         self.lbl_border = Label(self.window.app, "")\
@@ -537,11 +537,9 @@ class ACInfo:
                                 pos = self.get_standings_position(self.currentVehicle.value)
 
                             if pos > 1:
-                                self.info_position.setColor(Colors.white()).setBgColor(
-                                    Colors.grey(bg=True)).setBgOpacity(0.8)
+                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(0.8)
                             else:
-                                self.info_position.setColor(Colors.white()).setBgColor(
-                                    Colors.red(bg=True)).setBgOpacity(0.8)
+                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(0.8)
                             self.info_position.setText(str(pos))
                             self.info_position.show()
 
@@ -602,9 +600,9 @@ class ACInfo:
                         if pos == -1:
                             pos = self.get_standings_position(self.currentVehicle.value)
                         if pos > 1:
-                            self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg=True)).setBgOpacity(1)
+                            self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                         else:
-                            self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg=True)).setBgOpacity(1)
+                            self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
                         self.info_position.setText(str(pos)).show()
                         self.lbl_position_text.setValue(str(pos))
 
@@ -676,9 +674,9 @@ class ACInfo:
                     # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
                     pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                     if pos > 1:
-                        self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg=True)).setBgOpacity(1)
+                        self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                     else:
-                        self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg=True)).setBgOpacity(1)
+                        self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
                     self.info_position.setText(str(pos)).show()
                     self.lbl_timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
@@ -720,9 +718,9 @@ class ACInfo:
                     pos = self.get_standings_position(self.currentVehicle.value)
 
                 if pos > 1:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg=True)).setBgOpacity(0.8)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(0.8)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg=True)).setBgOpacity(0.8)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(0.8)
                 self.info_position.setText(str(pos))
                 self.info_position.show()
                 self.nameOffset = self.rowHeight * 49 / 36  # 49
@@ -770,9 +768,9 @@ class ACInfo:
                 self.nameOffset=self.rowHeight*49/36 #49
                 pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                 if pos > 1:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.grey(bg = True)).setBgOpacity(1)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.red(bg = True)).setBgOpacity(1)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
                 self.info_position.setText(str(pos)).show() 
                 self.lbl_timing_visible.setValue(0)
                 self.lbl_fastest_split.hideText()

@@ -103,7 +103,7 @@ class Driver:
                 .setPos(0, 0)\
                 .setFontSize(self.fontSize)\
                 .setAlign("left")\
-                .setBgColor(rgb([32, 32, 32], bg=True))\
+                .setBgColor(Colors.background_tower())\
                 .setBgOpacity(0.6)\
                 .setVisible(0)
         else:
@@ -111,14 +111,14 @@ class Driver:
                 .setSize(self.rowHeight * 5, self.rowHeight)\
                 .setPos(self.rowHeight, 0)\
                 .setFontSize(self.fontSize).setAlign("left")\
-                .setBgColor(rgb([32, 32, 32], bg=True))\
+                .setBgColor(Colors.background_tower())\
                 .setBgOpacity(0.6).setVisible(0)
             self.lbl_position = Label(app, str(pos + 1))\
                 .setSize(self.rowHeight, self.rowHeight)\
                 .setPos(0, 0)\
                 .setFontSize(self.fontSize)\
                 .setAlign("center")\
-                .setBgColor(Colors.grey(bg=True))\
+                .setBgColor(Colors.background_tower_position())\
                 .setColor(Colors.white())\
                 .setBgOpacity(1)\
                 .setVisible(0)
@@ -443,23 +443,23 @@ class Driver:
                     self.lbl_name.setBgOpacity(0.52)
                 if position == 1:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.red(bg=True), True)\
+                        self.lbl_position.setBgColor(Colors.background_first(), True)\
                             .setColor(Colors.white(), True)\
                             .setBgOpacity(0.72)
                     #self.lbl_time.setText(self.format_time(self.time.value))
                 elif battles and self.isCurrentVehicule.value:
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.white(bg=True))\
+                        self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True)\
                             .setColor(Colors.red(), True).setBgOpacity(0.72)
                     #self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(rgb([12, 12, 12], bg=True), True)\
+                            self.lbl_position.setBgColor(Colors.background_tower_position(), True)\
                                 .setColor(Colors.white(), True)\
                                 .setBgOpacity(0.72)
                         else:
-                            self.lbl_position.setBgColor(rgb([12, 12, 12], bg=True), True)\
+                            self.lbl_position.setBgColor(Colors.background_tower_position(), True)\
                                 .setColor(Colors.grey(), True)\
                                 .setBgOpacity(0.62)
                     '''
@@ -475,18 +475,18 @@ class Driver:
                     self.lbl_name.setBgOpacity(0.44)
                 if battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or)
                     if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.white(bg=True), True)\
+                        self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True)\
                             .setColor(Colors.red(), True)\
                             .setBgOpacity(0.68)
                     #self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(rgb([0, 0, 0], bg=True), True)\
+                            self.lbl_position.setBgColor(Colors.background_tower_position_even(), True)\
                                 .setColor(Colors.white(), True)\
                                 .setBgOpacity(0.58)
                         else:
-                            self.lbl_position.setBgColor(rgb([0, 0, 0], bg=True), True)\
+                            self.lbl_position.setBgColor(Colors.background_tower_position_even(), True)\
                                 .setColor(Colors.grey(), True)\
                                 .setBgOpacity(0.52)
                     '''
@@ -616,14 +616,14 @@ class ACTower:
             .setPos(0, self.rowHeight * 4 - self.rowHeight - 6)\
             .setFontSize(23)\
             .setAlign("center")\
-            .setBgColor(rgb([12, 12, 12], bg=True))\
+            .setBgColor(Colors.background_dark())\
             .setBgOpacity(0.8)\
             .setVisible(0)
         self.lbl_tire_stint = Label(self.window.app, "")\
             .setSize(self.rowHeight * 6, self.rowHeight)\
             .setPos(0, self.rowHeight * 4 - (self.rowHeight - 4))\
             .setFontSize(24).setAlign("center")\
-            .setBgColor(rgb([32, 32, 32], bg=True))\
+            .setBgColor(Colors.background_tower())\
             .setBgOpacity(0.58).setVisible(0)
         self.lbl_title_mode = Label(self.window.app, "Mode") \
             .setSize(self.rowHeight * 6, self.rowHeight - 4) \
