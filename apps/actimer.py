@@ -33,33 +33,51 @@ class ACTimer:
         self.trackName = ""
         self.window = Window(name="ACTV Timer", icon=False, width=228, height=42, texture="")
         self.lbl_session_info = Label(self.window.app, "Loading")\
-            .setSize(154, self.rowHeight)\
-            .setPos(self.rowHeight, 0)\
-            .setFontSize(26).setAlign("center")\
-            .setBgColor(Colors.background())\
-            .setBgOpacity(0.64)
+            .set(w=154, h=self.rowHeight,
+                 x=self.rowHeight, y=0,
+                 font_size=26,
+                 align="center",
+                 background=Colors.background(),
+                 opacity=Colors.background_opacity())
         self.lbl_session_title = Label(self.window.app, "P")\
-            .setSize(self.rowHeight, self.rowHeight).setPos(0, 0)\
-            .setFontSize(26).setAlign("center")\
-            .setBgColor(Colors.theme(bg=True))\
-            .setBgOpacity(0.64)
+            .set(w=self.rowHeight, h=self.rowHeight,
+                 x=0, y=0,
+                 font_size=26,
+                 align="center",
+                 background=Colors.theme(bg=True),
+                 opacity=Colors.background_opacity())
         self.lbl_session_single = Label(self.window.app, "Loading")\
-            .setSize(190, self.rowHeight).setPos(0, 0)\
-            .setFontSize(26).setAlign("center")\
-            .setBgColor(Colors.background())\
-            .setBgOpacity(0.64).setColor(Colors.white()).setVisible(0)
+            .set(w=190, h=self.rowHeight,
+                 x=0, y=0,
+                 font_size=26,
+                 align="center",
+                 background=Colors.background(),
+                 opacity=Colors.background_opacity(),
+                 color=Colors.white(),
+                 visible=0)
         self.lbl_session_border = Label(self.window.app, "")\
-            .setSize(154 + self.rowHeight, 1).setPos(0, self.rowHeight + 1)\
-            .setBgColor(Colors.theme(bg=True)).setBgOpacity(0.7).setVisible(1)
+            .set(w=154 + self.rowHeight, h=1,
+                 x=0, y=self.rowHeight + 1,
+                 background=Colors.theme(bg=True),
+                 opacity=Colors.border_opacity(),
+                 visible=1)
         self.lbl_pit_window_bg = Label(self.window.app, "")\
-            .setSize(0, self.rowHeight).setPos(0, -self.rowHeight)\
-            .setFontSize(26).setBgColor(Colors.background())\
-            .setBgOpacity(0.64).setVisible(0)
+            .set(w=0, h=self.rowHeight,
+                 x=0, y=-self.rowHeight,
+                 font_size=26,
+                 background=Colors.background(),
+                 opacity=Colors.background_opacity(),
+                 visible=0)
         self.lbl_pit_window_text = Label(self.window.app, "Loading")\
-            .setSize(160, self.rowHeight).setPos(0, -self.rowHeight)\
-            .setFontSize(26).setAlign("center")\
-            .setBgOpacity(0).setColor(Colors.white()).setVisible(0)
-
+            .set(w=160,
+                 h=self.rowHeight,
+                 x=0,
+                 y=-self.rowHeight,
+                 font_size=26,
+                 align="center",
+                 opacity=0,
+                 color=Colors.white(),
+                 visible=0)
 
         track_file_path = "content/tracks/" + ac.getTrackName(0) + "/ui/"
         if ac.getTrackConfiguration(0) != "":
@@ -173,7 +191,7 @@ class ACTimer:
 
     def destroy_finish(self):
         # Destroy
-        self.lbl_session_single.setBgColor(Colors.background()).setBgOpacity(0.64).setVisible(0)
+        self.lbl_session_single.setBgColor(Colors.background()).setBgOpacity(Colors.background_opacity()).setVisible(0)
         for label in self.finish_labels:
             label.setVisible(0)
         self.finish_initialised = False

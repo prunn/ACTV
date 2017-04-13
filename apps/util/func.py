@@ -11,57 +11,57 @@ def rgb(color, a=1, bg=False):
     r = color[0] / 255
     g = color[1] / 255
     b = color[2] / 255
-    if bg == False:
+    if not bg:
         return r, g, b, a
     else:
         return r, g, b
 
 
-def getFontSize(rowHeight):
-    if rowHeight == 50 or rowHeight == 49:
+def getFontSize(row_height):
+    if row_height == 50 or row_height == 49:
         return 34
-    if rowHeight == 48 or rowHeight == 47:
+    if row_height == 48 or row_height == 47:
         return 33
-    if rowHeight == 46 or rowHeight == 45:
+    if row_height == 46 or row_height == 45:
         return 32
-    if rowHeight == 44 or rowHeight == 43:
+    if row_height == 44 or row_height == 43:
         return 31
-    if rowHeight == 42:
+    if row_height == 42:
         return 30
-    if rowHeight == 41:
+    if row_height == 41:
         return 29
-    if rowHeight == 40:
+    if row_height == 40:
         return 28
-    if rowHeight == 39:
+    if row_height == 39:
         return 27
-    if rowHeight == 38 or rowHeight == 37:
+    if row_height == 38 or row_height == 37:
         return 26
-    if rowHeight == 36 or rowHeight == 35:
+    if row_height == 36 or row_height == 35:
         return 25
-    if rowHeight == 34:
+    if row_height == 34:
         return 24
-    if rowHeight == 33:
+    if row_height == 33:
         return 23
-    if rowHeight == 32 or rowHeight == 31:
+    if row_height == 32 or row_height == 31:
         return 22
-    if rowHeight == 30 or rowHeight == 29:
+    if row_height == 30 or row_height == 29:
         return 21
-    if rowHeight == 28:
+    if row_height == 28:
         return 19
-    if rowHeight == 27:
+    if row_height == 27:
         return 19
-    if rowHeight == 26:
+    if row_height == 26:
         return 19
-    if rowHeight == 25:
+    if row_height == 25:
         return 18
-    if rowHeight == 24 or rowHeight == 23:
+    if row_height == 24 or row_height == 23:
         return 17
-    if rowHeight == 22:
+    if row_height == 22:
         return 16
-    if rowHeight == 21:
+    if row_height == 21:
         return 15
-    if rowHeight == 20:
+    if row_height == 20:
         return 14
-    if rowHeight < 30:
-        return rowHeight - 6
+    if row_height < 30:
+        return row_height - 6
     return 26

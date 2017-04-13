@@ -191,7 +191,7 @@ class Colors:
         return rgb([192, 0, 0], bg=True)
 
     @staticmethod
-    def background_tower_position():
+    def background_tower_position_odd():
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
@@ -209,6 +209,14 @@ class Colors:
     @staticmethod
     def background_speedtrap():
         return rgb([12, 12, 12], bg=True)
+
+    @staticmethod
+    def background_opacity():
+        return 0.64
+
+    @staticmethod
+    def border_opacity():
+        return 0.7
 
     @staticmethod
     def bmw():
@@ -392,6 +400,49 @@ class Label:
         self.isTextVisible = Value(False)
 
     # PUBLIC METHODS
+    def set(self, text=None, align=None, color=None, font_size=None, font=None, w=None, h=None, x=None, y=None, texture=None, background=None, opacity=None, visible=None, animated=False, text_hidden=False):
+        # Text
+        if text is not None:
+            self.setText(text, text_hidden)
+        # Text alignment
+        if align is not None:
+            self.setAlign(align)
+        # Size
+        if w is not None and h is not None:
+            self.setSize(w, h, animated)
+        elif w is not None:
+            self.setSize(w, self.params["h"].value, animated)
+        elif h is not None:
+            self.setSize(self.params["w"].value, h, animated)
+        # Position
+        if x is not None and y is not None:
+            self.setPos(x, y, animated)
+        elif x is not None:
+            self.setX(x, animated)
+        elif y is not None:
+            self.setY(y, animated)
+        # Font color
+        if color is not None:
+            self.setColor(color, animated)
+        # Font
+        if font is not None:
+            self.setFont(font, 0, 0)
+        # Font size
+        if font_size is not None:
+            self.setFontSize(font_size)
+        # Background texture
+        if texture is not None:
+            self.setBgTexture(texture)
+        # Background color
+        if background is not None:
+            self.setBgColor(background, animated)
+        # Background opacity
+        if opacity is not None:
+            self.setBgOpacity(opacity, animated)
+        # Visibility
+        if visible is not None:
+            self.setVisible(visible)
+        return self
 
     def setText(self, text, hidden=False):
         self.text = text

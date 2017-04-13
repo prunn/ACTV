@@ -33,17 +33,17 @@ class ACDelta:
         self.highlight_end = 0
         self.rowHeight = Value(-1)
         self.lbl_delta = Label(self.window.app, "+0.000")\
-            .setSize(150, 36)\
-            .setPos(0, 60)\
-            .setFontSize(26)\
-            .setAlign("right")\
-            .setVisible(1)
+            .set(w=150, h=36,
+                 x=0, y=60,
+                 font_size=26,
+                 align="right",
+                 visible=1)
         self.lbl_lap = Label(self.window.app, "0.000")\
-            .setSize(150, 32)\
-            .setPos(0, 86)\
-            .setFontSize(17)\
-            .setAlign("right")\
-            .setVisible(1)
+            .set(w=150, h=32,
+                 x=0, y=86,
+                 font_size=17,
+                 align="right",
+                 visible=1)
         self.btn_reset = Button(self.window.app, self.on_reset_press)\
             .setPos(90, 68).setSize(60, 20)\
             .setText("Reset")\
@@ -104,7 +104,7 @@ class ACDelta:
         track_file_path = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa", "plugins", "actv_deltas", "default")
         if not os.path.exists(track_file_path):
             os.makedirs(track_file_path)
-            track_file_path += "/" + ac.getTrackName(0)
+        track_file_path += "/" + ac.getTrackName(0)
         if ac.getTrackConfiguration(0) != "":
             track_file_path += "_" + ac.getTrackConfiguration(0)
         track_file_path += "_" + ac.getCarName(0) + ".delta"

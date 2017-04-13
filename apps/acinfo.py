@@ -61,15 +61,17 @@ class ACInfo:
         self.window = Window(name="ACTV Info", icon=False, width=332, height=self.rowHeight * 2, texture="")
 
         self.lbl_driver_name = Label(self.window.app, "")\
-            .setSize(284, self.rowHeight)\
-            .setPos(0, 0)\
-            .setBgColor(Colors.background_dark())\
-            .setBgOpacity(0.8).setVisible(0)
+            .set(w=284, h=self.rowHeight,
+                 x=0, y=0,
+                 background=Colors.background_dark(),
+                 opacity=0.8,
+                 visible=0)
         self.lbl_driver_name2 = Label(self.window.app, "Loading")\
-            .setSize(284, self.rowHeight)\
-            .setPos(14, 0)\
-            .setFontSize(26).setAlign("left")\
-            .setVisible(0)
+            .set(w=284, h=self.rowHeight,
+                 x=14, y=0,
+                 font_size=26,
+                 align="left",
+                 visible=0)
         self.lbl_driver_name_visible = Value()
         self.lbl_driver_name_visible_fin = Value(0)
         self.lbl_driver_name_text = Value("")
@@ -80,42 +82,48 @@ class ACInfo:
         self.race_fastest_lap_driver = Value()
         self.lbl_timing_visible = Value(0)
         self.lbl_timing = Label(self.window.app, "Loading")\
-            .setSize(284, self.rowHeight)\
-            .setPos(0, self.rowHeight)\
-            .setFontSize(26).setAlign("left")\
-            .setBgColor(Colors.background())\
-            .setBgOpacity(0.64)\
-            .setVisible(0)
+            .set(w=284, h=self.rowHeight,
+                 x=0, y=self.rowHeight,
+                 font_size=26,
+                 align="left",
+                 background=Colors.background(),
+                 opacity=Colors.background_opacity(),
+                 visible=0)
         self.lbl_split = Label(self.window.app, "Loading")\
-            .setSize(220, self.rowHeight).setPos(10, self.rowHeight)\
-            .setFontSize(26)\
-            .setAlign("right")\
-            .setVisible(0)
+            .set(w=220, h=self.rowHeight,
+                 x=10, y=self.rowHeight,
+                 font_size=26,
+                 align="right",
+                 visible=0)
         self.lbl_fastest_split = Label(self.window.app, "Loading")\
-            .setSize(220, self.rowHeight)\
-            .setPos(48, self.rowHeight)\
-            .setFontSize(26)\
-            .setAlign("right").setVisible(0)
+            .set(w=220, h=self.rowHeight,
+                 x=48, y=self.rowHeight,
+                 font_size=26,
+                 align="right",
+                 visible=0)
         self.info_position = Label(self.window.app, "0")\
-            .setSize(self.rowHeight, self.rowHeight).setPos(0, 0)\
-            .setFontSize(26)\
-            .setAlign("center")\
-            .setBgColor(Colors.background_first())\
-            .setBgOpacity(1).setVisible(0)
+            .set(w=self.rowHeight, h=self.rowHeight,
+                 x=0, y=0,
+                 font_size=26,
+                 align="center",
+                 background=Colors.background_first(),
+                 opacity=1,
+                 visible=0)
         self.info_position_lead = Label(self.window.app, "1")\
-            .setSize(self.rowHeight, self.rowHeight)\
-            .setPos(246, self.rowHeight)\
-            .setFontSize(26)\
-            .setAlign("center")\
-            .setBgColor(Colors.background_first())\
-            .setBgOpacity(1).setVisible(0)
+            .set(w=self.rowHeight, h=self.rowHeight,
+                 x=246, y=self.rowHeight,
+                 font_size=26,
+                 align="center",
+                 background=Colors.background_first(),
+                 opacity=1,
+                 visible=0)
         car = ac.getCarName(0)
         self.lbl_border = Label(self.window.app, "")\
-            .setSize(284, 1)\
-            .setPos(0, self.rowHeight)\
-            .setBgColor(Colors.colorFromCar(car, self.colorsByClass.value))\
-            .setBgOpacity(0.7)\
-            .setVisible(0)
+            .set(w=284, h=1,
+                 x=0, y=self.rowHeight,
+                 background=Colors.colorFromCar(car, self.colorsByClass.value),
+                 opacity=Colors.border_opacity(),
+                 visible=0)
         self.load_cfg()
         self.info_position.setAnimationSpeed("o", 0.1)
         self.info_position_lead.setAnimationSpeed("o", 0.1)

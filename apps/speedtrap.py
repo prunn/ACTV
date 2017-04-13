@@ -34,20 +34,28 @@ class ACSpeedTrap:
         self.cursor.setValue(False)
         self.ui_row_height = Value(-1)
         self.window = Window(name="ACTV Speed Trap", icon=False, width=250, height=42, texture="")
-        self.lbl_title = Label(self.window.app, "").setSize(self.rowHeight, self.rowHeight)\
-            .setPos(0, 0).setFontSize(26)\
-            .setAlign("center").setBgColor(Colors.background_speedtrap())\
-            .setBgOpacity(0.72).setVisible(0)
-        self.lbl_time = Label(self.window.app, "").setSize(172, self.rowHeight)\
-            .setPos(38, 0).setFontSize(26).setAlign("center")\
-            .setBgColor(Colors.background())\
-            .setBgOpacity(0.64)\
-            .setVisible(0)
+        self.lbl_title = Label(self.window.app, "")\
+            .set(w=self.rowHeight, h=self.rowHeight,
+                 x=0, y=0,
+                 font_size=26,
+                 align="center",
+                 background=Colors.background_speedtrap(),
+                 opacity=0.72,
+                 visible=0)
+        self.lbl_time = Label(self.window.app, "")\
+            .set(w=172, h=self.rowHeight,
+                 x=38, y=0,
+                 font_size=26,
+                 align="center",
+                 background=Colors.background(),
+                 opacity=Colors.background_opacity(),
+                 visible=0)
         self.lbl_border = Label(self.window.app, "")\
-            .setSize(210, 1).setPos(0, 39)\
-            .setBgColor(Colors.theme(bg=True))\
-            .setBgOpacity(0.7)\
-            .setVisible(0)
+            .set(w=210, h=1,
+                 x=0, y=39,
+                 background=Colors.theme(bg=True),
+                 opacity=Colors.border_opacity(),
+                 visible=0)
         self.useMPH = False
 
         user_path = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa", "cfg")

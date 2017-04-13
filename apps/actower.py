@@ -118,7 +118,7 @@ class Driver:
                 .setPos(0, 0)\
                 .setFontSize(self.fontSize)\
                 .setAlign("center")\
-                .setBgColor(Colors.background_tower_position())\
+                .setBgColor(Colors.background_tower_position_odd())\
                 .setColor(Colors.white())\
                 .setBgOpacity(1)\
                 .setVisible(0)
@@ -141,7 +141,7 @@ class Driver:
             .setSize(self.rowHeight * 2.8, 1)\
             .setPos(0, self.rowHeight - 1)\
             .setBgColor(Colors.red(bg=True))\
-            .setBgOpacity(0.7)\
+            .setBgOpacity(Colors.border_opacity())\
             .setVisible(0)
         self.set_name()
         self.lbl_time.setAnimationSpeed("rgb", 0.08)
@@ -312,7 +312,7 @@ class Driver:
             self.set_border()
 
     def set_border(self):
-        self.lbl_border.setBgColor(Colors.colorFromCar(self.carName, ACTower.colorsByClass)).setBgOpacity(0.7)
+        self.lbl_border.setBgColor(Colors.colorFromCar(self.carName, ACTower.colorsByClass)).setBgOpacity(Colors.border_opacity())
 
     def show_full_name(self):
         offset = " "
@@ -455,11 +455,11 @@ class Driver:
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(Colors.background_tower_position(), True)\
+                            self.lbl_position.setBgColor(Colors.background_tower_position_odd(), True)\
                                 .setColor(Colors.white(), True)\
                                 .setBgOpacity(0.72)
                         else:
-                            self.lbl_position.setBgColor(Colors.background_tower_position(), True)\
+                            self.lbl_position.setBgColor(Colors.background_tower_position_odd(), True)\
                                 .setColor(Colors.grey(), True)\
                                 .setBgOpacity(0.62)
                     '''
