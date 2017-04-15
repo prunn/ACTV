@@ -21,6 +21,7 @@ battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap f
 ###Changelog
 1.2.0
 Fixed over 30 mins timed races
+Color by class option
 Improved tower display for 1st lap of race
 Tower highlight on current car instead of driver only
 Pit window open/close message
