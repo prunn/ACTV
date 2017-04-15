@@ -99,50 +99,55 @@ class Driver:
         self.showingFullNames = False
         if self.isLapLabel:
             self.lbl_name = Label(app, str_offset + name)\
-                .setSize(self.rowHeight * 6, self.rowHeight)\
-                .setPos(0, 0)\
-                .setFontSize(self.fontSize)\
-                .setAlign("left")\
-                .setBgColor(Colors.background_tower())\
-                .setBgOpacity(0.6)\
-                .setVisible(0)
+                .set(w=self.rowHeight * 6, h=self.rowHeight,
+                     x=0, y=0,
+                     font_size=self.fontSize,
+                     align="left",
+                     background=Colors.background_tower(),
+                     opacity=0.6,
+                     visible=0)
         else:
             self.lbl_name = Label(app, str_offset + self.format_name_tlc(name))\
-                .setSize(self.rowHeight * 5, self.rowHeight)\
-                .setPos(self.rowHeight, 0)\
-                .setFontSize(self.fontSize).setAlign("left")\
-                .setBgColor(Colors.background_tower())\
-                .setBgOpacity(0.6).setVisible(0)
+                .set(w=self.rowHeight * 5, h=self.rowHeight,
+                     x=self.rowHeight, y=0,
+                     font_size=self.fontSize,
+                     align="left",
+                     background=Colors.background_tower(),
+                     opacity=0.6,
+                     visible=0)
             self.lbl_position = Label(app, str(pos + 1))\
-                .setSize(self.rowHeight, self.rowHeight)\
-                .setPos(0, 0)\
-                .setFontSize(self.fontSize)\
-                .setAlign("center")\
-                .setBgColor(Colors.background_tower_position_odd())\
-                .setColor(Colors.white())\
-                .setBgOpacity(1)\
-                .setVisible(0)
+                .set(w=self.rowHeight, h=self.rowHeight,
+                     x=0, y=0,
+                     font_size=self.fontSize,
+                     align="center",
+                     background=Colors.background_tower_position_odd(),
+                     color=Colors.white(),
+                     opacity=1,
+                     visible=0)
             self.lbl_pit = Label(app, "P")\
-                .setSize(self.rowHeight * 0.6, self.rowHeight - 2)\
-                .setPos(self.rowHeight * 6, self.final_y + 2)\
-                .setFontSize(self.fontSize - 3)\
-                .setAlign("center")\
-                .setBgOpacity(0)\
-                .setVisible(0)
+                .set(w=self.rowHeight * 0.6, h=self.rowHeight - 2,
+                     x=self.rowHeight * 6, y=self.final_y + 2,
+                     font_size=self.fontSize - 3,
+                     align="center",
+                     opacity=0,
+                     visible=0)
             self.lbl_pit.setAnimationSpeed("rgb", 0.08)
             self.lbl_position.setAnimationMode("y", "spring")
             self.lbl_pit.setAnimationMode("y", "spring")
-        self.lbl_time = Label(app, "+0.000").setSize(self.rowHeight * 4.7, self.rowHeight)\
-            .setPos(self.rowHeight, 0).setColor(Colors.grey())\
-            .setFontSize(self.fontSize)\
-            .setAlign("right")\
-            .setBgOpacity(0).setVisible(0)
+        self.lbl_time = Label(app, "+0.000")\
+            .set(w=self.rowHeight * 4.7, h=self.rowHeight,
+                 x=self.rowHeight, y=0,
+                 color=Colors.grey(),
+                 font_size=self.fontSize,
+                 align="right",
+                 opacity=0,
+                 visible=0)
         self.lbl_border = Label(app, "")\
-            .setSize(self.rowHeight * 2.8, 1)\
-            .setPos(0, self.rowHeight - 1)\
-            .setBgColor(Colors.red(bg=True))\
-            .setBgOpacity(Colors.border_opacity())\
-            .setVisible(0)
+            .set(w=self.rowHeight * 2.8, h=1,
+                 x=0, y=self.rowHeight - 1,
+                 background=Colors.red(bg=True),
+                 opacity=Colors.border_opacity(),
+                 visible=0)
         self.set_name()
         self.lbl_time.setAnimationSpeed("rgb", 0.08)
         self.lbl_name.setAnimationMode("y", "spring")
@@ -612,23 +617,29 @@ class ACTower:
         self.minlap_stint = 5
         self.iLastTime = Value()
         self.lbl_title_stint = Label(self.window.app, "Current Stint")\
-            .setSize(self.rowHeight * 6, self.rowHeight - 4)\
-            .setPos(0, self.rowHeight * 4 - self.rowHeight - 6)\
-            .setFontSize(23)\
-            .setAlign("center")\
-            .setBgColor(Colors.background_dark())\
-            .setBgOpacity(0.8)\
-            .setVisible(0)
+            .set(w=self.rowHeight * 6, h=self.rowHeight - 4,
+                 x=0, y=self.rowHeight * 4 - self.rowHeight - 6,
+                 font_size=23,
+                 align="center",
+                 background=Colors.background_dark(),
+                 opacity=0.8,
+                 visible=0)
         self.lbl_tire_stint = Label(self.window.app, "")\
-            .setSize(self.rowHeight * 6, self.rowHeight)\
-            .setPos(0, self.rowHeight * 4 - (self.rowHeight - 4))\
-            .setFontSize(24).setAlign("center")\
-            .setBgColor(Colors.background_tower())\
-            .setBgOpacity(0.58).setVisible(0)
+            .set(w=self.rowHeight * 6, h=self.rowHeight,
+                 x=0, y=self.rowHeight * 4 - (self.rowHeight - 4),
+                 font_size=24,
+                 align="center",
+                 background=Colors.background_tower(),
+                 opacity=0.58,
+                 visible=0)
         self.lbl_title_mode = Label(self.window.app, "Mode") \
-            .setSize(self.rowHeight * 6, self.rowHeight - 4) \
-            .setPos(0, -(self.rowHeight - 4)).setFontSize(23).setAlign("center") \
-            .setBgColor(Colors.theme(bg=True)).setBgOpacity(0.8).setVisible(0)
+            .set(w=self.rowHeight * 6, h=self.rowHeight - 4,
+                 x=0, y=-(self.rowHeight - 4),
+                 font_size=23,
+                 align="center",
+                 background=Colors.theme(bg=True),
+                 opacity=0.8,
+                 visible=0)
         track = ac.getTrackName(0)
         config = ac.getTrackConfiguration(0)
         if track.find("ks_nordschleife") >= 0 and config.find("touristenfahrten") >= 0:

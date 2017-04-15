@@ -315,7 +315,6 @@ class Colors:
                 Colors.loadCarClasses()
             cl = Colors.getClassForCar(car)
             if cl != False:
-                tt = 1
                 if cl == 'lmp1':
                     return Colors.lmp1()
                 if cl == 'lmp3':
@@ -342,10 +341,10 @@ class Colors:
                     return rgb([98, 203, 236], bg=True)
                 if cl == 'vintage touring':
                     return Colors.alfa()
-                '''
-                small sports
-                90s touring
-                '''
+                if cl == 'small sports':
+                    return Colors.nissan()
+                if cl == '90s touring':
+                    return Colors.gte()
 
         if car.find("ferrari") >= 0:
             return Colors.ferrari()

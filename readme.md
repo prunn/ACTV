@@ -19,6 +19,15 @@ battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap f
 
 -
 ###Changelog
+1.2.0
+Fixed over 30 mins timed races
+Improved tower display for 1st lap of race
+Tower highlight on current car instead of driver only
+Pit window open/close message
+Tower qualif : Forcing to show full time instead of gaps when highlighted
+Tower faded dnf drivers
+Info widget resizing depending on driver name length
+
 1.1.1
 Customizable Theme Color Base (RGB)
 Config qualif new lap color(Red-Green)

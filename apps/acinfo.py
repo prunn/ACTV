@@ -157,22 +157,25 @@ class ACInfo:
         row2_height = self.ui_row_height.value
         font_size2 = getFontSize(row2_height)
         width = self.rowHeight * 7
-        self.lbl_driver_name.setSize(width, self.rowHeight).setFontSize(font_size)
-        self.lbl_driver_name2.setSize(width, self.rowHeight).setFontSize(font_size)
-        self.lbl_timing.setSize(width, row2_height)\
-            .setPos(0, self.rowHeight).setFontSize(font_size2)
-        self.lbl_split.setSize(self.rowHeight * 4.7, row2_height)\
-            .setPos(self.rowHeight, self.rowHeight)\
-            .setFontSize(font_size2)
-        self.lbl_fastest_split.setSize(self.rowHeight * 5.7, row2_height)\
-            .setPos(self.rowHeight, self.rowHeight)\
-            .setFontSize(font_size2)
-        self.info_position.setSize(self.rowHeight, self.rowHeight)\
-            .setFontSize(font_size)
-        self.info_position_lead.setSize(row2_height, row2_height)\
-            .setPos(width - row2_height, self.rowHeight)\
-            .setFontSize(font_size2)
-        self.lbl_border.setSize(width, 1).setPos(0, self.rowHeight)
+        self.lbl_driver_name.set(w=width, h=self.rowHeight,
+                                 font_size=font_size)
+        self.lbl_driver_name2.set(w=width, h=self.rowHeight,
+                                  font_size=font_size)
+        self.lbl_timing.set(w=width, h=row2_height,
+                            x=0, y=self.rowHeight,
+                            font_size=font_size2)
+        self.lbl_split.set(w=self.rowHeight * 4.7, h=row2_height,
+                           x=self.rowHeight, y=self.rowHeight,
+                           font_size=font_size2)
+        self.lbl_fastest_split.set(w=self.rowHeight * 5.7, h=row2_height,
+                                   x=self.rowHeight, y=self.rowHeight,
+                                   font_size=font_size2)
+        self.info_position.set(w=self.rowHeight, h=self.rowHeight,
+                               font_size=font_size)
+        self.info_position_lead.set(w=row2_height, h=row2_height,
+                                    x=width - row2_height, y=self.rowHeight,
+                                    font_size=font_size2)
+        self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
 
     def set_font(self, font_name):
         self.lbl_driver_name.setFont(font_name, 0, 0)
@@ -183,15 +186,15 @@ class ACInfo:
         self.info_position.setFont(font_name, 0, 0)
         self.info_position_lead.setFont(font_name, 0, 0)
 
-    def format_name(self, name):
+    def format_name(self, name, max_name_length):
         space = name.find(" ")
         if space > 0:
-            if len(name) > 14 and space + 1 < len(name):
-                return name[space + 1:].upper()
-            return name[:space].capitalize() + name[space:].upper()
-        if len(name) > 14:
-            return name[:15].upper()
-        return name.upper()
+            if len(name) > max_name_length and space + 1 < len(name):
+                return name[space + 1:].upper().lstrip()
+            return name[:space].capitalize().lstrip() + name[space:].upper()
+        if len(name) > max_name_length:
+            return name[:max_name_length+1].upper().lstrip()
+        return name.upper().lstrip()
 
     def format_tire(self, name):
         space = name.find("(")
@@ -272,6 +275,27 @@ class ACInfo:
         self.info_position.hide()
         self.visible_end = 0
 
+    def set_width_and_name(self):
+        width = self.rowHeight * 9.5
+        name = self.format_name(self.lbl_driver_name_text.value, 18)
+        if len(name) <= 13:
+            width = self.rowHeight * 7
+        elif len(name) <= 14:
+            width = self.rowHeight * 7.5
+        elif len(name) <= 15:
+            width = self.rowHeight * 8
+        elif len(name) <= 16:
+            width = self.rowHeight * 8.5
+        elif len(name) <= 17:
+            width = self.rowHeight * 9
+
+        self.lbl_driver_name.set(w=width, animated=True)
+        self.lbl_driver_name2.set(w=width, animated=True)
+        self.lbl_border.set(w=width, animated=True)
+        self.lbl_timing.set(w=width, animated=True)
+        self.info_position_lead.set(x=width - self.ui_row_height.value, animated=True)
+        self.lbl_driver_name2.setText(name)
+
     def visibility_qualif(self):
         self.lbl_fastest_split.hideText()
         if self.lbl_driver_name_visible.value == 1 and self.lbl_driver_name.isVisible.value == 0:
@@ -298,7 +322,7 @@ class ACInfo:
                 self.lbl_timing.show()
 
         if self.lbl_driver_name_text.hasChanged():
-            self.lbl_driver_name2.setText(self.lbl_driver_name_text.value.lstrip())
+            self.set_width_and_name()
         if self.nameOffsetValue.hasChanged():
             self.lbl_driver_name2.setX(self.nameOffsetValue.value, True)
         if self.lbl_timing_text.hasChanged():
@@ -323,7 +347,7 @@ class ACInfo:
                 self.lbl_timing.show()
 
         if self.lbl_driver_name_text.hasChanged():
-            self.lbl_driver_name2.setText(self.lbl_driver_name_text.value)
+            self.set_width_and_name()
         if self.nameOffsetValue.hasChanged():
             self.lbl_driver_name2.setX(self.nameOffsetValue.value, True)
         if self.lbl_timing_text.hasChanged():
@@ -447,7 +471,7 @@ class ACInfo:
                 # lap_invalidated = bool(ac.getCarState(0, acsys.CS.LapInvalidated))
                 lap_invalidated = bool(self.lastLapInvalidated == lap_count)
                 if current_vehicle_changed or self.lbl_driver_name_text.value == "":
-                    self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.currentVehicle.value)))
+                    self.lbl_driver_name_text.setValue(ac.getDriverName(self.currentVehicle.value))
                 # sector_delay = 5000
                 # live or info
                 if ((self.lastLapStart < 0 and self.minLapCount > 0 and self.isLapVisuallyEnded) or(self.minLapCount == 0 and lap_invalidated)) and self.session.value != 0:
@@ -664,7 +688,7 @@ class ACInfo:
                     self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value))
                     self.visible_end = session_time_left - 8000
                     self.lbl_driver_name_visible.setValue(1)
-                    self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.race_fastest_lap_driver.value)))
+                    self.lbl_driver_name_text.setValue(ac.getDriverName(self.race_fastest_lap_driver.value))
                     self.nameOffset = self.rowHeight * 14 / 36  # 14
                     self.lbl_timing_text.setValue(str_offset + "Fastest Lap")
                     self.lbl_timing_visible.setValue(1)
@@ -677,7 +701,7 @@ class ACInfo:
                         self.visible_end = session_time_left - 8000
                     self.lbl_driver_name_visible.setValue(1)
                     # if current_vehicle_changed:
-                    self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.currentVehicle.value)))
+                    self.lbl_driver_name_text.setValue(ac.getDriverName(self.currentVehicle.value))
                     self.nameOffset = self.rowHeight * 49 / 36  # 49
                     # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
                     pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
@@ -702,7 +726,7 @@ class ACInfo:
             cur_lap_time = ac.getCarState(self.currentVehicle.value, acsys.CS.LapTime)
             is_in_pit = (bool(ac.isCarInPitline(self.currentVehicle.value)) or bool(ac.isCarInPit(self.currentVehicle.value)))
             if current_vehicle_changed or self.lbl_driver_name_text.value == "":
-                self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.currentVehicle.value)))
+                self.lbl_driver_name_text.setValue(ac.getDriverName(self.currentVehicle.value))
             if is_in_pit:
                 self.lbl_driver_name_visible.setValue(0)
                 self.lbl_timing_visible.setValue(0)
@@ -772,7 +796,7 @@ class ACInfo:
             if current_vehicle_changed:
                 self.visible_end = session_time_left - 8000
                 self.lbl_driver_name_visible.setValue(1)
-                self.lbl_driver_name_text.setValue(self.format_name(ac.getDriverName(self.currentVehicle.value)))
+                self.lbl_driver_name_text.setValue(ac.getDriverName(self.currentVehicle.value))
                 self.nameOffset=self.rowHeight*49/36 #49
                 pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                 if pos > 1:
