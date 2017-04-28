@@ -17,6 +17,7 @@ class ACInfo:
     # INITIALIZATION
     def __init__(self):
         self.rowHeight = 36
+        self.font_offset = 0
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.isLapVisuallyEnded = True
@@ -47,6 +48,7 @@ class ACInfo:
         self.sectorCount = -1
         self.lapTimesArray = []
         self.driversLap = []
+        self.standings = None
         track = ac.getTrackName(0)
         config = ac.getTrackConfiguration(0)
         if track.find("ks_nordschleife") >= 0 and config.find("touristenfahrten") >= 0:
@@ -153,9 +155,9 @@ class ACInfo:
 
     def redraw_size(self):
         self.rowHeight = self.ui_row_height.value + 2
-        font_size = getFontSize(self.rowHeight)
+        font_size = getFontSize(self.rowHeight+self.font_offset)
         row2_height = self.ui_row_height.value
-        font_size2 = getFontSize(row2_height)
+        font_size2 = getFontSize(row2_height+self.font_offset)
         width = self.rowHeight * 7
         self.lbl_driver_name.set(w=width, h=self.rowHeight,
                                  font_size=font_size)
@@ -177,7 +179,8 @@ class ACInfo:
                                     font_size=font_size2)
         self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
 
-    def set_font(self, font_name):
+    def set_font(self, font_name, font_offset):
+        self.font_offset = font_offset
         self.lbl_driver_name.setFont(font_name, 0, 0)
         self.lbl_driver_name2.setFont(font_name, 0, 0)
         self.lbl_timing.setFont(font_name, 0, 0)
@@ -185,6 +188,7 @@ class ACInfo:
         self.lbl_fastest_split.setFont(font_name, 0, 0)
         self.info_position.setFont(font_name, 0, 0)
         self.info_position_lead.setFont(font_name, 0, 0)
+        self.redraw_size();
 
     def format_name(self, name, max_name_length):
         space = name.find(" ")
@@ -250,6 +254,13 @@ class ACInfo:
         if len(p) > 0:
             return p[0] + 1
         return 0
+
+    def get_race_standings_position(self, identifier):
+        if len(self.standings):
+            p = [i for i, v in enumerate(self.standings) if v[0] == identifier]
+            if len(p) > 0:
+                return p[0] + 1
+        return ac.getCarRealTimeLeaderboardPosition(identifier) + 1
 
     def animate(self):
         self.lbl_driver_name.animate()
@@ -386,7 +397,8 @@ class ACInfo:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
 
-    def on_update(self, sim_info, fl):
+    def on_update(self, sim_info, fl, standings):
+        self.standings = standings
         self.session.setValue(sim_info.graphics.session)
         self.manage_window()
         self.animate()
@@ -702,9 +714,14 @@ class ACInfo:
                     self.lbl_driver_name_visible.setValue(1)
                     # if current_vehicle_changed:
                     self.lbl_driver_name_text.setValue(ac.getDriverName(self.currentVehicle.value))
-                    self.nameOffset = self.rowHeight * 49 / 36  # 49
+                    self.nameOffset = self.rowHeight * 49 / 36
                     # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
-                    pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
+                    # pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
+
+                    if sim_info.graphics.completedLaps == 0 and sim_info.graphics.iCurrentTime <= 20000:
+                        pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
+                    else:
+                        pos = self.get_race_standings_position(self.currentVehicle.value)
                     if pos > 1:
                         self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                     else:

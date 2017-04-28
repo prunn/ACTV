@@ -10,6 +10,7 @@ class ACSpeedTrap:
     # INITIALIZATION
     def __init__(self):
         self.rowHeight = 36
+        self.font_offset = 0
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.lastLapShown = 0
@@ -83,14 +84,16 @@ class ACSpeedTrap:
 
     def redraw_size(self):
         self.rowHeight = self.ui_row_height.value
-        font_size = getFontSize(self.rowHeight)
+        font_size = getFontSize(self.rowHeight+self.font_offset)
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
         self.lbl_time.setSize(self.rowHeight * 4.8, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
         self.lbl_border.setSize(self.rowHeight * 5.8, 1).setPos(0, self.rowHeight + 1)
 
-    def set_font(self, font_name):
+    def set_font(self, font_name, font_offset):
+        self.font_offset = font_offset
         self.lbl_title.setFont(font_name, 0, 0)
         self.lbl_time.setFont(font_name, 0, 0)
+        self.redraw_size();
 
     def check_mph(self, cfg_path):
         conf = Config(cfg_path, "/gameplay.ini")

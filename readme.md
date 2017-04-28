@@ -28,6 +28,7 @@ Pit window open/close message
 Tower qualif : Forcing to show full time instead of gaps when highlighted
 Tower faded dnf drivers
 Info widget resizing depending on driver name length
+Info widget always on option
 
 1.1.1
 Customizable Theme Color Base (RGB)

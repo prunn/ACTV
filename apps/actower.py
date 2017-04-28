@@ -53,13 +53,14 @@ class Driver:
     def __init__(self, app, row_height, font_name, identifier, name, pos, is_lap_label=False):
         self.identifier = identifier
         self.rowHeight = row_height
+        self.font_offset = 0
         self.race = False
         self.hasStartedRace = False
         self.inPitFromPitLane = False
         self.isInPitLane = Value(False)
         self.isInPitLaneOld = False
         self.isInPitBox = Value(False)
-        self.fontSize = getFontSize(self.rowHeight)
+        self.fontSize = getFontSize(self.rowHeight+self.font_offset)
         str_offset = " "
         self.final_y = 0
         self.isDisplayed = False
@@ -170,9 +171,10 @@ class Driver:
     def on_click_func(*args, driver=0):
         ac.focusCar(driver)
 
-    def redraw_size(self, height):
+    def redraw_size(self, height, font_offset):
+        self.font_offset = font_offset
         self.rowHeight = height
-        font_size = getFontSize(self.rowHeight)
+        font_size = getFontSize(self.rowHeight+self.font_offset)
         self.final_y = self.num_pos * self.rowHeight
         if self.isLapLabel:
             self.lbl_name.setSize(self.rowHeight * 6, self.rowHeight).setPos(0, self.final_y).setFontSize(font_size)
@@ -577,6 +579,7 @@ class ACTower:
     # INITIALIZATION
     def __init__(self):
         self.rowHeight = 36
+        self.font_offset = 0
         self.fontName = ""
         self.drivers = []
         self.stintLabels = []
@@ -670,8 +673,8 @@ class ACTower:
     def redraw_size(self):
         self.rowHeight = self.ui_row_height.value
         height = self.rowHeight - 2
-        font_size = getFontSize(height)
-        font_size2 = getFontSize(height - 2)
+        font_size = getFontSize(height+self.font_offset)
+        font_size2 = getFontSize(height - 2+self.font_offset)
         self.lbl_tire_stint.setSize(self.rowHeight * 6, height).setPos(0, self.rowHeight).setFontSize(font_size)
         self.lbl_title_stint.setSize(self.rowHeight * 6, height - 2)\
             .setPos(0, self.rowHeight * 4 - (height - 2))\
@@ -681,16 +684,18 @@ class ACTower:
             .setPos(0, -(height - 2))\
             .setFontSize(font_size2)
         for driver in self.drivers:
-            driver.redraw_size(self.rowHeight)
+            driver.redraw_size(self.rowHeight, self.font_offset)
             driver.set_border()
         for lbl in self.stintLabels:
-            lbl.redraw_size(self.rowHeight)
+            lbl.redraw_size(self.rowHeight, self.font_offset)
 
-    def set_font(self, font_name):
+    def set_font(self, font_name, font_offset):
+        self.font_offset = font_offset
         self.lbl_title_stint.setFont(font_name, 0, 0)
         self.lbl_tire_stint.setFont(font_name, 0, 0)
         self.lbl_title_mode.setFont(font_name, 0, 0)
         self.fontName = font_name
+        self.redraw_size()
 
     def animate(self, session_time_left):
         self.lbl_title_stint.animate()
@@ -1133,6 +1138,9 @@ class ACTower:
 
     def get_fastest_lap(self):
         return self.fastestLap
+
+    def get_standings(self):
+        return self.standings
 
     def manage_window(self):
         pt = POINT()

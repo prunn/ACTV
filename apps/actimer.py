@@ -11,6 +11,7 @@ class ACTimer:
     # INITIALIZATION
 
     def __init__(self):
+        self.font_offset = 0
         self.finish_labels = []
         self.finish_initialised = False
         self.replay_initialised = False
@@ -120,7 +121,7 @@ class ACTimer:
 
     def redraw_size(self):
         self.rowHeight = self.ui_row_height.value
-        font_size = getFontSize(self.rowHeight)
+        font_size = getFontSize(self.rowHeight+self.font_offset)
         width = self.rowHeight * 5
         self.lbl_session_info.setSize(self.rowHeight * 4, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
         self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
@@ -145,11 +146,13 @@ class ACTimer:
                     i += 1
                     j = 0
 
-    def set_font(self, font_name):
+    def set_font(self, font_name, font_offset):
+        self.font_offset = font_offset
         self.lbl_session_info.setFont(font_name, 0, 0)
         self.lbl_session_title.setFont(font_name, 0, 0)
         self.lbl_session_single.setFont(font_name, 0, 0)
         self.lbl_pit_window_text.setFont(font_name, 0, 0)
+        self.redraw_size();
 
     def time_splitting(self, ms):
         s = ms / 1000

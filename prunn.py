@@ -94,30 +94,15 @@ def acMain(ac_version):
         deltaInit = True
     except:
         Log.w("Error init delta")
-    '''
-    try:
-        fontName="Khula"
-        #fontName="Noto Sans UI Light"
-        if ac.initFont(0,fontName,0,0) > 0:
-            if timerInit:
-                timer.set_font(fontName)
-            if infoInit:
-                info.set_font(fontName)
-            if towerInit:
-                tower.set_font(fontName)
-            if speedInit:    
-                speed.set_font(fontName)
-        else:
-            ac.console("font init failed")
-    except:
-        Log.w("Error init font") 
-    '''                      
+
+    
     return "Prunn"
 
 
 def acUpdate(deltaT):
     global timer, info, tower, speed, timerInit, infoInit, towerInit, speedInit, config, configInit, delta, deltaInit
     fl = 0
+    standings = []
     if configInit:     
         try:
             config_changed = config.on_update(sim_info)
@@ -141,11 +126,12 @@ def acUpdate(deltaT):
         try:
             tower.on_update(sim_info)
             fl = tower.get_fastest_lap()
+            standings = tower.get_standings()
         except:
             Log.w("Error tower")  
     if infoInit:
         try:
-            info.on_update(sim_info, fl)
+            info.on_update(sim_info, fl, standings)
         except:
             Log.w("Error info")
     if speedInit:     
