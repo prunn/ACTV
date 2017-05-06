@@ -2,7 +2,7 @@ import ac
 import acsys
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
-from apps.util.classes import Window, Button, Label, Value, Config, Log
+from apps.util.classes import Window, Button, Label, Value, Config, Log, Font
 from apps.util.func import rgb
 
 
@@ -141,6 +141,17 @@ class Configuration:
         self.lbl_colors_by = Label(self.window.app, "Brand").setSize(120, 26).setPos(186, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
 
+        # Font
+        y += 70
+        self.spin_font = ac.addSpinner(self.window.app, "Font :")
+        ac.setRange(self.spin_font, 0, len(Font.fonts) - 1)
+        ac.setPosition(self.spin_font, 20, y)
+        ac.setValue(self.spin_font, Font.current)
+        ac.addOnValueChangeListener(self.spin_font, self.on_spin_font_changed)
+        ac.setVisible(self.spin_font, 0)
+        self.lbl_font = Label(self.window.app, "Default").setSize(120, 26).setPos(148, y - 28).setFontSize(
+            12).setAlign("left").setVisible(0)
+
         self.cfg_loaded = False
         self.cfg = Config("apps/python/prunn/", "config.ini")
         self.load_cfg()
@@ -191,6 +202,10 @@ class Configuration:
         self.__class__.carColorsBy = self.cfg.get("SETTINGS", "car_colors_by", "int")
         if self.__class__.carColorsBy == -1:
             self.__class__.carColorsBy = 0
+        font = self.cfg.get("SETTINGS", "font", "int")
+        if font == -1:
+            font = 0
+        Font.set_font(font)
 
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
@@ -204,6 +219,7 @@ class Configuration:
         ac.setValue(self.spin_theme_blue, self.__class__.theme_blue)
         ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
         ac.setValue(self.spin_colors_by, self.__class__.carColorsBy)
+        ac.setValue(self.spin_font, font)
         self.set_labels()
         self.cfg_loaded = True
 
@@ -221,6 +237,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "blue", self.__class__.theme_blue)
         self.cfg.set("SETTINGS", "tower_highlight", self.__class__.tower_highlight)
         self.cfg.set("SETTINGS", "car_colors_by", self.__class__.carColorsBy)
+        self.cfg.set("SETTINGS", "font", Font.current)
 
     def set_labels(self):
         # Qualifying mode
@@ -245,6 +262,8 @@ class Configuration:
             self.lbl_colors_by.setText("Brand")
         else:
             self.lbl_colors_by.setText("Class")
+        # Font
+        self.lbl_font.setText(str(Font.get_font()))
 
     def change_tab(self):
         if self.__class__.currentTab == 1:
@@ -255,8 +274,10 @@ class Configuration:
             ac.setVisible(self.spin_theme_blue, 0)
             ac.setVisible(self.spin_tower_lap, 0)
             ac.setVisible(self.spin_colors_by, 0)
+            ac.setVisible(self.spin_font, 0)
             self.lbl_tower_lap.setVisible(0)
             self.lbl_colors_by.setVisible(0)
+            self.lbl_font.setVisible(0)
             ac.setVisible(self.spin_race_mode, 1)
             ac.setVisible(self.spin_qual_mode, 1)
             ac.setVisible(self.spin_num_cars, 1)
@@ -276,8 +297,10 @@ class Configuration:
             ac.setVisible(self.spin_theme_blue, 1)
             ac.setVisible(self.spin_tower_lap, 1)
             ac.setVisible(self.spin_colors_by, 1)
+            ac.setVisible(self.spin_font, 1)
             self.lbl_tower_lap.setVisible(1)
             self.lbl_colors_by.setVisible(1)
+            self.lbl_font.setVisible(1)
             ac.setVisible(self.spin_race_mode, 0)
             ac.setVisible(self.spin_qual_mode, 0)
             ac.setVisible(self.spin_num_cars, 0)
@@ -377,6 +400,11 @@ class Configuration:
     @staticmethod
     def on_spin_colors_by_changed(value):
         Configuration.carColorsBy = value
+        Configuration.configChanged = True
+
+    @staticmethod
+    def on_spin_font_changed(value):
+        Font.set_font(value)
         Configuration.configChanged = True
 
     @staticmethod

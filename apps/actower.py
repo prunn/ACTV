@@ -4,8 +4,7 @@ import math
 import functools
 import ctypes
 import time
-from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, raceGaps
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, raceGaps, Font
 import http.client
 import encodings.idna
 import threading
@@ -60,7 +59,7 @@ class Driver:
         self.isInPitLane = Value(False)
         self.isInPitLaneOld = False
         self.isInPitBox = Value(False)
-        self.fontSize = getFontSize(self.rowHeight+self.font_offset)
+        self.fontSize = Font.get_font_size(self.rowHeight+self.font_offset)
         str_offset = " "
         self.final_y = 0
         self.isDisplayed = False
@@ -171,10 +170,17 @@ class Driver:
     def on_click_func(*args, driver=0):
         ac.focusCar(driver)
 
-    def redraw_size(self, height, font_offset):
-        self.font_offset = font_offset
+    def redraw_size(self, height):
+        # Fonts
+        self.font_offset = Font.get_font_offset()
+        self.lbl_name.update_font()
+        self.lbl_time.update_font()
+        if not self.isLapLabel:
+            self.lbl_position.update_font()
+            self.lbl_pit.update_font()
+        # UI
         self.rowHeight = height
-        font_size = getFontSize(self.rowHeight+self.font_offset)
+        font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.final_y = self.num_pos * self.rowHeight
         if self.isLapLabel:
             self.lbl_name.setSize(self.rowHeight * 6, self.rowHeight).setPos(0, self.final_y).setFontSize(font_size)
@@ -591,6 +597,7 @@ class ACTower:
         self.TimeLeftUpdate = Value()
         self.lapsCompleted = Value()
         self.currentVehicule = Value(0)
+        self.font = Value(0)
         self.fastestLap = 0
         self.race_show_end = 0
         self.driver_shown = 0
@@ -664,17 +671,24 @@ class ACTower:
         else:
             self.__class__.colorsByClass = False
         Colors.highlight(reload=True)
-        if self.ui_row_height.hasChanged():
+        self.font.setValue(Font.current)
+        if self.ui_row_height.hasChanged() or self.font.hasChanged():
             self.redraw_size()
         else:
             for driver in self.drivers:
                 driver.set_border()
 
     def redraw_size(self):
+        # Fonts
+        self.font_offset = Font.get_font_offset()
+        self.lbl_title_stint.update_font()
+        self.lbl_tire_stint.update_font()
+        self.lbl_title_mode.update_font()
+        # UI
         self.rowHeight = self.ui_row_height.value
         height = self.rowHeight - 2
-        font_size = getFontSize(height+self.font_offset)
-        font_size2 = getFontSize(height - 2+self.font_offset)
+        font_size = Font.get_font_size(height+self.font_offset)
+        font_size2 = Font.get_font_size(height - 2+self.font_offset)
         self.lbl_tire_stint.setSize(self.rowHeight * 6, height).setPos(0, self.rowHeight).setFontSize(font_size)
         self.lbl_title_stint.setSize(self.rowHeight * 6, height - 2)\
             .setPos(0, self.rowHeight * 4 - (height - 2))\
@@ -684,16 +698,16 @@ class ACTower:
             .setPos(0, -(height - 2))\
             .setFontSize(font_size2)
         for driver in self.drivers:
-            driver.redraw_size(self.rowHeight, self.font_offset)
+            driver.redraw_size(self.rowHeight)
             driver.set_border()
         for lbl in self.stintLabels:
-            lbl.redraw_size(self.rowHeight, self.font_offset)
+            lbl.redraw_size(self.rowHeight)
 
-    def set_font(self, font_name, font_offset):
+    def set_font(self, font_name, italic, bold, font_offset):
         self.font_offset = font_offset
-        self.lbl_title_stint.setFont(font_name, 0, 0)
-        self.lbl_tire_stint.setFont(font_name, 0, 0)
-        self.lbl_title_mode.setFont(font_name, 0, 0)
+        self.lbl_title_stint.setFont(font_name, italic, bold)
+        self.lbl_tire_stint.setFont(font_name, italic, bold)
+        self.lbl_title_mode.setFont(font_name, italic, bold)
         self.fontName = font_name
         self.redraw_size()
 

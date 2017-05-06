@@ -3,8 +3,8 @@ import acsys
 import os.path
 import json
 import ctypes
-from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config
+from apps.util.func import rgb
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
 
 
 class ACTimer:
@@ -21,6 +21,7 @@ class ACTimer:
         self.cursor = Value(False)
         self.session_draw = Value(-1)
         self.ui_row_height = Value(-1)
+        self.font = Value(0)
         self.numberOfLaps = -1
         self.hasExtraLap = -1
         self.numberOfLapsTimedRace = -1
@@ -112,16 +113,26 @@ class ACTimer:
     # PUBLIC METHODS
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     def load_cfg(self):
+        # Load
         cfg = Config("apps/python/prunn/", "config.ini")
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
-        if self.ui_row_height.hasChanged():
+        # UI
+        self.font.setValue(Font.current)
+        if self.ui_row_height.hasChanged() or self.font.hasChanged():
             self.redraw_size()
         self.lbl_session_border.setBgColor(Colors.theme(bg=True, reload=True))
         self.lbl_session_title.setBgColor(Colors.theme(bg=True, reload=True))
 
     def redraw_size(self):
+        # Fonts
+        self.font_offset = Font.get_font_offset()
+        self.lbl_session_info.update_font()
+        self.lbl_session_title.update_font()
+        self.lbl_session_single.update_font()
+        self.lbl_pit_window_text.update_font()
+        # UI
         self.rowHeight = self.ui_row_height.value
-        font_size = getFontSize(self.rowHeight+self.font_offset)
+        font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         width = self.rowHeight * 5
         self.lbl_session_info.setSize(self.rowHeight * 4, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
         self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
@@ -146,13 +157,13 @@ class ACTimer:
                     i += 1
                     j = 0
 
-    def set_font(self, font_name, font_offset):
+    def set_font(self, font_name, italic, bold, font_offset):
         self.font_offset = font_offset
-        self.lbl_session_info.setFont(font_name, 0, 0)
-        self.lbl_session_title.setFont(font_name, 0, 0)
-        self.lbl_session_single.setFont(font_name, 0, 0)
-        self.lbl_pit_window_text.setFont(font_name, 0, 0)
-        self.redraw_size();
+        self.lbl_session_info.setFont(font_name, italic, bold)
+        self.lbl_session_title.setFont(font_name, italic, bold)
+        self.lbl_session_single.setFont(font_name, italic, bold)
+        self.lbl_pit_window_text.setFont(font_name, italic, bold)
+        self.redraw_size()
 
     def time_splitting(self, ms):
         s = ms / 1000

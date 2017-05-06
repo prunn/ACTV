@@ -1,9 +1,7 @@
 import ac
 import acsys
 import ctypes
-
-from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config
+from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
 
 
 class lapTimeStart:
@@ -21,6 +19,7 @@ class ACInfo:
         self.lastLapInPit = 0
         self.lastLapInvalidated = 0
         self.isLapVisuallyEnded = True
+        self.raceStarted = False
         self.carsCount = 0
         self.lbl_timing_height = 0
         self.lbl_position_height = 0
@@ -30,6 +29,7 @@ class ACInfo:
         self.cursor = Value(False)
         self.fastestLap = Value(0)
         self.fastestLap2 = Value(0)
+        self.font = Value(0)
         self.fastestPos = 1
         self.lastLap = 0
         self.lastLapStart = 10000
@@ -149,15 +149,26 @@ class ACInfo:
         else:
             self.colorsByClass.setValue(False)
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
-        if self.ui_row_height.hasChanged():
+        self.font.setValue(Font.current)
+        if self.ui_row_height.hasChanged() or self.font.hasChanged():
             self.redraw_size()
             # self.info_position.setBgColor(Colors.theme(bg = True, reload = True))
 
     def redraw_size(self):
+        # Fonts
+        self.font_offset = Font.get_font_offset()
+        self.lbl_driver_name.update_font()
+        self.lbl_driver_name2.update_font()
+        self.lbl_timing.update_font()
+        self.lbl_split.update_font()
+        self.lbl_fastest_split.update_font()
+        self.info_position.update_font()
+        self.info_position_lead.update_font()
+        # UI
         self.rowHeight = self.ui_row_height.value + 2
-        font_size = getFontSize(self.rowHeight+self.font_offset)
+        font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         row2_height = self.ui_row_height.value
-        font_size2 = getFontSize(row2_height+self.font_offset)
+        font_size2 = Font.get_font_size(row2_height+self.font_offset)
         width = self.rowHeight * 7
         self.lbl_driver_name.set(w=width, h=self.rowHeight,
                                  font_size=font_size)
@@ -179,16 +190,16 @@ class ACInfo:
                                     font_size=font_size2)
         self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
 
-    def set_font(self, font_name, font_offset):
+    def set_font(self, font_name, italic, bold, font_offset):
         self.font_offset = font_offset
-        self.lbl_driver_name.setFont(font_name, 0, 0)
-        self.lbl_driver_name2.setFont(font_name, 0, 0)
-        self.lbl_timing.setFont(font_name, 0, 0)
-        self.lbl_split.setFont(font_name, 0, 0)
-        self.lbl_fastest_split.setFont(font_name, 0, 0)
-        self.info_position.setFont(font_name, 0, 0)
-        self.info_position_lead.setFont(font_name, 0, 0)
-        self.redraw_size();
+        self.lbl_driver_name.setFont(font_name, italic, bold)
+        self.lbl_driver_name2.setFont(font_name, italic, bold)
+        self.lbl_timing.setFont(font_name, italic, bold)
+        self.lbl_split.setFont(font_name, italic, bold)
+        self.lbl_fastest_split.setFont(font_name, italic, bold)
+        self.info_position.setFont(font_name, italic, bold)
+        self.info_position_lead.setFont(font_name, italic, bold)
+        self.redraw_size()
 
     def format_name(self, name, max_name_length):
         space = name.find(" ")
@@ -388,6 +399,7 @@ class ACInfo:
         session_changed = self.session.hasChanged()
         if session_changed:
             self.reset_visibility()
+            self.raceStarted = False
             self.fastestLapSectors = [0, 0, 0, 0, 0, 0]
         if self.cursor.hasChanged() or session_changed:
             if self.cursor.value and self.lbl_driver_name_visible.value == 0:
@@ -717,8 +729,10 @@ class ACInfo:
                     self.nameOffset = self.rowHeight * 49 / 36
                     # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
                     # pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
-
-                    if sim_info.graphics.completedLaps == 0 and sim_info.graphics.iCurrentTime <= 20000:
+                    if not self.raceStarted:
+                        if sim_info.graphics.completedLaps > 0 or sim_info.graphics.iCurrentTime > 20000:
+                            self.raceStarted = True
+                    if not self.raceStarted:
                         pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                     else:
                         pos = self.get_race_standings_position(self.currentVehicle.value)

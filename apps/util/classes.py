@@ -515,9 +515,13 @@ class Label:
     def setFont(self, fontName, italic, bold):
         self.fontName = fontName
         ac.setCustomFont(self.label, self.fontName, italic, bold)
-        if fontName == "Khula":
-            self.fontSize += 1
-            ac.setFontSize(self.label, self.fontSize)
+        #if fontName == "Khula":
+        #    self.fontSize += 1
+        #    ac.setFontSize(self.label, self.fontSize)
+        return self
+
+    def update_font(self):
+        self.setFont(Font.get_font(), 0, 0)
         return self
 
     def setFontSize(self, fontSize):
@@ -864,3 +868,76 @@ class Config:
             self._write()
         else:
             ac.console("Prunn: Config.remOption -- option not found.")
+
+
+class Font:
+    fonts = ["Segoe UI", "Khula", "PT Sans", "Lato", "Aller", "Noto Sans"]
+    offsets = [0, 4, 2, 2, 2, 0]
+    support = [True, True, True, True, True, True]
+    init = [False, False, False, False, False, False]
+    current = 0
+
+    @staticmethod
+    def set_font(font):
+        Font.current = font
+        if not Font.init[Font.current]:
+            if ac.initFont(0, Font.fonts[Font.current], 0, 0) > 0:
+                Font.init[Font.current] = True
+
+    @staticmethod
+    def get_font():
+        return Font.fonts[Font.current]
+
+    @staticmethod
+    def get_font_offset():
+        return Font.offsets[Font.current]
+
+    @staticmethod
+    def get_font_size(row_height):
+        if row_height == 50 or row_height == 49:
+            return 34
+        if row_height == 48 or row_height == 47:
+            return 33
+        if row_height == 46 or row_height == 45:
+            return 32
+        if row_height == 44 or row_height == 43:
+            return 31
+        if row_height == 42:
+            return 30
+        if row_height == 41:
+            return 29
+        if row_height == 40:
+            return 28
+        if row_height == 39:
+            return 27
+        if row_height == 38 or row_height == 37:
+            return 26
+        if row_height == 36 or row_height == 35:
+            return 25
+        if row_height == 34:
+            return 24
+        if row_height == 33:
+            return 23
+        if row_height == 32 or row_height == 31:
+            return 22
+        if row_height == 30 or row_height == 29:
+            return 21
+        if row_height == 28:
+            return 19
+        if row_height == 27:
+            return 19
+        if row_height == 26:
+            return 19
+        if row_height == 25:
+            return 18
+        if row_height == 24 or row_height == 23:
+            return 17
+        if row_height == 22:
+            return 16
+        if row_height == 21:
+            return 15
+        if row_height == 20:
+            return 14
+        if row_height < 30:
+            return row_height - 6
+        return 26
