@@ -524,6 +524,9 @@ class Label:
         self.setFont(Font.get_font(), 0, 0)
         return self
 
+    def change_font_if_needed(self):
+        return self
+
     def setFontSize(self, fontSize):
         self.fontSize = fontSize
         ac.setFontSize(self.label, self.fontSize)
@@ -871,15 +874,26 @@ class Config:
 
 
 class Font:
-    fonts = ["Segoe UI", "Khula", "PT Sans", "Lato", "Aller", "Noto Sans"]
-    offsets = [0, 4, 2, 2, 2, 0]
-    support = [True, True, True, True, True, True]
-    init = [False, False, False, False, False, False]
+    fonts = ["Segoe UI", "Khula", "Noto Sans", "Heebo", "Yantramanav",
+             "Ubuntu", "Overlock", "Share", "Strait", "Nunito",
+             "Open Sans", "Arimo", "Signika", "Signika Negative", "Roboto"]
+    offsets = [0, 5, 0, 3, 5,
+               4, 2, 7, 5, 2,
+               0, 2, 3, 2, 2]
+    support = [None, 0, 0, 0, 0,
+               0, 0, 0, 0, 0,
+               0, 0, 0, 0, 0]
+    init = []
     current = 0
 
     @staticmethod
     def set_font(font):
         Font.current = font
+        if not len(Font.init):
+            i = 0
+            for _ in Font.fonts:
+                Font.init.append(False)
+                i += 1
         if not Font.init[Font.current]:
             if ac.initFont(0, Font.fonts[Font.current], 0, 0) > 0:
                 Font.init[Font.current] = True

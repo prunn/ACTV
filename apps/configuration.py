@@ -138,7 +138,7 @@ class Configuration:
         ac.setValue(self.spin_colors_by, self.__class__.carColorsBy)
         ac.addOnValueChangeListener(self.spin_colors_by, self.on_spin_colors_by_changed)
         ac.setVisible(self.spin_colors_by, 0)
-        self.lbl_colors_by = Label(self.window.app, "Brand").setSize(120, 26).setPos(186, y - 28).setFontSize(
+        self.lbl_colors_by = Label(self.window.app, "Brand").setSize(120, 26).setPos(178, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
 
         # Font
@@ -204,6 +204,8 @@ class Configuration:
             self.__class__.carColorsBy = 0
         font = self.cfg.get("SETTINGS", "font", "int")
         if font == -1:
+            font = 0
+        if font > len(Font.fonts) - 1:
             font = 0
         Font.set_font(font)
 

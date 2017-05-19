@@ -733,7 +733,8 @@ class ACInfo:
                         if sim_info.graphics.completedLaps > 0 or sim_info.graphics.iCurrentTime > 20000:
                             self.raceStarted = True
                     if not self.raceStarted:
-                        pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
+                        #pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
+                        pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
                     else:
                         pos = self.get_race_standings_position(self.currentVehicle.value)
                     if pos > 1:

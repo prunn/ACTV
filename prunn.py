@@ -95,7 +95,6 @@ def acMain(ac_version):
     except:
         Log.w("Error init delta")
 
-    
     return "Prunn"
 
 
