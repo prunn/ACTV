@@ -393,6 +393,7 @@ class Label:
         self.align = "left"
         self.bgTexture = ""
         self.fontName = ""
+        self.cur_fontName = ""
         # self.opacity   = 1
         self.visible = 0
         self.isVisible = Value(False)
@@ -514,17 +515,20 @@ class Label:
 
     def setFont(self, fontName, italic, bold):
         self.fontName = fontName
+        self.cur_fontName = fontName
         ac.setCustomFont(self.label, self.fontName, italic, bold)
-        #if fontName == "Khula":
-        #    self.fontSize += 1
-        #    ac.setFontSize(self.label, self.fontSize)
         return self
 
     def update_font(self):
         self.setFont(Font.get_font(), 0, 0)
         return self
 
-    def change_font_if_needed(self):
+    def change_font_if_needed(self, support=None):
+        if support is not None:
+            self.cur_fontName = Font.get_support_font()
+            ac.setCustomFont(self.label, self.cur_fontName, 0, 0)
+        elif self.fontName != self.cur_fontName:
+            self.setFont(Font.get_font(), 0, 0)
         return self
 
     def setFontSize(self, fontSize):
@@ -874,15 +878,35 @@ class Config:
 
 
 class Font:
-    fonts = ["Segoe UI", "Khula", "Noto Sans", "Heebo", "Yantramanav",
-             "Ubuntu", "Overlock", "Share", "Strait", "Nunito",
-             "Open Sans", "Arimo", "Signika", "Signika Negative", "Roboto"]
-    offsets = [0, 5, 0, 3, 5,
-               4, 2, 7, 5, 2,
-               0, 2, 3, 2, 2]
-    support = [None, 0, 0, 0, 0,
-               0, 0, 0, 0, 0,
-               0, 0, 0, 0, 0]
+    # Name, offset, support
+    fonts = [["Segoe UI", 0, None],
+             ["Noto Sans", 0, None],
+             ["Khula", 5, 0],
+             ["Heebo", 2, 0],
+             ["Yantramanav", 5, 0],
+             ["Overlock", 3, 0],
+             ["Share", 7, 0],
+             ["Strait", 5, 0],
+             ["Nunito", 2, 0],
+             ["Open Sans", 0, 0],
+             ["Signika", 3, 0],
+             ["Signika Negative", 3, 0],
+             ["Roboto", 3, 0]]
+    '''
+               ["Ubuntu", 4, 0],
+               ["Arimo", 3, None],
+    fonts = ["Noto Sans", 
+            "Khula", 
+            "Heebo", 
+            "Yantramanav",
+            "Overlock", 
+            "Share", 
+            "Strait", 
+            "Nunito",
+            "Signika", 
+            "Signika Negative", 
+            "Roboto"]
+    '''
     init = []
     current = 0
 
@@ -895,16 +919,22 @@ class Font:
                 Font.init.append(False)
                 i += 1
         if not Font.init[Font.current]:
-            if ac.initFont(0, Font.fonts[Font.current], 0, 0) > 0:
+            if ac.initFont(0, Font.fonts[Font.current][0], 0, 0) > 0:
                 Font.init[Font.current] = True
 
     @staticmethod
     def get_font():
-        return Font.fonts[Font.current]
+        return Font.fonts[Font.current][0]
+
+    @staticmethod
+    def get_support_font():
+        if Font.fonts[Font.current][2] is not None:
+            return Font.fonts[Font.fonts[Font.current][2]][0]
+        return Font.fonts[Font.current][0]
 
     @staticmethod
     def get_font_offset():
-        return Font.offsets[Font.current]
+        return Font.fonts[Font.current][1]
 
     @staticmethod
     def get_font_size(row_height):

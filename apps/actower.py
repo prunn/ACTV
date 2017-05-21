@@ -160,12 +160,14 @@ class Driver:
             if not self.isLapLabel:
                 self.lbl_position.setFont(font_name, 0, 0)
                 self.lbl_pit.setFont(font_name, 0, 0)
-        '''
+                
         self.lbl_name.update_font()
         self.lbl_time.update_font()
         if not self.isLapLabel:
             self.lbl_position.update_font()
             self.lbl_pit.update_font()
+        '''
+        self.redraw_size(row_height)
 
         if not self.isLapLabel:
             self.partial_func = functools.partial(self.on_click_func, driver=self.identifier)
@@ -354,15 +356,15 @@ class Driver:
             if time_changed:
                 self.time_highlight_end = session_time - 5000
             if self.position.value == 1 or mode == 1:
-                self.lbl_time.setText(self.format_time(self.time.value))
+                self.lbl_time.change_font_if_needed().setText(self.format_time(self.time.value))
             else:
-                self.lbl_time.setText("+" + self.format_time(self.gap.value))
+                self.lbl_time.change_font_if_needed().setText("+" + self.format_time(self.gap.value))
 
     def set_time_stint(self, time, valid):
         self.time.setValue(time)
         self.gap.setValue(time)
         if self.time.hasChanged() or self.gap.hasChanged():
-            self.lbl_time.setText(self.format_time(self.time.value))  # .setVisible(1)
+            self.lbl_time.change_font_if_needed().setText(self.format_time(self.time.value))  # .setVisible(1)
             self.lbl_time.setColor(Colors.grey())
             if valid:
                 self.lbl_time.setColor(Colors.white())
@@ -372,35 +374,35 @@ class Driver:
 
     def set_time_race(self, time, leader, session_time):
         if self.position.value == 1:
-            self.lbl_time.setText("Lap " + str(time)).setColor(Colors.white())
+            self.lbl_time.change_font_if_needed().setText("Lap " + str(time)).setColor(Colors.white())
         else:
-            self.lbl_time.setText("+" + self.format_time(leader - session_time)).setColor(Colors.white())
+            self.lbl_time.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(Colors.white())
 
     def set_time_race_battle(self, time, identifier, lap=False):
         if time == "PIT":
-            self.lbl_time.setText("PIT").setColor(Colors.yellow(), True)
+            self.lbl_time.change_font_if_needed().setText("PIT").setColor(Colors.yellow(), True)
         elif time == "DNF":
-            self.lbl_time.setText("DNF").setColor(Colors.dnf(), True)
+            self.lbl_time.change_font_if_needed().setText("DNF").setColor(Colors.dnf(), True)
         elif time == "UP":
-            self.lbl_time.setText(u"\u25B2").setColor(Colors.green(), True)
+            self.lbl_time.change_font_if_needed(1).setText(u"\u25B2").setColor(Colors.green(), True)
         elif time == "DOWN":
-            self.lbl_time.setText(u"\u25BC").setColor(Colors.red(), True)
+            self.lbl_time.change_font_if_needed(1).setText(u"\u25BC").setColor(Colors.red(), True)
         elif self.identifier == identifier or time == 600000:
-            self.lbl_time.setText("").setColor(Colors.white(), True)
+            self.lbl_time.change_font_if_needed().setText("").setColor(Colors.white(), True)
         elif lap:
             str_time = "+" + str(math.floor(abs(time)))
             if abs(time) >= 2:
                 str_time += " Laps"
             else:
                 str_time += " Lap"
-            self.lbl_time.setText(str_time).setColor(Colors.white(), True)
+            self.lbl_time.change_font_if_needed().setText(str_time).setColor(Colors.white(), True)
         elif identifier == -1:
             if time <= ac.getCarState(self.identifier, acsys.CS.BestLap):
-                self.lbl_time.setText(self.format_time(time)).setColor(Colors.purple(), True)
+                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.purple(), True)
             else:
-                self.lbl_time.setText(self.format_time(time)).setColor(Colors.red(), True)
+                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.red(), True)
         else:
-            self.lbl_time.setText(self.format_time(time)).setColor(Colors.white(), True)
+            self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.white(), True)
 
     def optimise(self):
         if len(self.race_gaps) > 132:
