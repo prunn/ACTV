@@ -593,9 +593,9 @@ class ACInfo:
                                 pos = self.get_standings_position(self.currentVehicle.value)
 
                             if pos > 1:
-                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(0.8)
+                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                             else:
-                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(0.8)
+                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
                             self.info_position.setText(str(pos))
                             self.info_position.show()
 
@@ -782,9 +782,9 @@ class ACInfo:
                     pos = self.get_standings_position(self.currentVehicle.value)
 
                 if pos > 1:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(0.8)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(0.8)
+                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
                 self.info_position.setText(str(pos))
                 self.info_position.show()
                 self.nameOffset = self.rowHeight * 49 / 36  # 49

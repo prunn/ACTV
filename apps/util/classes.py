@@ -881,32 +881,11 @@ class Font:
     # Name, offset, support
     fonts = [["Segoe UI", 0, None],
              ["Noto Sans", 0, None],
-             ["Khula", 5, 0],
-             ["Heebo", 2, 0],
-             ["Yantramanav", 5, 0],
-             ["Overlock", 3, 0],
-             ["Share", 7, 0],
-             ["Strait", 5, 0],
-             ["Nunito", 2, 0],
              ["Open Sans", 0, 0],
-             ["Signika", 3, 0],
+             ["Yantramanav", 5, 0],
              ["Signika Negative", 3, 0],
-             ["Roboto", 3, 0]]
-    '''
-               ["Ubuntu", 4, 0],
-               ["Arimo", 3, None],
-    fonts = ["Noto Sans", 
-            "Khula", 
-            "Heebo", 
-            "Yantramanav",
-            "Overlock", 
-            "Share", 
-            "Strait", 
-            "Nunito",
-            "Signika", 
-            "Signika Negative", 
-            "Roboto"]
-    '''
+             ["Strait", 6, 0],
+             ["Overlock", 4, 1]]
     init = []
     current = 0
 

@@ -483,12 +483,6 @@ class Driver:
                             self.lbl_position.setBgColor(Colors.background_tower_position_odd(), True)\
                                 .setColor(Colors.grey(), True)\
                                 .setBgOpacity(0.62)
-                    '''
-                    if qual_mode == 1:
-                        self.lbl_time.setText(self.format_time(self.time.value))
-                    else:
-                        self.lbl_time.setText("+" + self.format_time(self.gap.value))
-                    '''
             else:
                 if self.isAlive.value:
                     self.lbl_name.setBgOpacity(0.58)
@@ -499,7 +493,6 @@ class Driver:
                         self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True)\
                             .setColor(Colors.red(), True)\
                             .setBgOpacity(0.68)
-                    #self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
@@ -510,12 +503,6 @@ class Driver:
                             self.lbl_position.setBgColor(Colors.background_tower_position_even(), True)\
                                 .setColor(Colors.grey(), True)\
                                 .setBgOpacity(0.52)
-                    '''
-                    if qual_mode == 1:
-                        self.lbl_time.setText(self.format_time(self.time.value))
-                    else:
-                        self.lbl_time.setText("+" + self.format_time(self.gap.value))
-                    '''
         if not self.isLapLabel:
             self.fullName.setValue(ac.getDriverName(self.identifier))
             if self.fullName.hasChanged():
