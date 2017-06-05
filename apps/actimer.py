@@ -157,14 +157,6 @@ class ACTimer:
                     i += 1
                     j = 0
 
-    def set_font(self, font_name, italic, bold, font_offset):
-        self.font_offset = font_offset
-        self.lbl_session_info.setFont(font_name, italic, bold)
-        self.lbl_session_title.setFont(font_name, italic, bold)
-        self.lbl_session_single.setFont(font_name, italic, bold)
-        self.lbl_pit_window_text.setFont(font_name, italic, bold)
-        self.redraw_size()
-
     def time_splitting(self, ms):
         s = ms / 1000
         m, s = divmod(s, 60)
@@ -250,7 +242,7 @@ class ACTimer:
         self.lbl_pit_window_bg.animate()
         if sim_info_status == 2:  # LIVE
             if self.replay_initialised:
-                self.lbl_session_single.setColor(rgb([255, 255, 255]))
+                self.lbl_session_single.setColor(Colors.font_color())
             self.session.setValue(self.session_draw.value)
             session_time_left = sim_info.graphics.sessionTimeLeft
             if self.session.value < 2:
@@ -285,7 +277,7 @@ class ACTimer:
                             self.lbl_session_title.setBgColor(Colors.black(bg=True), True)
                         else:
                             self.lbl_session_info.setBgColor(Colors.background())
-                            self.lbl_session_info.setColor(Colors.white(), True)
+                            self.lbl_session_info.setColor(Colors.font_color(), True)
                             self.lbl_session_border.setBgColor(Colors.theme(bg=True), True)
                             self.lbl_session_title.setBgColor(Colors.theme(bg=True), True)
                     self.lbl_session_info.animate()
@@ -336,7 +328,7 @@ class ACTimer:
                     elif sim_info.graphics.MandatoryPitDone:
                         self.lbl_pit_window_text.setColor(rgb([172, 172, 172]), True)
                     else:
-                        self.lbl_pit_window_text.setColor(Colors.white(), True)
+                        self.lbl_pit_window_text.setColor(Colors.font_color(), True)
                     self.lbl_pit_window_text.setText("Pits open")
                     self.lbl_pit_window_text.showText()
                 elif self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
@@ -393,7 +385,7 @@ class ACTimer:
                         self.lbl_session_border.setBgColor(Colors.black(bg=True), True)
                     else:
                         self.lbl_session_single.setBgColor(Colors.background(), True)
-                        self.lbl_session_single.setColor(Colors.white(), True)
+                        self.lbl_session_single.setColor(Colors.font_color(), True)
                         self.lbl_session_border.setBgColor(Colors.theme(bg=True), True)
                 self.lbl_session_border.animate()
                 self.lbl_session_single.animate()
@@ -420,9 +412,16 @@ class ACTimer:
                 self.replay_rgb += 2
             elif replay_time_multiplier > 0:
                 self.replay_rgb -= 2
-            if self.replay_rgb < 100:
-                self.replay_asc = True
-            elif self.replay_rgb >= 246:
-                self.replay_rgb = 246
-                self.replay_asc = False
+            if Colors.general_theme == 1:
+                if self.replay_rgb <= 2:
+                    self.replay_asc = True
+                elif self.replay_rgb > 168:
+                    self.replay_rgb = 168
+                    self.replay_asc = False
+            else:
+                if self.replay_rgb < 100:
+                    self.replay_asc = True
+                elif self.replay_rgb >= 246:
+                    self.replay_rgb = 246
+                    self.replay_asc = False
             self.lbl_session_single.setText("REPLAY")

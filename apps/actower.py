@@ -195,20 +195,29 @@ class Driver:
         else:
             if self.isInPit.value and not self.race:
                 self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight)\
-                    .setPos(self.rowHeight, self.final_y)\
+                    .setPos(self.rowHeight + 4, self.final_y)\
                     .setFontSize(font_size)
             else:
-                self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight)\
-                    .setPos(self.rowHeight, self.final_y)\
-                    .setFontSize(font_size)
-            self.lbl_position.setSize(self.rowHeight, self.rowHeight)\
+                if Colors.border_direction == 1:
+                    self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight)\
+                        .setPos(self.rowHeight + 8, self.final_y)\
+                        .setFontSize(font_size)
+                else:
+                    self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight)\
+                        .setPos(self.rowHeight + 4, self.final_y)\
+                        .setFontSize(font_size)
+            self.lbl_position.setSize(self.rowHeight + 4, self.rowHeight)\
                 .setPos(0, self.final_y).setFontSize(font_size)
             self.lbl_pit.setSize(self.rowHeight * 0.6, self.rowHeight - 2)\
-                .setPos(self.rowHeight * 6, self.final_y + 2).setFontSize(font_size - 3)
+                .setPos(self.rowHeight * 6 + 4, self.final_y + 2).setFontSize(font_size - 3)
         self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight)\
-            .setPos(self.rowHeight, self.final_y).setFontSize(font_size)
-        self.lbl_border.setSize(self.rowHeight * 2.8, 1)\
-            .setPos(0, self.final_y + self.rowHeight - 1)
+            .setPos(self.rowHeight + 4, self.final_y).setFontSize(font_size)
+        if Colors.border_direction == 1:
+            self.lbl_border.setSize(4, self.rowHeight)\
+                .setPos(self.rowHeight + 4, self.final_y)
+        else:
+            self.lbl_border.setSize(self.rowHeight * 2.8, 1)\
+                .setPos(0, self.final_y + self.rowHeight - 1)
 
     def show(self, needs_tlc=True, race=True):
         self.race = race
@@ -243,9 +252,9 @@ class Driver:
             if not self.isAlive.value and not self.finished.value:
                 self.lbl_name.setColor(Colors.grey(), True)
             elif self.isInPit.value or ac.getCarState(self.identifier, acsys.CS.SpeedKMH) > 30 or self.finished.value:
-                self.lbl_name.setColor(Colors.white(), True)
+                self.lbl_name.setColor(Colors.font_color(), True)
             else:
-                self.lbl_name.setColor(Colors.yellow(), True)
+                self.lbl_name.setColor(Colors.yellow_time(), True)
 
     def update_pit(self, session_time):
         if not self.isLapLabel and self.isInPit.hasChanged():
@@ -367,16 +376,16 @@ class Driver:
             self.lbl_time.change_font_if_needed().setText(self.format_time(self.time.value))  # .setVisible(1)
             self.lbl_time.setColor(Colors.grey())
             if valid:
-                self.lbl_time.setColor(Colors.white())
+                self.lbl_time.setColor(Colors.font_color())
             else:
                 self.lbl_time.setColor(Colors.red())
                 # self.lbl_time.showText()
 
     def set_time_race(self, time, leader, session_time):
         if self.position.value == 1:
-            self.lbl_time.change_font_if_needed().setText("Lap " + str(time)).setColor(Colors.white())
+            self.lbl_time.change_font_if_needed().setText("Lap " + str(time)).setColor(Colors.font_color())
         else:
-            self.lbl_time.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(Colors.white())
+            self.lbl_time.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(Colors.font_color())
 
     def set_time_race_battle(self, time, identifier, lap=False):
         if time == "PIT":
@@ -388,21 +397,21 @@ class Driver:
         elif time == "DOWN":
             self.lbl_time.change_font_if_needed(1).setText(u"\u25BC").setColor(Colors.red(), True)
         elif self.identifier == identifier or time == 600000:
-            self.lbl_time.change_font_if_needed().setText("").setColor(Colors.white(), True)
+            self.lbl_time.change_font_if_needed().setText("").setColor(Colors.font_color(), True)
         elif lap:
             str_time = "+" + str(math.floor(abs(time)))
             if abs(time) >= 2:
                 str_time += " Laps"
             else:
                 str_time += " Lap"
-            self.lbl_time.change_font_if_needed().setText(str_time).setColor(Colors.white(), True)
+            self.lbl_time.change_font_if_needed().setText(str_time).setColor(Colors.font_color(), True)
         elif identifier == -1:
             if time <= ac.getCarState(self.identifier, acsys.CS.BestLap):
                 self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.purple(), True)
             else:
                 self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.red(), True)
         else:
-            self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.white(), True)
+            self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.font_color(), True)
 
     def optimise(self):
         if len(self.race_gaps) > 132:
@@ -445,34 +454,40 @@ class Driver:
                     self.lbl_position.setY(self.final_y)
                     self.lbl_pit.setY(self.final_y + 2)
                 self.lbl_time.setY(self.final_y)
-                self.lbl_border.setY(self.final_y + self.rowHeight - 1)
+                if Colors.border_direction == 1:
+                    self.lbl_border.setY(self.final_y)
+                else:
+                    self.lbl_border.setY(self.final_y + self.rowHeight - 1)
                 self.firstDraw = True
 
             if self.isLapLabel:
                 self.lbl_name.setPos(0, self.final_y, True)
             else:
                 self.lbl_position.setText(str(self.position.value))
-                self.lbl_name.setPos(self.rowHeight, self.final_y, True)
+                # self.lbl_name.setPos(self.rowHeight + 6, self.final_y, True)
+                self.lbl_name.setY(self.final_y, True)
                 self.lbl_position.setPos(0, self.final_y, True)
                 self.lbl_pit.setPos(self.rowHeight * 6, self.final_y + 2, True)
             self.lbl_time.setPos(self.rowHeight, self.final_y, True)
-            self.lbl_border.setPos(0, self.final_y + self.rowHeight - 1, True)
+            if Colors.border_direction == 1:
+                self.lbl_border.setY(self.final_y, True)
+            else:
+                # self.lbl_border.setPos(0, self.final_y + self.rowHeight - 1, True)
+                self.lbl_border.setY(self.final_y + self.rowHeight - 1, True)
             if position % 2 == 1:
                 if self.isAlive.value:
-                    self.lbl_name.setBgOpacity(0.72)
+                    self.lbl_name.setBgOpacity(Colors.opacity_tower_odd())
                 else:
                     self.lbl_name.setBgOpacity(0.52)
-                if position == 1:
+                if position == 1 and Colors.general_theme != 1:
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_first(), True)\
                             .setColor(Colors.white(), True)\
                             .setBgOpacity(0.72)
-                    #self.lbl_time.setText(self.format_time(self.time.value))
                 elif battles and self.isCurrentVehicule.value:
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True)\
                             .setColor(Colors.red(), True).setBgOpacity(0.72)
-                    #self.lbl_time.setText(self.format_time(self.time.value))
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
@@ -485,7 +500,7 @@ class Driver:
                                 .setBgOpacity(0.62)
             else:
                 if self.isAlive.value:
-                    self.lbl_name.setBgOpacity(0.58)
+                    self.lbl_name.setBgOpacity(Colors.opacity_tower_even())
                 else:
                     self.lbl_name.setBgOpacity(0.44)
                 if battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or)
@@ -565,7 +580,7 @@ class Driver:
             if self.highlight.value:
                 self.lbl_time.setColor(Colors.highlight(), True)
             else:
-                self.lbl_time.setColor(Colors.white(), True)
+                self.lbl_time.setColor(Colors.font_color(), True)
         if not self.isLapLabel:
             self.lbl_position.animate()
             self.lbl_pit.animate()
@@ -628,6 +643,7 @@ class ACTower:
                  align="center",
                  background=Colors.background_dark(),
                  opacity=0.8,
+                 color=Colors.font_color(),
                  visible=0)
         self.lbl_tire_stint = Label(self.window.app, "")\
             .set(w=self.rowHeight * 6, h=self.rowHeight,
@@ -635,6 +651,7 @@ class ACTower:
                  font_size=24,
                  align="center",
                  background=Colors.background_tower(),
+                 color=Colors.font_color(),
                  opacity=0.58,
                  visible=0)
         self.lbl_title_mode = Label(self.window.app, "Mode") \

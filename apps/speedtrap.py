@@ -48,6 +48,7 @@ class ACSpeedTrap:
                  x=38, y=0,
                  font_size=26,
                  align="center",
+                 color=Colors.font_color(),
                  background=Colors.background(),
                  opacity=Colors.background_opacity(),
                  visible=0)
@@ -94,12 +95,6 @@ class ACSpeedTrap:
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
         self.lbl_time.setSize(self.rowHeight * 4.8, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
         self.lbl_border.setSize(self.rowHeight * 5.8, 1).setPos(0, self.rowHeight + 1)
-
-    def set_font(self, font_name, italic, bold, font_offset):
-        self.font_offset = font_offset
-        self.lbl_title.setFont(font_name, italic, bold)
-        self.lbl_time.setFont(font_name, italic, bold)
-        self.redraw_size()
 
     def check_mph(self, cfg_path):
         conf = Config(cfg_path, "/gameplay.ini")

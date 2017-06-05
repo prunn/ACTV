@@ -113,6 +113,8 @@ class POINT(ctypes.Structure):
 
 
 class Colors:
+    general_theme = 0  # 0 : Dark, 1 : Light
+    border_direction = 0  # 0 : Horizontal, 1 : Vertical
     theme_red = -1
     theme_green = -1
     theme_blue = -1
@@ -158,13 +160,16 @@ class Colors:
             if not carName in loadedCars:
                 loadedCars.append(carName)
                 filePath = "content/cars/" + carName + "/ui/ui_car.json"
-                if os.path.exists(filePath):
-                    with open(filePath) as data_file:
-                        d = data_file.read().replace('\r', '').replace('\n', '').replace('\t', '')
-                        data = json.loads(d)
-                        for t in data["tags"]:
-                            if t[0] == "#":
-                                Colors.dataCarsClasses.append({"c": carName, "t": t[1:].lower()})
+                try:
+                    if os.path.exists(filePath):
+                        with open(filePath) as data_file:
+                            d = data_file.read().replace('\r', '').replace('\n', '').replace('\t', '')
+                            data = json.loads(d)
+                            for t in data["tags"]:
+                                if t[0] == "#":
+                                    Colors.dataCarsClasses.append({"c": carName, "t": t[1:].lower()})
+                except:
+                    Log.w("Error color:" + filePath)
         Colors.carsClassesLoaded = True
 
     @staticmethod
@@ -176,26 +181,41 @@ class Colors:
 
     @staticmethod
     def background():
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], bg=True)
         return rgb([55, 55, 55], bg=True)
 
     @staticmethod
     def background_dark():
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], bg=True)
         return rgb([20, 20, 20], bg=True)
 
     @staticmethod
     def background_tower():
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], bg=True)
         return rgb([32, 32, 32], bg=True)
 
     @staticmethod
     def background_first():
+        if Colors.general_theme == 1:
+            # return rgb([0, 50, 130], bg=True)
+            return rgb([5, 48, 110], bg=True)
         return rgb([192, 0, 0], bg=True)
 
     @staticmethod
     def background_tower_position_odd():
+        if Colors.general_theme == 1:
+            # return rgb([0, 50, 130], bg=True)
+            return rgb([5, 48, 110], bg=True)
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
     def background_tower_position_even():
+        if Colors.general_theme == 1:
+            # return rgb([0, 50, 130], bg=True)
+            return rgb([5, 48, 110], bg=True)
         return rgb([0, 0, 0], bg=True)
 
     @staticmethod
@@ -204,18 +224,45 @@ class Colors:
 
     @staticmethod
     def background_info_position():
+        if Colors.general_theme == 1:
+            #return rgb([0, 50, 130], bg=True)
+            return rgb([5, 48, 110], bg=True)
         return rgb([112, 112, 112], bg=True)
 
     @staticmethod
     def background_speedtrap():
+        if Colors.general_theme == 1:
+            return rgb([5, 48, 110], bg=True)
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
+    def font_color():
+        if Colors.general_theme == 1:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def opacity_tower_odd():
+        if Colors.general_theme == 1:
+            return 0.9
+        return 0.72
+
+    @staticmethod
+    def opacity_tower_even():
+        if Colors.general_theme == 1:
+            return 0.84
+        return 0.58
+
+    @staticmethod
     def background_opacity():
+        if Colors.general_theme == 1:
+            return 0.9
         return 0.64
 
     @staticmethod
     def border_opacity():
+        if Colors.general_theme == 1:
+            return 0.8
         return 0.7
 
     @staticmethod
@@ -278,7 +325,15 @@ class Colors:
 
     @staticmethod
     def green(bg=False):
+        if Colors.general_theme == 1:
+            return rgb([12, 152, 11], bg=bg)
         return rgb([32, 192, 31], bg=bg)
+
+    @staticmethod
+    def yellow_time(bg=False):
+        if Colors.general_theme == 1:
+            return Colors.red(bg)
+        return Colors.yellow(bg)
 
     @staticmethod
     def yellow(bg=False):
@@ -294,6 +349,8 @@ class Colors:
 
     @staticmethod
     def pitColor(bg=False):
+        if Colors.general_theme == 1:
+            return rgb([12, 12, 12], bg=bg)
         return rgb([225, 225, 225], bg=bg)
 
     @staticmethod
@@ -884,7 +941,7 @@ class Font:
              ["Open Sans", 0, 0],
              ["Yantramanav", 5, 0],
              ["Signika Negative", 3, 0],
-             ["Strait", 6, 0],
+             ["Strait", 7, 0],
              ["Overlock", 4, 1]]
     init = []
     current = 0

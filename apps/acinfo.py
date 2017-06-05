@@ -73,6 +73,7 @@ class ACInfo:
                  x=14, y=0,
                  font_size=26,
                  align="left",
+                 color=Colors.font_color(),
                  visible=0)
         self.lbl_driver_name_visible = Value()
         self.lbl_driver_name_visible_fin = Value(0)
@@ -96,11 +97,13 @@ class ACInfo:
                  x=10, y=self.rowHeight,
                  font_size=26,
                  align="right",
+                 color=Colors.font_color(),
                  visible=0)
         self.lbl_fastest_split = Label(self.window.app, "Loading")\
             .set(w=220, h=self.rowHeight,
                  x=48, y=self.rowHeight,
                  font_size=26,
+                 color=Colors.font_color(),
                  align="right",
                  visible=0)
         self.info_position = Label(self.window.app, "0")\
@@ -176,6 +179,7 @@ class ACInfo:
                                   font_size=font_size)
         self.lbl_timing.set(w=width, h=row2_height,
                             x=0, y=self.rowHeight,
+                            color=Colors.font_color(),
                             font_size=font_size2)
         self.lbl_split.set(w=self.rowHeight * 4.7, h=row2_height,
                            x=self.rowHeight, y=self.rowHeight,
@@ -183,23 +187,12 @@ class ACInfo:
         self.lbl_fastest_split.set(w=self.rowHeight * 5.7, h=row2_height,
                                    x=self.rowHeight, y=self.rowHeight,
                                    font_size=font_size2)
-        self.info_position.set(w=self.rowHeight, h=self.rowHeight,
+        self.info_position.set(w=self.rowHeight + 4, h=self.rowHeight,
                                font_size=font_size)
         self.info_position_lead.set(w=row2_height, h=row2_height,
                                     x=width - row2_height, y=self.rowHeight,
                                     font_size=font_size2)
         self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
-
-    def set_font(self, font_name, italic, bold, font_offset):
-        self.font_offset = font_offset
-        self.lbl_driver_name.setFont(font_name, italic, bold)
-        self.lbl_driver_name2.setFont(font_name, italic, bold)
-        self.lbl_timing.setFont(font_name, italic, bold)
-        self.lbl_split.setFont(font_name, italic, bold)
-        self.lbl_fastest_split.setFont(font_name, italic, bold)
-        self.info_position.setFont(font_name, italic, bold)
-        self.info_position_lead.setFont(font_name, italic, bold)
-        self.redraw_size()
 
     def format_name(self, name, max_name_length):
         space = name.find(" ")
@@ -550,12 +543,12 @@ class ACInfo:
                             if self.sectorCount - 1 == sector:
                                 # LAST_SECONDS_OF_SECTOR_LAP,
                                 self.lbl_split.setText(self.time_splitting(self.fastestLap.value, "yes"))\
-                                    .setColor(Colors.white()).showText()
+                                    .setColor(Colors.font_color()).showText()
                                 self.info_position_lead.show()
                                 show_split = True
                             elif fastest_split_fin > 0:
                                 self.lbl_split.setText(self.time_splitting(fastest_split_fin, "yes")).setColor(
-                                    Colors.white()).showText()
+                                    Colors.font_color()).showText()
                                 self.info_position_lead.show()
                                 show_split = True
                             break
@@ -567,7 +560,7 @@ class ACInfo:
                             if fastest_split < time_split:
                                 self.lbl_split.setText(
                                     "+" + self.time_splitting(time_split - fastest_split, "yes")).setColor(
-                                    Colors.yellow()).showText()
+                                    Colors.yellow_time()).showText()
                             else:
                                 self.lbl_split.setText(
                                     "-" + self.time_splitting(fastest_split - time_split, "yes")).setColor(
@@ -603,7 +596,7 @@ class ACInfo:
                             self.lbl_timing_text.setValue(str_offset + self.time_splitting(last_lap, "yes"))
                             if self.fastestLap.value < last_lap:
                                 self.lbl_split.setText("+" + self.time_splitting(last_lap - self.fastestLap.value, "yes"))\
-                                    .setColor(Colors.yellow()).showText()
+                                    .setColor(Colors.yellow_time()).showText()
                             else:
                                 self.lbl_split.setText("-" + self.time_splitting(self.get_best_lap() - last_lap, "yes"))\
                                     .setColor(Colors.green()).showText()
@@ -644,7 +637,7 @@ class ACInfo:
 
                         if self.fastestLap.value < bestlap:
                             self.lbl_split.setText("+" + self.time_splitting(bestlap - self.fastestLap.value, "yes"))\
-                                .setColor(Colors.yellow()).showText()
+                                .setColor(Colors.yellow_time()).showText()
                         else:
                             self.lbl_split.hideText()
 
@@ -791,7 +784,7 @@ class ACInfo:
                 self.lbl_timing_text.setValue(str_offset + self.time_splitting(last_lap, "yes"))
                 if self.fastestLap.value < last_lap:
                     self.lbl_split.setText("+" + self.time_splitting(last_lap - self.fastestLap.value, "yes"))\
-                        .setColor(Colors.yellow()).showText()
+                        .setColor(Colors.yellow_time()).showText()
                 else:
                     self.lbl_split.setText("-" + self.time_splitting(self.fastestLap.old - last_lap, "yes"))\
                         .setColor(Colors.green()).showText()
