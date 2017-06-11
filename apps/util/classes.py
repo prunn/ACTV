@@ -115,6 +115,7 @@ class POINT(ctypes.Structure):
 class Colors:
     general_theme = 0  # 0 : Dark, 1 : Light
     border_direction = 0  # 0 : Horizontal, 1 : Vertical
+    themed_info = True
     theme_red = -1
     theme_green = -1
     theme_blue = -1
