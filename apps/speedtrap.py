@@ -80,8 +80,8 @@ class ACSpeedTrap:
             self.lapCanBeInvalidated = False
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
         self.font.setValue(Font.current)
-        if self.ui_row_height.hasChanged() or self.font.hasChanged():
-            self.redraw_size()
+        #if self.ui_row_height.hasChanged() or self.font.hasChanged():
+        self.redraw_size()
         self.lbl_border.setBgColor(Colors.theme(bg=True, reload=True))
 
     def redraw_size(self):
@@ -90,6 +90,14 @@ class ACSpeedTrap:
         self.lbl_title.update_font()
         self.lbl_time.update_font()
         # UI
+        if Colors.general_theme == 2:
+            self.lbl_title.set(background=Colors.background(), opacity=Colors.background_opacity())
+            self.lbl_time.set(background=Colors.background_speedtrap(), opacity=Colors.background_opacity(), color=Colors.font_color()).patch_if_hidden()
+            self.lbl_border.set(background=Colors.theme(bg=True), opacity=Colors.border_opacity())
+        else:
+            self.lbl_title.set(background=Colors.background_speedtrap(), opacity=Colors.background_opacity())
+            self.lbl_time.set(background=Colors.background(), opacity=Colors.background_opacity(), color=Colors.font_color()).patch_if_hidden()
+            self.lbl_border.set(background=Colors.theme(bg=True), opacity=Colors.border_opacity())
         self.rowHeight = self.ui_row_height.value
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)

@@ -156,9 +156,9 @@ class ACInfo:
             self.colorsByClass.setValue(False)
         self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
         self.font.setValue(Font.current)
-        if self.ui_row_height.hasChanged() or self.font.hasChanged():
-            self.redraw_size()
-            # self.info_position.setBgColor(Colors.theme(bg = True, reload = True))
+        #if self.ui_row_height.hasChanged() or self.font.hasChanged():
+        self.redraw_size()
+        # self.info_position.setBgColor(Colors.theme(bg = True, reload = True))
 
     def redraw_size(self):
         # Fonts
@@ -170,6 +170,18 @@ class ACInfo:
         self.info_position.update_font()
         self.info_position_lead.update_font()
         # UI
+        if Colors.general_theme == 2:
+            self.lbl_timing.set(background=Colors.background_info_position(), opacity=Colors.background_opacity())
+        else:
+            self.lbl_timing.set(background=Colors.background(), opacity=Colors.background_opacity())
+        self.info_position_lead.set(background=Colors.background_first())
+        if Colors.themed_info == 1 and self.timing_visible.value == 1:
+            self.lbl_driver_name.setBgColor(Colors.theme(bg=True))
+            self.lbl_driver_name_text.setColor(Colors.white()).patch_if_hidden()
+        else:
+            self.lbl_driver_name.setBgColor(Colors.background_dark())
+            self.lbl_driver_name_text.setColor(Colors.font_color()).patch_if_hidden()
+        self.lbl_fastest_split.set(color=Colors.font_color())
         self.rowHeight = self.ui_row_height.value + 2
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         row2_height = self.ui_row_height.value
@@ -183,7 +195,7 @@ class ACInfo:
         self.lbl_timing_text.set(w=width * 0.6, h=row2_height,
                                  x=self.rowHeight * 14 / 36, y=self.rowHeight,
                                  color=Colors.font_color(),
-                                 font_size=font_size2)
+                                 font_size=font_size2).patch_if_hidden()
         self.lbl_split.set(w=self.rowHeight * 4.7, h=row2_height,
                            x=self.rowHeight, y=self.rowHeight,
                            font_size=font_size2)
@@ -200,8 +212,13 @@ class ACInfo:
                                     font_size=font_size2)
         if Colors.border_direction == 1:
             self.lbl_border.set(w=4, h=self.rowHeight, x=self.rowHeight + 4, y=0, opacity=1)
+            if not self.lbl_border.isVisible.value:
+                self.lbl_border.hide()
         else:
             self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
+        if not self.lbl_timing.isVisible.value:
+            self.lbl_timing.hide()
+        self.set_width_and_name()
 
     def format_name(self, name, max_name_length):
         space = name.find(" ")
@@ -353,7 +370,7 @@ class ACInfo:
             else:
                 self.lbl_timing.show()
                 self.lbl_timing_text.showText()
-        if Colors.themed_info and self.driver_name_visible.value == 1:
+        if Colors.themed_info == 1 and self.driver_name_visible.value == 1:
             if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
@@ -364,7 +381,7 @@ class ACInfo:
                 self.lbl_driver_name_text.hideText()
                 self.lbl_border.hide()
             else:
-                if Colors.themed_info and self.timing_visible.value == 1:
+                if Colors.themed_info == 1 and self.timing_visible.value == 1:
                     self.lbl_driver_name.setBgColor(Colors.theme(bg=True)).show()
                     self.lbl_driver_name_text.setColor(Colors.white()).showText()
                 else:
@@ -393,8 +410,8 @@ class ACInfo:
                 self.lbl_timing_text.showText()
 
         self.nameOffsetValue.setValue(self.nameOffset)
-        if Colors.themed_info and self.driver_name_visible.value == 1:
-            if Colors.themed_info and self.timing_visible.value == 1:
+        if Colors.themed_info == 1 and self.driver_name_visible.value == 1:
+            if Colors.themed_info == 1 and self.timing_visible.value == 1:
                 self.lbl_driver_name.setBgColor(Colors.theme(bg=True))
                 self.lbl_driver_name_text.setColor(Colors.white())
             else:
@@ -683,8 +700,8 @@ class ACInfo:
                         self.lbl_split.hideText()
                         self.info_position.hide()
                         self.timing_text.setValue("0.0")
-                        if Colors.border_direction == 1:
-                            self.lbl_border.set(x=0)
+                        #if Colors.border_direction == 1:
+                        #    self.lbl_border.set(x=0)
                     elif lap_invalidated and self.lastLapInPit < lap_count and self.minLapCount > 0:
                         self.driver_name_visible.setValue(0)
                         self.timing_visible.setValue(0)
@@ -713,8 +730,8 @@ class ACInfo:
                             self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
                         self.info_position.setText(str(pos)).show()
                         self.lbl_position_text.setValue(str(pos))
-                        if Colors.border_direction == 1:
-                            self.lbl_border.set(x=self.rowHeight + 4)
+                        #if Colors.border_direction == 1:
+                        #    self.lbl_border.set(x=self.rowHeight + 4)
                     elif is_in_pit:
                         self.driver_name_visible.setValue(0)
                         self.timing_visible.setValue(0)
@@ -730,8 +747,8 @@ class ACInfo:
                             self.timing_text.setValue("Out Lap")
                         self.lbl_split.hideText()
                         self.info_position.hide()
-                        if Colors.border_direction == 1:
-                            self.lbl_border.set(x=0)
+                        #if Colors.border_direction == 1:
+                        #    self.lbl_border.set(x=0)
                 if cur_lap_time <= self.sector_delay and ac.getCarState(self.currentVehicle.value, acsys.CS.LastLap) > 0 and backup_last_lap_in_pits + 1 < ac.getCarState(x, acsys.CS.LapCount) and session_time_left < 0:
                     self.nameOffset = self.rowHeight * 49 / 36  # 49
                     self.driver_name_visible.setValue(1)
@@ -799,8 +816,8 @@ class ACInfo:
                     self.info_position.setText(str(pos)).show()
                     self.timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
-                    if Colors.border_direction == 1:
-                        self.lbl_border.set(x=self.rowHeight + 4)
+                    #if Colors.border_direction == 1:
+                    #    self.lbl_border.set(x=self.rowHeight + 4)
                 elif self.visible_end == 0 or session_time_left < self.visible_end or (sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
                     self.driver_name_visible.setValue(0)
                     self.info_position.hide()
@@ -900,8 +917,8 @@ class ACInfo:
                 self.info_position.setText(str(pos)).show()
                 self.timing_visible.setValue(0)
                 self.lbl_fastest_split.hideText()
-                if Colors.border_direction == 1:
-                    self.lbl_border.set(x=self.rowHeight + 4)
+                #if Colors.border_direction == 1:
+                #    self.lbl_border.set(x=self.rowHeight + 4)
             elif self.visible_end == 0 or session_time_left < self.visible_end or (
                     sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0):
                 self.driver_name_visible.setValue(0)

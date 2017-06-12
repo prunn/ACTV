@@ -187,6 +187,8 @@ class Driver:
             self.lbl_position.update_font()
             self.lbl_pit.update_font()
         # UI
+        self.lbl_name.set(background=Colors.background_tower())
+        self.position.setValue(-1)
         self.rowHeight = height
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.final_y = self.num_pos * self.rowHeight
@@ -194,9 +196,14 @@ class Driver:
             self.lbl_name.setSize(self.rowHeight * 6, self.rowHeight).setPos(0, self.final_y).setFontSize(font_size)
         else:
             if self.isInPit.value and not self.race:
-                self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight)\
-                    .setPos(self.rowHeight + 4, self.final_y)\
-                    .setFontSize(font_size)
+                if Colors.border_direction == 1:
+                    self.lbl_name.setSize(self.rowHeight * 5.6 + 8, self.rowHeight)\
+                        .setPos(self.rowHeight + 4, self.final_y)\
+                        .setFontSize(font_size)
+                else:
+                    self.lbl_name.setSize(self.rowHeight * 5.6 + 4, self.rowHeight)\
+                        .setPos(self.rowHeight + 4, self.final_y)\
+                        .setFontSize(font_size)
             else:
                 if Colors.border_direction == 1:
                     self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight)\
@@ -252,7 +259,10 @@ class Driver:
 
         if needs_tlc or self.isLapLabel:
             self.lbl_time.showText()
-        self.lbl_border.show()
+        if (self.isLapLabel and Colors.border_direction == 0) or not self.isLapLabel:
+            self.lbl_border.show()
+        else:
+            self.lbl_border.hide()
         if not self.isLapLabel:
             self.lbl_position.show()
             if not self.isAlive.value and not self.finished.value:
@@ -471,7 +481,7 @@ class Driver:
             else:
                 self.lbl_position.setText(str(self.position.value))
                 self.lbl_name.setY(self.final_y, True)
-                self.lbl_position.setPos(0, self.final_y, True)
+                self.lbl_position.setY(self.final_y, True)
                 self.lbl_pit.setY(self.final_y + 2, True)
 
             self.lbl_time.setY(self.final_y, True)
@@ -484,7 +494,7 @@ class Driver:
                     self.lbl_name.setBgOpacity(Colors.opacity_tower_odd())
                 else:
                     self.lbl_name.setBgOpacity(0.52)
-                if position == 1 and Colors.general_theme != 1:
+                if position == 1 and Colors.general_theme == 0:
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_first(), True)\
                             .setColor(Colors.white(), True)\
@@ -492,13 +502,20 @@ class Driver:
                 elif battles and self.isCurrentVehicule.value:
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True)\
-                            .setColor(Colors.red(), True).setBgOpacity(0.72)
+                            .setColor(Colors.red(), True) #.setBgOpacity(0.72)
+                    if Colors.general_theme == 2:
+                        self.lbl_position.setBgOpacity(1)
+                    else:
+                        self.lbl_position.setBgOpacity(0.72)
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
                             self.lbl_position.setBgColor(Colors.background_tower_position_odd(), True)\
-                                .setColor(Colors.white(), True)\
-                                .setBgOpacity(0.72)
+                                .setColor(Colors.white(), True)#.setBgOpacity(0.72)
+                            if Colors.general_theme == 2:
+                                self.lbl_position.setBgOpacity(1)
+                            else:
+                                self.lbl_position.setBgOpacity(0.72)
                         else:
                             self.lbl_position.setBgColor(Colors.background_tower_position_odd(), True)\
                                 .setColor(Colors.grey(), True)\
@@ -511,14 +528,20 @@ class Driver:
                 if battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or)
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True)\
-                            .setColor(Colors.red(), True)\
-                            .setBgOpacity(0.68)
+                            .setColor(Colors.red(), True)#.setBgOpacity(0.68)
+                        if Colors.general_theme == 2:
+                            self.lbl_position.setBgOpacity(0.96)
+                        else:
+                            self.lbl_position.setBgOpacity(0.68)
                 else:
                     if not self.isLapLabel:
                         if self.isAlive.value:
                             self.lbl_position.setBgColor(Colors.background_tower_position_even(), True)\
-                                .setColor(Colors.white(), True)\
-                                .setBgOpacity(0.58)
+                                .setColor(Colors.white(), True)#.setBgOpacity(0.58)
+                            if Colors.general_theme == 2:
+                                self.lbl_position.setBgOpacity(0.96)
+                            else:
+                                self.lbl_position.setBgOpacity(0.58)
                         else:
                             self.lbl_position.setBgColor(Colors.background_tower_position_even(), True)\
                                 .setColor(Colors.grey(), True)\
@@ -689,11 +712,12 @@ class ACTower:
             self.__class__.colorsByClass = False
         Colors.highlight(reload=True)
         self.font.setValue(Font.current)
-        if self.ui_row_height.hasChanged() or self.font.hasChanged():
-            self.redraw_size()
-        else:
-            for driver in self.drivers:
-                driver.set_border()
+        #if self.ui_row_height.hasChanged() or self.font.hasChanged():
+        #    self.redraw_size()
+        #else:
+        self.redraw_size()
+        for driver in self.drivers:
+            driver.set_border()
 
     def redraw_size(self):
         # Fonts
@@ -702,6 +726,8 @@ class ACTower:
         self.lbl_tire_stint.update_font()
         self.lbl_title_mode.update_font()
         # UI
+        self.lbl_title_stint.set(background=Colors.background_dark(), color=Colors.font_color()).patch_if_hidden()
+        self.lbl_tire_stint.set(background=Colors.background_tower(), color=Colors.font_color()).patch_if_hidden()
         self.rowHeight = self.ui_row_height.value
         height = self.rowHeight - 2
         font_size = Font.get_font_size(height+self.font_offset)

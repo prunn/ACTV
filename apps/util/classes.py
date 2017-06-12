@@ -115,7 +115,7 @@ class POINT(ctypes.Structure):
 class Colors:
     general_theme = 0  # 0 : Dark, 1 : Light
     border_direction = 0  # 0 : Horizontal, 1 : Vertical
-    themed_info = True
+    themed_info = 1
     theme_red = -1
     theme_green = -1
     theme_blue = -1
@@ -125,6 +125,8 @@ class Colors:
 
     @staticmethod
     def theme(bg=False, reload=False):
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=bg)
         # get theme color
         if reload or Colors.theme_red < 0 or Colors.theme_green < 0 or Colors.theme_blue < 0:
             cfg = Config("apps/python/prunn/", "config.ini")
@@ -184,39 +186,50 @@ class Colors:
     def background():
         if Colors.general_theme == 1:
             return rgb([255, 255, 255], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=True)
         return rgb([55, 55, 55], bg=True)
 
     @staticmethod
     def background_dark():
         if Colors.general_theme == 1:
             return rgb([255, 255, 255], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=True)
         return rgb([20, 20, 20], bg=True)
 
     @staticmethod
     def background_tower():
         if Colors.general_theme == 1:
             return rgb([255, 255, 255], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=True)
         return rgb([32, 32, 32], bg=True)
 
     @staticmethod
     def background_first():
         if Colors.general_theme == 1:
-            # return rgb([0, 50, 130], bg=True)
             return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
         return rgb([192, 0, 0], bg=True)
 
     @staticmethod
     def background_tower_position_odd():
         if Colors.general_theme == 1:
-            # return rgb([0, 50, 130], bg=True)
             return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
     def background_tower_position_even():
         if Colors.general_theme == 1:
-            # return rgb([0, 50, 130], bg=True)
             return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
         return rgb([0, 0, 0], bg=True)
 
     @staticmethod
@@ -226,14 +239,17 @@ class Colors:
     @staticmethod
     def background_info_position():
         if Colors.general_theme == 1:
-            #return rgb([0, 50, 130], bg=True)
             return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
         return rgb([112, 112, 112], bg=True)
 
     @staticmethod
     def background_speedtrap():
         if Colors.general_theme == 1:
             return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
@@ -246,24 +262,32 @@ class Colors:
     def opacity_tower_odd():
         if Colors.general_theme == 1:
             return 0.9
+        if Colors.general_theme == 2:
+            return 1
         return 0.72
 
     @staticmethod
     def opacity_tower_even():
         if Colors.general_theme == 1:
             return 0.84
+        if Colors.general_theme == 2:
+            return 1
         return 0.58
 
     @staticmethod
     def background_opacity():
         if Colors.general_theme == 1:
             return 0.9
+        if Colors.general_theme == 2:
+            return 1
         return 0.64
 
     @staticmethod
     def border_opacity():
         if Colors.general_theme == 1:
-            return 0.8
+            return 0.85
+        if Colors.general_theme == 2:
+            return 1
         return 0.7
 
     @staticmethod
@@ -426,6 +450,8 @@ class Colors:
             return rgb([214, 112, 157], bg=True)
         # if car.find("glickenhaus")>=0 or car.find("p4-5_2011")>=0:
         #	return rgb([0, 0, 0], bg = True)
+        if Colors.general_theme == 2:
+            return Colors.white(bg=True)
         return Colors.theme(bg=True)
 
 
@@ -570,6 +596,14 @@ class Label:
             self.params["a"].setValue(color[3])
             ac.setFontColor(self.label, *color)
         return self
+
+    def patch_if_hidden(self):
+        if not self.isVisible.value:
+            # Patching animation when changing font alpha to non-visible label
+            self.params["r"].hasChanged()
+            self.params["g"].hasChanged()
+            self.params["b"].hasChanged()
+            self.params["a"].hasChanged()
 
     def setFont(self, fontName, italic, bold):
         self.fontName = fontName
@@ -740,8 +774,7 @@ class Label:
                 else:
                     ac.setText(self.label, "")
 
-        if self.params["r"].hasChanged() or self.params["g"].hasChanged() or self.params["b"].hasChanged() or \
-                self.params["a"].hasChanged():
+        if self.params["r"].hasChanged() or self.params["g"].hasChanged() or self.params["b"].hasChanged() or self.params["a"].hasChanged():
             ac.setFontColor(self.label, self.params["r"].value, self.params["g"].value, self.params["b"].value,
                             self.params["a"].value)
             if self.params["a"].value == 0:

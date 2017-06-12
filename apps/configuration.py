@@ -2,7 +2,7 @@ import ac
 import acsys
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
-from apps.util.classes import Window, Button, Label, Value, Config, Log, Font
+from apps.util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
 from apps.util.func import rgb
 
 
@@ -27,7 +27,7 @@ class Configuration:
     def __init__(self):
         self.session = Value(-1)
         self.listen_active = True
-        self.window = Window(name="ACTV Config", icon=True, width=251, height=480, texture="").setBgOpacity(0.6)
+        self.window = Window(name="ACTV Config", icon=True, width=251, height=558, texture="").setBgOpacity(0.6)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -78,6 +78,16 @@ class Configuration:
         ac.setPosition(self.spin_row_height, 20, y)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.addOnValueChangeListener(self.spin_row_height, self.on_spin_row_height_changed)
+
+        # Font
+        y += 70
+        self.spin_font = ac.addSpinner(self.window.app, "Font :")
+        ac.setRange(self.spin_font, 0, len(Font.fonts) - 1)
+        ac.setPosition(self.spin_font, 20, y)
+        ac.setValue(self.spin_font, Font.current)
+        ac.addOnValueChangeListener(self.spin_font, self.on_spin_font_changed)
+        self.lbl_font = Label(self.window.app, "Default").setSize(120, 26).setPos(148, y - 28).setFontSize(
+            12).setAlign("left").setVisible(1)
 
         y += 52
         self.chk_invalidated = ac.addCheckBox(self.window.app, "")
@@ -141,16 +151,38 @@ class Configuration:
         self.lbl_colors_by = Label(self.window.app, "Brand").setSize(120, 26).setPos(178, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
 
-        # Font
+        # General theme : 0-Dark 1-white 2-electric
         y += 70
-        self.spin_font = ac.addSpinner(self.window.app, "Font :")
-        ac.setRange(self.spin_font, 0, len(Font.fonts) - 1)
-        ac.setPosition(self.spin_font, 20, y)
-        ac.setValue(self.spin_font, Font.current)
-        ac.addOnValueChangeListener(self.spin_font, self.on_spin_font_changed)
-        ac.setVisible(self.spin_font, 0)
-        self.lbl_font = Label(self.window.app, "Default").setSize(120, 26).setPos(148, y - 28).setFontSize(
+        self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
+        ac.setRange(self.spin_general_theme, 0, 2)
+        ac.setPosition(self.spin_general_theme, 20, y)
+        ac.setValue(self.spin_general_theme, 0)
+        ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
+        ac.setVisible(self.spin_general_theme, 0)
+        self.lbl_general_theme = Label(self.window.app, "Dark").setSize(120, 26).setPos(152, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
+
+        # Border direction - Horizontal vertical none
+        y += 70
+        self.spin_border_direction = ac.addSpinner(self.window.app, "Border direction :")
+        ac.setRange(self.spin_border_direction, 0, 1)
+        ac.setPosition(self.spin_border_direction, 20, y)
+        ac.setValue(self.spin_border_direction, 0)
+        ac.addOnValueChangeListener(self.spin_border_direction, self.on_spin_border_direction_changed)
+        ac.setVisible(self.spin_border_direction, 0)
+        self.lbl_border_direction = Label(self.window.app, "Horizontal").setSize(120, 26).setPos(192, y - 28).setFontSize(
+            12).setAlign("left").setVisible(0)
+
+        # Themed info - checkbox
+        y += 52
+        self.chk_themed_info = ac.addCheckBox(self.window.app, "")
+        ac.setPosition(self.chk_themed_info, 20, y)
+        ac.addOnCheckBoxChanged(self.chk_themed_info, self.on_check_themed_info_changed)
+        ac.setVisible(self.chk_themed_info, 0)
+        self.lbl_title_themed_info = Label(self.window.app, "Themed info")\
+            .setSize(200, 26).setPos(65, y + 1)\
+            .setFontSize(16).setAlign("left")\
+            .setVisible(0)
 
         self.cfg_loaded = False
         self.cfg = Config("apps/python/prunn/", "config.ini")
@@ -203,11 +235,19 @@ class Configuration:
         if self.__class__.carColorsBy == -1:
             self.__class__.carColorsBy = 0
         font = self.cfg.get("SETTINGS", "font", "int")
-        if font == -1:
-            font = 0
-        if font > len(Font.fonts) - 1:
-            font = 0
+        if font == -1 or font > len(Font.fonts) - 1:
+            font = 2  # Open Sans
         Font.set_font(font)
+
+        general_theme = self.cfg.get("SETTINGS", "general_theme", "int")
+        if general_theme >= 0:
+            Colors.general_theme = general_theme
+        border_direction = self.cfg.get("SETTINGS", "border_direction", "int")
+        if border_direction >= 0:
+            Colors.border_direction = border_direction
+        themed_info = self.cfg.get("SETTINGS", "themed_info", "int")
+        if themed_info >= 0:
+            Colors.themed_info = themed_info
 
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
@@ -222,6 +262,9 @@ class Configuration:
         ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
         ac.setValue(self.spin_colors_by, self.__class__.carColorsBy)
         ac.setValue(self.spin_font, font)
+        ac.setValue(self.spin_general_theme, Colors.general_theme)
+        ac.setValue(self.spin_border_direction, Colors.border_direction)
+        ac.setValue(self.chk_themed_info, Colors.themed_info)
         self.set_labels()
         self.cfg_loaded = True
 
@@ -240,6 +283,9 @@ class Configuration:
         self.cfg.set("SETTINGS", "tower_highlight", self.__class__.tower_highlight)
         self.cfg.set("SETTINGS", "car_colors_by", self.__class__.carColorsBy)
         self.cfg.set("SETTINGS", "font", Font.current)
+        self.cfg.set("SETTINGS", "general_theme", Colors.general_theme)
+        self.cfg.set("SETTINGS", "border_direction", Colors.border_direction)
+        self.cfg.set("SETTINGS", "themed_info", Colors.themed_info)
 
     def set_labels(self):
         # Qualifying mode
@@ -266,6 +312,18 @@ class Configuration:
             self.lbl_colors_by.setText("Class")
         # Font
         self.lbl_font.setText(str(Font.get_font()))
+        # Theme
+        if Colors.general_theme == 0:
+            self.lbl_general_theme.setText("Dark")
+        elif Colors.general_theme == 1:
+            self.lbl_general_theme.setText("Light")
+        elif Colors.general_theme == 2:
+            self.lbl_general_theme.setText("Electric")
+        # Border direction
+        if Colors.border_direction == 0:
+            self.lbl_border_direction.setText("Horizontal")
+        elif Colors.border_direction == 1:
+            self.lbl_border_direction.setText("Vertical")
 
     def change_tab(self):
         if self.__class__.currentTab == 1:
@@ -276,10 +334,16 @@ class Configuration:
             ac.setVisible(self.spin_theme_blue, 0)
             ac.setVisible(self.spin_tower_lap, 0)
             ac.setVisible(self.spin_colors_by, 0)
-            ac.setVisible(self.spin_font, 0)
+            ac.setVisible(self.spin_font, 1)
             self.lbl_tower_lap.setVisible(0)
             self.lbl_colors_by.setVisible(0)
-            self.lbl_font.setVisible(0)
+            self.lbl_font.setVisible(1)
+            ac.setVisible(self.spin_general_theme, 0)
+            self.lbl_general_theme.setVisible(0)
+            ac.setVisible(self.spin_border_direction, 0)
+            self.lbl_border_direction.setVisible(0)
+            ac.setVisible(self.chk_themed_info, 0)
+            self.lbl_title_themed_info.setVisible(0)
             ac.setVisible(self.spin_race_mode, 1)
             ac.setVisible(self.spin_qual_mode, 1)
             ac.setVisible(self.spin_num_cars, 1)
@@ -291,6 +355,7 @@ class Configuration:
             self.lbl_title_force_info.setVisible(1)
             self.lbl_race_mode.setVisible(1)
             self.lbl_qual_mode.setVisible(1)
+
         else:
             self.btn_tab1.setBgColor(rgb([12, 12, 12], bg=True)).setBgOpacity(0.6)
             self.btn_tab2.setBgColor(rgb([255, 12, 12], bg=True)).setBgOpacity(0.6)
@@ -299,10 +364,16 @@ class Configuration:
             ac.setVisible(self.spin_theme_blue, 1)
             ac.setVisible(self.spin_tower_lap, 1)
             ac.setVisible(self.spin_colors_by, 1)
-            ac.setVisible(self.spin_font, 1)
+            ac.setVisible(self.spin_font, 0)
             self.lbl_tower_lap.setVisible(1)
             self.lbl_colors_by.setVisible(1)
-            self.lbl_font.setVisible(1)
+            self.lbl_font.setVisible(0)
+            ac.setVisible(self.spin_general_theme, 1)
+            self.lbl_general_theme.setVisible(1)
+            ac.setVisible(self.spin_border_direction, 1)
+            self.lbl_border_direction.setVisible(1)
+            ac.setVisible(self.chk_themed_info, 1)
+            self.lbl_title_themed_info.setVisible(1)
             ac.setVisible(self.spin_race_mode, 0)
             ac.setVisible(self.spin_qual_mode, 0)
             ac.setVisible(self.spin_num_cars, 0)
@@ -370,6 +441,11 @@ class Configuration:
         Configuration.configChanged = True
 
     @staticmethod
+    def on_check_themed_info_changed(name, state):
+        Colors.themed_info = state
+        Configuration.configChanged = True
+
+    @staticmethod
     def on_spin_num_cars_changed(value):
         Configuration.max_num_cars = value
         Configuration.configChanged = True
@@ -377,6 +453,16 @@ class Configuration:
     @staticmethod
     def on_spin_num_laps_changed(value):
         Configuration.max_num_laps_stint = value
+        Configuration.configChanged = True
+
+    @staticmethod
+    def on_spin_general_theme_changed(value):
+        Colors.general_theme = value
+        Configuration.configChanged = True
+
+    @staticmethod
+    def on_spin_border_direction_changed(value):
+        Colors.border_direction = value
         Configuration.configChanged = True
 
     @staticmethod
