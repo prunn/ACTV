@@ -92,17 +92,18 @@ class ACSpeedTrap:
         # UI
         if Colors.general_theme == 2:
             self.lbl_title.set(background=Colors.background(), opacity=Colors.background_opacity())
-            self.lbl_time.set(background=Colors.background_speedtrap(), opacity=Colors.background_opacity(), color=Colors.font_color()).patch_if_hidden()
+            self.lbl_time.set(background=Colors.background_speedtrap(), opacity=Colors.background_opacity(), color=Colors.font_color())
             self.lbl_border.set(background=Colors.theme(bg=True), opacity=Colors.border_opacity())
         else:
             self.lbl_title.set(background=Colors.background_speedtrap(), opacity=Colors.background_opacity())
-            self.lbl_time.set(background=Colors.background(), opacity=Colors.background_opacity(), color=Colors.font_color()).patch_if_hidden()
+            self.lbl_time.set(background=Colors.background(), opacity=Colors.background_opacity(), color=Colors.font_color())
             self.lbl_border.set(background=Colors.theme(bg=True), opacity=Colors.border_opacity())
         self.rowHeight = self.ui_row_height.value
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
         self.lbl_time.setSize(self.rowHeight * 4.8, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
         self.lbl_border.setSize(self.rowHeight * 5.8, 1).setPos(0, self.rowHeight + 1)
+        self.reset_visibility()
 
     def check_mph(self, cfg_path):
         conf = Config(cfg_path, "/gameplay.ini")

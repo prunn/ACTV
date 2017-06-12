@@ -177,10 +177,10 @@ class ACInfo:
         self.info_position_lead.set(background=Colors.background_first())
         if Colors.themed_info == 1 and self.timing_visible.value == 1:
             self.lbl_driver_name.setBgColor(Colors.theme(bg=True))
-            self.lbl_driver_name_text.setColor(Colors.white()).patch_if_hidden()
+            self.lbl_driver_name_text.setColor(Colors.white())
         else:
             self.lbl_driver_name.setBgColor(Colors.background_dark())
-            self.lbl_driver_name_text.setColor(Colors.font_color()).patch_if_hidden()
+            self.lbl_driver_name_text.setColor(Colors.font_color())
         self.lbl_fastest_split.set(color=Colors.font_color())
         self.rowHeight = self.ui_row_height.value + 2
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
@@ -195,7 +195,7 @@ class ACInfo:
         self.lbl_timing_text.set(w=width * 0.6, h=row2_height,
                                  x=self.rowHeight * 14 / 36, y=self.rowHeight,
                                  color=Colors.font_color(),
-                                 font_size=font_size2).patch_if_hidden()
+                                 font_size=font_size2)
         self.lbl_split.set(w=self.rowHeight * 4.7, h=row2_height,
                            x=self.rowHeight, y=self.rowHeight,
                            font_size=font_size2)
@@ -216,9 +216,7 @@ class ACInfo:
                 self.lbl_border.hide()
         else:
             self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
-        if not self.lbl_timing.isVisible.value:
-            self.lbl_timing.hide()
-        self.set_width_and_name()
+        self.reset_visibility()
 
     def format_name(self, name, max_name_length):
         space = name.find(" ")

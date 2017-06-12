@@ -113,8 +113,8 @@ class POINT(ctypes.Structure):
 
 
 class Colors:
-    general_theme = 0  # 0 : Dark, 1 : Light
-    border_direction = 0  # 0 : Horizontal, 1 : Vertical
+    general_theme = 1  # 0 : Dark, 1 : Light
+    border_direction = 1  # 0 : Horizontal, 1 : Vertical
     themed_info = 1
     theme_red = -1
     theme_green = -1
@@ -604,6 +604,10 @@ class Label:
             self.params["g"].hasChanged()
             self.params["b"].hasChanged()
             self.params["a"].hasChanged()
+            self.params["br"].hasChanged()
+            self.params["bg"].hasChanged()
+            self.params["bb"].hasChanged()
+            self.params["o"].hasChanged()
 
     def setFont(self, fontName, italic, bold):
         self.fontName = fontName
