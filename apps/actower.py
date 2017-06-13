@@ -187,13 +187,16 @@ class Driver:
             self.lbl_position.update_font()
             self.lbl_pit.update_font()
         # UI
-        self.lbl_name.set(background=Colors.background_tower())
+        self.lbl_name.set(background=Colors.background_tower(), color=Colors.font_color())
         self.position.setValue(-1)
         self.rowHeight = height
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.final_y = self.num_pos * self.rowHeight
         if self.isLapLabel:
-            self.lbl_name.setSize(self.rowHeight * 6, self.rowHeight).setPos(0, self.final_y).setFontSize(font_size)
+            if Colors.border_direction == 1:
+                self.lbl_name.setSize(self.rowHeight * 6 + 8, self.rowHeight).setPos(0, self.final_y).setFontSize(font_size)
+            else:
+                self.lbl_name.setSize(self.rowHeight * 6 + 4, self.rowHeight).setPos(0, self.final_y).setFontSize(font_size)
         else:
             if self.isInPit.value and not self.race:
                 if Colors.border_direction == 1:

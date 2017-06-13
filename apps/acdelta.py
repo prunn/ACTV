@@ -11,11 +11,11 @@ from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, 
 class ACDelta:
     resetPressed = False
     configChanged = False
-    ui_row_height = 38
+    ui_row_height = 42
 
     # INITIALIZATION
     def __init__(self): 
-        self.window = Window(name="ACTV Delta", icon=False, width=240, height=184, texture="")
+        self.window = Window(name="ACTV Delta", icon=False, width=240, height=246, texture="")
         self.cursor = Value(False)
         self.session = Value(-1)
         self.performance = Value(0)
@@ -51,7 +51,7 @@ class ACDelta:
             .setBgColor(rgb([255, 12, 12], bg=True))\
             .setVisible(0)
         self.spin_row_height = ac.addSpinner(self.window.app, "")
-        ac.setRange(self.spin_row_height, 20, 48)
+        ac.setRange(self.spin_row_height, 20, 70)
         ac.setPosition(self.spin_row_height, 20, 28)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.addOnValueChangeListener(self.spin_row_height, self.on_spin_row_height_changed)

@@ -6,19 +6,16 @@
 * Timer (Session info - Replay)
 * Config (Configuration)
 
-Driver colors are set with car brand
-* bmw-ford-shelby: blue
-* mercedes-mazda: grey
-* ruf-corvette-lotus : yellow
-* lamborghini-pagani: lime-green
-* alpha romeo: forest-green
-* nissan: purple
-* ktm-mclaren: orange
-
-battle ares set at 2.5 sec if nothing 5 sec else standings are shown every lap for 12 sec
-
 -
 ###Changelog
+1.2.1
+added Fonts
+shared standings from tower to info
+Dark, white, electric themes options
+border direction option
+changed first row of info widget and added option to revert if wanted
+bigger delta option
+
 1.2.0
 Fixed over 30 mins timed races
 Color by class option
@@ -104,7 +101,24 @@ speed units bounded to game options
    * if you don't see them at first its normal if they have nothing to show but a mouse over the widget will trigger a background and a title(AC puts them at the top left by default) allowing you to place them as you want
 4. don't forget to take a deep breath and smile ;) as you are all set
 
--
+
+###Credits
+OV1 - base of classes
+Fonts:
+
+Noto Sans : https://fonts.google.com/specimen/Noto+Sans
+
+Open Sans : https://fonts.google.com/specimen/Open+Sans
+
+Yantramanav : https://fonts.google.com/specimen/Yantramanav
+
+Signika Negative : https://fonts.google.com/specimen/Signika+Negative
+
+Strait : https://fonts.google.com/specimen/Strait
+
+Overlock : https://fonts.google.com/specimen/Overlock
+
+
 ###License
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 GNU General Public License v2.

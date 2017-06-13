@@ -18,6 +18,46 @@ def rgb(color, a=1, bg=False):
 
 
 def getFontSize(row_height):
+    if row_height == 70:
+        return 54
+    if row_height == 69:
+        return 53
+    if row_height == 68:
+        return 52
+    if row_height == 67:
+        return 51
+    if row_height == 66:
+        return 50
+    if row_height == 65:
+        return 49
+    if row_height == 64:
+        return 48
+    if row_height == 63:
+        return 47
+    if row_height == 62:
+        return 46
+    if row_height == 61:
+        return 45
+    if row_height == 60:
+        return 44
+    if row_height == 59:
+        return 43
+    if row_height == 58:
+        return 42
+    if row_height == 57:
+        return 41
+    if row_height == 56:
+        return 40
+    if row_height == 55:
+        return 39
+    if row_height == 54:
+        return 38
+    if row_height == 53:
+        return 37
+    if row_height == 52:
+        return 36
+    if row_height == 51:
+        return 35
     if row_height == 50 or row_height == 49:
         return 34
     if row_height == 48 or row_height == 47:
