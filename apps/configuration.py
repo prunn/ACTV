@@ -38,7 +38,7 @@ class Configuration:
 
         y = 50
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
-        ac.setRange(self.spin_race_mode, 0, 2)
+        ac.setRange(self.spin_race_mode, 0, 3)
         ac.setPosition(self.spin_race_mode, 20, y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.on_spin_race_mode_changed)
@@ -297,9 +297,11 @@ class Configuration:
         if self.__class__.race_mode == 0:
             self.lbl_race_mode.setText("Auto")
         elif self.__class__.race_mode == 1:
-            self.lbl_race_mode.setText("Full-Gaps")
+            self.lbl_race_mode.setText("Gaps")
+        elif self.__class__.race_mode == 2:
+            self.lbl_race_mode.setText("Intervals")
         else:
-            self.lbl_race_mode.setText("Full")
+            self.lbl_race_mode.setText("Names")
         # Tower color
         if self.__class__.tower_highlight == 0:
             self.lbl_tower_lap.setText("Red")

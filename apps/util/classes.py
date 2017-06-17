@@ -604,10 +604,10 @@ class Label:
             self.params["g"].hasChanged()
             self.params["b"].hasChanged()
             self.params["a"].hasChanged()
-            self.params["br"].hasChanged()
-            self.params["bg"].hasChanged()
-            self.params["bb"].hasChanged()
-            self.params["o"].hasChanged()
+            #self.params["br"].hasChanged()
+            #self.params["bg"].hasChanged()
+            #self.params["bb"].hasChanged()
+            #self.params["o"].hasChanged()
 
     def setFont(self, fontName, italic, bold):
         self.fontName = fontName
