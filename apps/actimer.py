@@ -5,6 +5,7 @@ import json
 import ctypes
 from apps.util.func import rgb
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .configuration import Configuration
 
 
 class ACTimer:
@@ -114,8 +115,7 @@ class ACTimer:
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     def load_cfg(self):
         # Load
-        cfg = Config("apps/python/prunn/", "config.ini")
-        self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
+        self.ui_row_height.setValue(Configuration.ui_row_height)
         # UI
         self.font.setValue(Font.current)
         #if self.ui_row_height.hasChanged() or self.font.hasChanged():

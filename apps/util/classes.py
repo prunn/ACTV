@@ -6,6 +6,7 @@ import ctypes
 import os.path
 import json
 from apps.util.func import rgb
+from html.parser import HTMLParser
 
 
 class Window:
@@ -1059,3 +1060,40 @@ class Font:
         if row_height < 30:
             return row_height - 6
         return 26
+
+
+class Laps:
+    def __init__(self, lap, valid, time):
+        self.lap = lap
+        self.valid = valid
+        self.time = time
+
+
+class MyHTMLParser(HTMLParser):
+    html_table = 0
+    logging_html = False
+    line = []
+    data = []
+    tmp_data = ""
+    b = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "table":
+            self.__class__.html_table += 1
+            if self.__class__.html_table > 1:
+                self.__class__.logging_html = True
+
+    def handle_endtag(self, tag):
+        if tag == "table":
+            self.__class__.logging_html = False
+        elif self.__class__.logging_html and tag == "tr" and len(self.__class__.line) > 0:
+            self.__class__.data.append(self.__class__.line)
+            self.__class__.line = []
+            self.__class__.tmp_data = ""
+        elif self.__class__.logging_html and tag == "td":
+            self.__class__.line.append(self.__class__.tmp_data)
+            self.__class__.tmp_data = ""
+
+    def handle_data(self, data):
+        if self.__class__.logging_html:
+            self.__class__.tmp_data = data

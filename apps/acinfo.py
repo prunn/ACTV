@@ -2,6 +2,7 @@ import ac
 import acsys
 import ctypes
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .configuration import Configuration
 
 
 class lapTimeStart:
@@ -141,20 +142,19 @@ class ACInfo:
     # PUBLIC METHODS
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     def load_cfg(self):
-        cfg = Config("apps/python/prunn/", "config.ini")
-        if cfg.get("SETTINGS", "lap_can_be_invalidated", "int") == 1:
+        if Configuration.lapCanBeInvalidated == 1:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
-        if cfg.get("SETTINGS", "force_info_visible", "int") == 1:
+        if Configuration.forceInfoVisible == 1:
             self.forceViewAlways = True
         else:
             self.forceViewAlways = False
-        if cfg.get("SETTINGS", "car_colors_by", "int") == 1:
+        if Configuration.carColorsBy == 1:
             self.colorsByClass.setValue(True)
         else:
             self.colorsByClass.setValue(False)
-        self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
+        self.ui_row_height.setValue(Configuration.ui_row_height)
         self.font.setValue(Font.current)
         #if self.ui_row_height.hasChanged() or self.font.hasChanged():
         self.redraw_size()

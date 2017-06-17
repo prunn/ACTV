@@ -3,6 +3,7 @@ import acsys
 import ctypes
 import os
 from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .configuration import Configuration
 
 
 class ACSpeedTrap:
@@ -73,12 +74,11 @@ class ACSpeedTrap:
 
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     def load_cfg(self):
-        cfg = Config("apps/python/prunn/", "config.ini")
-        if cfg.get("SETTINGS", "lap_can_be_invalidated", "int") == 1:
+        if Configuration.lapCanBeInvalidated == 1:
             self.lapCanBeInvalidated = True
         else:
             self.lapCanBeInvalidated = False
-        self.ui_row_height.setValue(cfg.get("SETTINGS", "ui_row_height", "int"))
+        self.ui_row_height.setValue(Configuration.ui_row_height)
         self.font.setValue(Font.current)
         #if self.ui_row_height.hasChanged() or self.font.hasChanged():
         self.redraw_size()
