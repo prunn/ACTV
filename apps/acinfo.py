@@ -1,15 +1,8 @@
 import ac
 import acsys
 import ctypes
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .util.classes import Window, Label, Value, POINT, Colors, Font, lapTimeStart
 from .configuration import Configuration
-
-
-class lapTimeStart:
-    def __init__(self, lap, time, lastpit):
-        self.lap = lap
-        self.time = time
-        self.lastpit = lastpit
 
 
 class ACInfo:

@@ -1069,6 +1069,13 @@ class Laps:
         self.time = time
 
 
+class lapTimeStart:
+    def __init__(self, lap, time, lastpit):
+        self.lap = lap
+        self.time = time
+        self.lastpit = lastpit
+
+
 class MyHTMLParser(HTMLParser):
     html_table = 0
     logging_html = False

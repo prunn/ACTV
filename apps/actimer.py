@@ -3,8 +3,8 @@ import acsys
 import os.path
 import json
 import ctypes
-from apps.util.func import rgb
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .util.func import rgb
+from .util.classes import Window, Label, Value, POINT, Colors, Font
 from .configuration import Configuration
 
 

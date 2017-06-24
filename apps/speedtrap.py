@@ -2,7 +2,7 @@ import ac
 import acsys
 import ctypes
 import os
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .util.classes import Window, Label, Value, POINT, Colors, Config, Font
 from .configuration import Configuration
 
 

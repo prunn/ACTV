@@ -1,11 +1,11 @@
 import ac
 import acsys
 import ctypes
-import os,threading,json,math
+import os, threading, json, math
 import gzip
-import time
-from apps.util.func import rgb, getFontSize
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, Button, raceGaps
+#import time
+from .util.func import rgb, getFontSize
+from .util.classes import Window, Label, Value, POINT, Colors, Config, Log, Button, raceGaps
 
         
 class ACDelta:
