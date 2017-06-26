@@ -2,8 +2,8 @@ import ac
 import acsys
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
-from apps.util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
-from apps.util.func import rgb
+from .util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
+from .util.func import rgb
 
 
 class Configuration:
@@ -49,7 +49,7 @@ class Configuration:
 
         y += 70
         self.spin_qual_mode = ac.addSpinner(self.window.app, "Qual tower mode :")
-        ac.setRange(self.spin_qual_mode, 0, 1)
+        ac.setRange(self.spin_qual_mode, 0, 2)
         ac.setPosition(self.spin_qual_mode, 20, y)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
         ac.addOnValueChangeListener(self.spin_qual_mode, self.on_spin_qual_mode_changed)
@@ -291,8 +291,10 @@ class Configuration:
         # Qualifying mode
         if self.__class__.qual_mode == 0:
             self.lbl_qual_mode.setText("Gaps")
-        else:
+        elif self.__class__.qual_mode == 1:
             self.lbl_qual_mode.setText("Times")
+        else:
+            self.lbl_qual_mode.setText("Compact")
         # Race mode
         if self.__class__.race_mode == 0:
             self.lbl_race_mode.setText("Auto")

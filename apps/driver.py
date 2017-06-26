@@ -2,12 +2,12 @@ import ac
 import acsys
 import math
 import functools
-from apps.util.classes import Window, Label, Value, POINT, Colors, Config, Log, raceGaps, Font, Laps, MyHTMLParser
+from .util.classes import Label, Value, Colors, Font
 from .configuration import Configuration
 
 
 class Driver:
-    def __init__(self, app, row_height, font_name, identifier, name, pos, is_lap_label=False):
+    def __init__(self, app, row_height, identifier, name, pos, is_lap_label=False, is_results=False):
         self.identifier = identifier
         self.rowHeight = row_height
         self.font_offset = 0
@@ -24,6 +24,7 @@ class Driver:
         self.firstDraw = False
         self.isAlive = Value(False)
         self.pitBoxMode = False
+        self.is_results = is_results
         self.movingUp = False
         self.isCurrentVehicule = Value(False)
         self.isLapLabel = is_lap_label
@@ -111,20 +112,6 @@ class Driver:
         self.lbl_name.setAnimationMode("y", "spring")
         self.lbl_time.setAnimationMode("y", "spring")
         self.lbl_border.setAnimationMode("y", "spring")
-        '''
-        if font_name != "":
-            self.lbl_name.setFont(font_name, 0, 0)
-            self.lbl_time.setFont(font_name, 0, 0)
-            if not self.isLapLabel:
-                self.lbl_position.setFont(font_name, 0, 0)
-                self.lbl_pit.setFont(font_name, 0, 0)
-
-        self.lbl_name.update_font()
-        self.lbl_time.update_font()
-        if not self.isLapLabel:
-            self.lbl_position.update_font()
-            self.lbl_pit.update_font()
-        '''
         self.redraw_size(row_height)
 
         if not self.isLapLabel:
@@ -145,7 +132,11 @@ class Driver:
             self.lbl_position.update_font()
             self.lbl_pit.update_font()
         # UI
-        self.lbl_name.set(background=Colors.background_tower(), color=Colors.font_color())
+        if self.isDisplayed:
+            self.lbl_name.set(background=Colors.background_tower(), color=Colors.font_color())
+            if not self.isLapLabel:
+                self.lbl_pit.setColor(Colors.pitColor())
+            self.lbl_time.setColor(Colors.font_color())
         self.position.setValue(-1)
         self.rowHeight = height
         font_size = Font.get_font_size(self.rowHeight + self.font_offset)
@@ -201,23 +192,18 @@ class Driver:
             self.set_name()
         elif not self.showingFullNames and not needs_tlc:
             self.show_full_name()
-        if self.pitBoxMode:
-            if self.isInPit.value:
-                self.lbl_pit.showText()
-                self.lbl_name.setSize(self.rowHeight * 15.6, self.rowHeight, True)
-            else:
-                self.lbl_pit.hideText()
-                self.lbl_name.setSize(self.rowHeight * 15, self.rowHeight, True)
-        else:
-            if not self.isDisplayed:
-                if not self.isLapLabel:
-                    if self.isInPit.value and not race:
-                        self.lbl_pit.showText()
-                        self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight, True)
-                    else:
-                        self.lbl_pit.hideText()
-                        self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight, True)
-                self.isDisplayed = True
+        if not self.isDisplayed:
+            self.lbl_name.set(background=Colors.background_tower())
+            self.lbl_time.setColor(Colors.font_color())
+            if not self.isLapLabel:
+                self.lbl_pit.setColor(Colors.pitColor()).setVisible(0)
+                if self.isInPit.value and not race:
+                    self.lbl_pit.showText()
+                    self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight, True)
+                else:
+                    self.lbl_pit.hideText()
+                    self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight, True)
+            self.isDisplayed = True
         self.lbl_name.show()
 
         if needs_tlc or self.isLapLabel:
@@ -324,10 +310,10 @@ class Driver:
 
     def set_border(self):
         if Configuration.carColorsBy == 1:
-            colorsByClass = True
+            colors_by_class = True
         else:
-            colorsByClass = False
-        self.lbl_border.setBgColor(Colors.colorFromCar(self.carName, colorsByClass)).setBgOpacity(
+            colors_by_class = False
+        self.lbl_border.setBgColor(Colors.colorFromCar(self.carName, colors_by_class)).setBgOpacity(
             Colors.border_opacity())
 
     def show_full_name(self):
@@ -409,7 +395,7 @@ class Driver:
         if len(self.race_gaps) > 132:
             del self.race_gaps[0:len(self.race_gaps) - 132]
 
-    def set_position(self, position, offset, battles, qual_mode):
+    def set_position(self, position, offset, battles):
         if not self.isLapLabel:
             self.isInPitLane.setValue(bool(ac.isCarInPitline(self.identifier)))
             self.isInPitBox.setValue(bool(ac.isCarInPit(self.identifier)))
