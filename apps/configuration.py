@@ -38,7 +38,7 @@ class Configuration:
 
         y = 50
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
-        ac.setRange(self.spin_race_mode, 0, 3)
+        ac.setRange(self.spin_race_mode, 0, 4)
         ac.setPosition(self.spin_race_mode, 20, y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.on_spin_race_mode_changed)
@@ -302,8 +302,10 @@ class Configuration:
             self.lbl_race_mode.setText("Gaps")
         elif self.__class__.race_mode == 2:
             self.lbl_race_mode.setText("Intervals")
-        else:
+        elif self.__class__.race_mode == 3:
             self.lbl_race_mode.setText("Names")
+        else:
+            self.lbl_race_mode.setText("Compact")
         # Tower color
         if self.__class__.tower_highlight == 0:
             self.lbl_tower_lap.setText("Red")
@@ -421,7 +423,7 @@ class Configuration:
 
     def hotkey_pressed(self):
         if self.session.value == 2:
-            if self.__class__.race_mode >= 2:
+            if self.__class__.race_mode >= 4:
                 self.__class__.race_mode = 0
             else:
                 self.__class__.race_mode += 1
