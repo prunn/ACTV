@@ -59,7 +59,7 @@ class ACTimer:
                  color=Colors.font_color(),
                  visible=0)
         self.lbl_session_border = Label(self.window.app, "")\
-            .set(w=154 + self.rowHeight, h=1,
+            .set(w=154 + self.rowHeight, h=2,
                  x=0, y=self.rowHeight + 1,
                  background=Colors.theme(bg=True),
                  opacity=Colors.border_opacity(),
@@ -148,7 +148,7 @@ class ACTimer:
         self.lbl_session_info.setSize(self.rowHeight * 4, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
         self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
         self.lbl_session_single.setSize(width, self.rowHeight).setFontSize(font_size)
-        self.lbl_session_border.setSize(width, 1).setPos(0, self.rowHeight + 1)
+        self.lbl_session_border.setSize(width, 2).setPos(0, self.rowHeight + 1)
         #self.lbl_pit_window_text.setPos(width, 2).setSize(self.rowHeight * 3, self.rowHeight).setFontSize(font_size-2)
         self.lbl_pit_window_text.setPos(0, -self.rowHeight+2).setSize(width, self.rowHeight).setFontSize(font_size-2)
         #self.lbl_pit_window_bg.setPos(width, 0)

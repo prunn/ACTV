@@ -502,7 +502,26 @@ class ACTower:
                         elif self.race_mode.value == 3:
                             driver.show(False)
                         else:
-                            driver.show()
+                            if driver.isCurrentVehicule.value:
+                                gap = lap_gap = 0
+                                if p[0] > 0:
+                                    id_compare = self.standings[p[0]-1][0]
+                                    for d in self.drivers:
+                                        if id_compare == d.identifier:
+                                            gap = self.gap_to_driver(driver, d, d.race_current_sector.value)
+                                            lap_gap = self.get_max_sector(d) - self.get_max_sector(driver)
+                                            break
+                                if lap_gap > 100:
+                                    driver.set_time_race_battle(lap_gap / 100, first_driver.identifier, True)
+                                    driver.show()
+                                else:
+                                    driver.set_time_race_battle(gap, first_driver.identifier, False,
+                                                                self.race_mode.value == 2)
+                                    driver.show()
+                            elif driver.finished.value:
+                                driver.show(False)
+                            else:
+                                driver.show()
                     else:
                         driver.hide()
                     driver.optimise()
@@ -714,7 +733,10 @@ class ACTower:
                         elif self.race_mode.value == 3:
                             driver.show(False)
                         else:
-                            driver.show()
+                            if driver.finished.value:
+                                driver.show(False)
+                            else:
+                                driver.show()
                     else:
                         driver.hide()
                     #driver.optimise()

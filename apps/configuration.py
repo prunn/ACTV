@@ -429,7 +429,7 @@ class Configuration:
                 self.__class__.race_mode += 1
             ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         else:
-            if self.__class__.qual_mode >= 1:
+            if self.__class__.qual_mode >= 2:
                 self.__class__.qual_mode = 0
             else:
                 self.__class__.qual_mode += 1

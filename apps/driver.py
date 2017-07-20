@@ -215,31 +215,31 @@ class Driver:
         else:
             self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
                 .setPos(self.rowHeight + 4, self.final_y).setFontSize(font_size)
-            self.lbl_border.setSize(self.rowHeight * 2.8, 1) \
-                .setPos(0, self.final_y + self.rowHeight - 1)
+            self.lbl_border.setSize(self.rowHeight * 2.8, 2) \
+                .setPos(0, self.final_y + self.rowHeight - 2)
 
-    def show(self, needs_tlc=True, race=True):
+    def show(self, needs_tlc=True, race=True):#, compact=False
         self.race = race
+        compact = self.is_compact_mode()
         if self.showingFullNames and needs_tlc:
             self.set_name()
         elif not self.showingFullNames and not needs_tlc:
             self.show_full_name()
         if not self.isDisplayed:
             self.lbl_name.set(background=Colors.background_tower())
-            self.lbl_time.setColor(Colors.font_color())
+            if not compact:  #self.race and not Configuration.race_mode == 4) or (not self.race and Configuration.qual_mode != 2):
+                self.lbl_time.setColor(Colors.font_color())
             if not self.isLapLabel:
                 #self.lbl_pit.setColor(Colors.pitColor()).setVisible(0)
                 if self.isInPit.value and not race:
-                    #self.lbl_pit.showText()
                     self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight, True)
                 else:
-                    #self.lbl_pit.hideText()
                     self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight, True)
             self.isDisplayed = True
         self.lbl_name.show()
 
         if self.isLapLabel or needs_tlc:
-            if (self.race and not Configuration.race_mode == 4) or (not self.race and Configuration.qual_mode != 2):
+            if not compact:  #(self.race and not Configuration.race_mode == 4) or (not self.race and Configuration.qual_mode != 2):
                 self.lbl_time.showText()
             else:
                 self.lbl_time.hideText()
@@ -476,7 +476,7 @@ class Driver:
                 if Colors.border_direction == 1:
                     self.lbl_border.setY(self.final_y)
                 else:
-                    self.lbl_border.setY(self.final_y + self.rowHeight - 1)
+                    self.lbl_border.setY(self.final_y + self.rowHeight - 2)
                 self.firstDraw = True
 
             if self.isLapLabel:
@@ -603,55 +603,57 @@ class Driver:
             return "{0}.{1}".format(int(s), str(int(d)).zfill(3))
 
     def is_compact_mode(self):
+        if self.isLapLabel:
+            return False
         if Configuration.qual_mode == 2 and not self.highlight.value and not self.race:
             return True
-        if Configuration.race_mode == 4 and self.race and not self.finished.value:
+        if Configuration.race_mode == 4 and self.race and not self.finished.value and not self.isCurrentVehicule.value:
             return True
         return False
 
     def animate(self, session_time_left):
         if session_time_left == -1:
             self.time_highlight_end = 0
-        # color
-        self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < session_time_left)
-        if self.highlight.hasChanged() and not self.race:
-            if self.is_compact_mode():
-                name_width = 1.9
-            else:
-                name_width = 5
-            if self.isInPit.value:
-                name_width += 0.6
-            if self.highlight.value:
-                self.lbl_time.setColor(Colors.highlight(), True)
-                self.lbl_time.showText()
-                self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
-            else:
-                self.lbl_time.setColor(Colors.font_color(), True)
-                if self.is_compact_mode():
-                    self.lbl_time.hideText()
-                else:
-                    self.lbl_time.showText()
-                self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
-        elif self.race:
-            if self.is_compact_mode():
-                name_width = 1.9
-                if self.isInPit.value and self.isDisplayed:
-                    if Colors.border_direction == 1:
-                        pit_offset = 7
-                    else:
-                        pit_offset = 4
-                    name_width += 0.6
-                    pit_x = 2.9
-                    self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
-                    self.lbl_pit.showText()
-                else:
-                    self.lbl_pit.hideText()
-            else:
-                name_width = 5
-                self.lbl_pit.hideText()
-            self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
-
         if not self.isLapLabel:
+            # color
+            self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < session_time_left)
+            if self.highlight.hasChanged() and not self.race:
+                if self.is_compact_mode():
+                    name_width = 1.9
+                else:
+                    name_width = 5
+                if self.isInPit.value:
+                    name_width += 0.6
+                if self.highlight.value:
+                    self.lbl_time.setColor(Colors.highlight(), True)
+                    self.lbl_time.showText()
+                    self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
+                else:
+                    self.lbl_time.setColor(Colors.font_color(), True)
+                    if self.is_compact_mode():
+                        self.lbl_time.hideText()
+                    else:
+                        self.lbl_time.showText()
+                    self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
+            elif self.race:
+                if self.is_compact_mode():
+                    name_width = 1.9
+                    if self.isInPit.value and self.isDisplayed and self.isAlive.value:
+                        if Colors.border_direction == 1:
+                            pit_offset = 7
+                        else:
+                            pit_offset = 4
+                        name_width += 0.6
+                        pit_x = 2.9
+                        self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
+                        self.lbl_pit.showText()
+                    else:
+                        self.lbl_pit.hideText()
+                else:
+                    name_width = 5
+                    self.lbl_pit.hideText()
+                self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
+            # not isLapLabel
             self.lbl_position.animate()
             self.lbl_pit.animate()
         self.lbl_border.animate()

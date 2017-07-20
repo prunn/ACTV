@@ -102,7 +102,7 @@ class ACSpeedTrap:
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
         self.lbl_time.setSize(self.rowHeight * 4.8, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
-        self.lbl_border.setSize(self.rowHeight * 5.8, 1).setPos(0, self.rowHeight + 1)
+        self.lbl_border.setSize(self.rowHeight * 5.8, 2).setPos(0, self.rowHeight + 1)
         self.reset_visibility()
 
     def check_mph(self, cfg_path):

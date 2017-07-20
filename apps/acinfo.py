@@ -121,7 +121,7 @@ class ACInfo:
                  visible=0)
         car = ac.getCarName(0)
         self.lbl_border = Label(self.window.app, "")\
-            .set(w=284, h=1,
+            .set(w=284, h=2,
                  x=0, y=self.rowHeight,
                  background=Colors.colorFromCar(car, self.colorsByClass.value),
                  opacity=Colors.border_opacity(),
@@ -208,7 +208,7 @@ class ACInfo:
             if not self.lbl_border.isVisible.value:
                 self.lbl_border.hide()
         else:
-            self.lbl_border.set(w=width, h=1, x=0, y=self.rowHeight)
+            self.lbl_border.set(w=width, h=2, x=0, y=self.rowHeight)
         self.reset_visibility()
 
     def format_name(self, name, max_name_length):
