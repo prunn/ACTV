@@ -303,9 +303,9 @@ class Configuration:
         elif self.__class__.race_mode == 2:
             self.lbl_race_mode.setText("Intervals")
         elif self.__class__.race_mode == 3:
-            self.lbl_race_mode.setText("Names")
-        else:
             self.lbl_race_mode.setText("Compact")
+        else:
+            self.lbl_race_mode.setText("Names")
         # Tower color
         if self.__class__.tower_highlight == 0:
             self.lbl_tower_lap.setText("Red")

@@ -31,6 +31,7 @@ class Driver:
         self.race_gaps = []
         self.finished = Value(False)
         self.bestLap = 0
+        self.compact_mode_race = False
         self.bestLapServer = 0
         self.lapCount = 0
         self.fullName = Value(name)
@@ -218,28 +219,29 @@ class Driver:
             self.lbl_border.setSize(self.rowHeight * 2.8, 2) \
                 .setPos(0, self.final_y + self.rowHeight - 2)
 
-    def show(self, needs_tlc=True, race=True):#, compact=False
+    def show(self, needs_tlc=True, race=True, compact=False):
         self.race = race
-        compact = self.is_compact_mode()
+        self.compact_mode_race = compact
+        #compact = self.is_compact_mode()
         if self.showingFullNames and needs_tlc:
             self.set_name()
         elif not self.showingFullNames and not needs_tlc:
             self.show_full_name()
         if not self.isDisplayed:
             self.lbl_name.set(background=Colors.background_tower())
-            if not compact:  #self.race and not Configuration.race_mode == 4) or (not self.race and Configuration.qual_mode != 2):
+            if not compact:
                 self.lbl_time.setColor(Colors.font_color())
             if not self.isLapLabel:
                 #self.lbl_pit.setColor(Colors.pitColor()).setVisible(0)
                 if self.isInPit.value and not race:
-                    self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight, True)
+                    self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight, False)
                 else:
-                    self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight, True)
+                    self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight, False)
             self.isDisplayed = True
         self.lbl_name.show()
 
         if self.isLapLabel or needs_tlc:
-            if not compact:  #(self.race and not Configuration.race_mode == 4) or (not self.race and Configuration.qual_mode != 2):
+            if not compact:
                 self.lbl_time.showText()
             else:
                 self.lbl_time.hideText()
@@ -605,9 +607,9 @@ class Driver:
     def is_compact_mode(self):
         if self.isLapLabel:
             return False
-        if Configuration.qual_mode == 2 and not self.highlight.value and not self.race:
+        if not self.race and Configuration.qual_mode == 2 and not self.highlight.value:
             return True
-        if Configuration.race_mode == 4 and self.race and not self.finished.value and not self.isCurrentVehicule.value:
+        if self.race and self.compact_mode_race:# Configuration.race_mode == 3 and not self.finished.value and not self.isCurrentVehicule.value:
             return True
         return False
 
@@ -636,7 +638,7 @@ class Driver:
                         self.lbl_time.showText()
                     self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
             elif self.race:
-                if self.is_compact_mode():
+                if self.compact_mode_race:
                     name_width = 1.9
                     if self.isInPit.value and self.isDisplayed and self.isAlive.value:
                         if Colors.border_direction == 1:
@@ -646,6 +648,7 @@ class Driver:
                         name_width += 0.6
                         pit_x = 2.9
                         self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
+                        self.lbl_pit.setColor(Colors.pitColor())
                         self.lbl_pit.showText()
                     else:
                         self.lbl_pit.hideText()

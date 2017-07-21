@@ -301,7 +301,7 @@ class ACTower:
         found1 = False
         found2 = False
         max_offset = 25
-        if self.race_mode.value == 1 or self.race_mode.value == 2:
+        if self.race_mode.value == 1 or self.race_mode.value == 2 or self.race_mode.value == 3:
             max_offset = 125
         if abs(sector - self.get_max_sector(d1)) > max_offset:
             return 600000
@@ -362,9 +362,9 @@ class ACTower:
             elif self.race_mode.value == 2:
                 self.lbl_title_mode.setText("Intervals")
             elif self.race_mode.value == 3:
-                self.lbl_title_mode.setText("Names")
-            else:
                 self.lbl_title_mode.setText("Compact")
+            else:
+                self.lbl_title_mode.setText("Names")
             self.title_mode_visible_end = self.sessionTimeLeft - 6000
         if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
             self.lbl_title_mode.show()
@@ -415,8 +415,6 @@ class ACTower:
         driver_shown_max_gap = 0
         max_gap = 2500
         # needs_tlc=True
-        # if self.lapsCompleted.value >= self.numberOfLaps:
-        #    needs_tlc=False
         # memsize=0
         # if mode == 0?
         if self.race_mode.value == 0:
@@ -463,12 +461,12 @@ class ACTower:
                             driver.set_position(p[0] + 1, best_pos - 1, True)
                         else:
                             driver.set_position(p[0] + 1, best_pos - 1 + display_offset, True)
-                        if self.race_mode.value == 1 or self.race_mode.value == 2:
+                        if self.race_mode.value == 1 or self.race_mode.value == 2 or (self.race_mode.value == 3 and (driver.isCurrentVehicule.value or cur_driver_pos - 2 == p[0] or cur_driver_pos == p[0] or driver.finished.value)):
                             gap = lap_gap = 0
                             if self.race_mode.value == 1:
                                 gap = self.gap_to_driver(driver, first_driver, first_driver_sector)
                                 lap_gap = self.get_max_sector(first_driver) - self.get_max_sector(driver)
-                            elif self.race_mode.value == 2:
+                            elif self.race_mode.value == 2 or self.race_mode.value == 3:
                                 if p[0] > 0:
                                     id_compare = self.standings[p[0]-1][0]
                                     for d in self.drivers:
@@ -499,29 +497,10 @@ class ACTower:
                             else:
                                 driver.set_time_race_battle(gap, first_driver.identifier, False, self.race_mode.value == 2)
                                 driver.show()
-                        elif self.race_mode.value == 3:
+                        elif self.race_mode.value == 4:
                             driver.show(False)
                         else:
-                            if driver.isCurrentVehicule.value:
-                                gap = lap_gap = 0
-                                if p[0] > 0:
-                                    id_compare = self.standings[p[0]-1][0]
-                                    for d in self.drivers:
-                                        if id_compare == d.identifier:
-                                            gap = self.gap_to_driver(driver, d, d.race_current_sector.value)
-                                            lap_gap = self.get_max_sector(d) - self.get_max_sector(driver)
-                                            break
-                                if lap_gap > 100:
-                                    driver.set_time_race_battle(lap_gap / 100, first_driver.identifier, True)
-                                    driver.show()
-                                else:
-                                    driver.set_time_race_battle(gap, first_driver.identifier, False,
-                                                                self.race_mode.value == 2)
-                                    driver.show()
-                            elif driver.finished.value:
-                                driver.show(False)
-                            else:
-                                driver.show()
+                            driver.show(compact=True)
                     else:
                         driver.hide()
                     driver.optimise()
@@ -730,7 +709,7 @@ class ACTower:
                             else:
                                 driver.set_time_race_battle(gap, first_driver.identifier, False, self.race_mode.value == 2)
                                 driver.show()
-                        elif self.race_mode.value == 3:
+                        elif self.race_mode.value == 4:
                             driver.show(False)
                         else:
                             if driver.finished.value:
