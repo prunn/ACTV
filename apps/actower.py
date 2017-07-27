@@ -117,21 +117,28 @@ class ACTower:
         self.lbl_tire_stint.set(background=Colors.background_tower(), color=Colors.font_color()).patch_if_hidden()
         self.rowHeight = self.ui_row_height.value
         height = self.rowHeight - 2
-        font_size = Font.get_font_size(height+self.font_offset)
-        font_size2 = Font.get_font_size(height - 2+self.font_offset)
-        self.lbl_tire_stint.setSize(self.rowHeight * 6, height).setPos(0, self.rowHeight).setFontSize(font_size)
-        self.lbl_title_stint.setSize(self.rowHeight * 6, height - 2)\
-            .setPos(0, self.rowHeight * 4 - (height - 2))\
-            .setFontSize(font_size2)
+        font_size = Font.get_font_size(height + self.font_offset)
+        font_size2 = Font.get_font_size(height - 2 + self.font_offset)
+
         if Colors.border_direction == 1:
             self.lbl_title_mode.setBgColor(Colors.theme(bg=True))\
                 .setSize(self.rowHeight * 6 + 8, height - 2)\
                 .setPos(0, -(height - 2))\
                 .setFontSize(font_size2)
+            self.lbl_tire_stint.setSize(self.rowHeight * 6 + 8, height) \
+                .setPos(0, self.rowHeight).setFontSize(font_size)
+            self.lbl_title_stint.setSize(self.rowHeight * 6 + 8, height - 2) \
+                .setPos(0, self.rowHeight * 4 - (height - 2)) \
+                .setFontSize(font_size2)
         else:
             self.lbl_title_mode.setBgColor(Colors.theme(bg=True))\
                 .setSize(self.rowHeight * 6 + 4, height - 2)\
                 .setPos(0, -(height - 2))\
+                .setFontSize(font_size2)
+            self.lbl_tire_stint.setSize(self.rowHeight * 6 + 4, height) \
+                .setPos(0, self.rowHeight).setFontSize(font_size)
+            self.lbl_title_stint.setSize(self.rowHeight * 6 + 4, height - 2) \
+                .setPos(0, self.rowHeight * 4 - (height - 2)) \
                 .setFontSize(font_size2)
         for driver in self.drivers:
             driver.redraw_size(self.rowHeight)
@@ -250,7 +257,7 @@ class ACTower:
                 if c > 0 and (driver.lapCount > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value and check_pos <= self.max_num_cars:
                     if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                         driver.set_position(p[0] + 1, 0, False)
-                        driver.show(race=False)
+                        driver.show(race=False, compact=Configuration.qual_mode == 2)
                         driver.set_time(c, self.standings[0][1], self.sessionTimeLeft, self.qual_mode.value)
                         driver.update_pit(self.sessionTimeLeft)
                 else:
@@ -289,7 +296,7 @@ class ACTower:
             if c > 0 and (lap_count > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value and check_pos <= self.max_num_cars:
                 if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                     driver.set_position(p[0] + 1, 0, False)
-                    driver.show(race=False)
+                    driver.show(race=False, compact=Configuration.qual_mode == 2)
                     driver.set_time(c, self.standings[0][1], self.sessionTimeLeft, self.qual_mode.value)
                     driver.update_pit(self.sessionTimeLeft)
             else:
@@ -504,19 +511,20 @@ class ACTower:
                     else:
                         driver.hide()
                     driver.optimise()
-            elif self.race_mode.value == 1 or self.race_mode.value == 2:
+            elif self.race_mode.value == 1 or self.race_mode.value == 2 or self.race_mode.value == 3:
                 for driver in self.drivers:
                     p = [i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                     if len(p) > 0 and p[0] < self.max_num_cars and driver.isDisplayed:
-                        if driver.completedLapsChanged and driver.completedLaps.value > 1:
-                            driver.last_lap_visible_end = self.sessionTimeLeft - 5000
-                        if driver.finished.value:
-                            driver.show(False)
-                        elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive.value and not driver.isInPit.value:
-                            lastlap = ac.getCarState(driver.identifier, acsys.CS.LastLap)
-                            driver.set_time_race_battle(lastlap, -1)
-                            # else:
-                            #    driver.hide()
+                        if self.race_mode.value == 1 or self.race_mode.value == 2 or (self.race_mode.value == 3 and (driver.isCurrentVehicule.value or cur_driver_pos - 2 == p[0] or cur_driver_pos == p[0])):
+                            if driver.completedLapsChanged and driver.completedLaps.value > 1:
+                                driver.last_lap_visible_end = self.sessionTimeLeft - 5000
+                            if driver.finished.value:
+                                driver.show(False)
+                            elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive.value and not driver.isInPit.value:
+                                lastlap = ac.getCarState(driver.identifier, acsys.CS.LastLap)
+                                driver.set_time_race_battle(lastlap, -1)
+                                # else:
+                                #    driver.hide()
             self.tick_race_mode += 1
 
         elif not self.force_hidden and driver_shown > 1 and (
