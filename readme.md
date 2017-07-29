@@ -8,6 +8,14 @@
 
 -
 ###Changelog
+1.2.2
+tower : added push to pass status to tower
+tower : added interval mode for race 
+tower : added compact modes
+tower : corrected stint mode bug
+improved theme changes
+thicker horizontal bars
+
 1.2.1
 added Fonts
 shared standings from tower to info
