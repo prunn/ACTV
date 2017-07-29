@@ -12,6 +12,7 @@ class Driver:
         self.rowHeight = row_height
         self.font_offset = 0
         self.race = False
+        self.cur_theme = Value(0)
         self.hasStartedRace = False
         self.inPitFromPitLane = False
         self.isInPitLane = Value(False)
@@ -41,6 +42,8 @@ class Driver:
         self.raceProgress = 0
         self.race_current_sector = Value(0)
         self.race_standings_sector = Value(0)
+        self.push_2_pass_status = Value(0)
+        self.push_2_pass_left = Value(0)
         self.isInPit = Value(False)
         self.completedLaps = Value()
         self.completedLapsChanged = False
@@ -117,8 +120,17 @@ class Driver:
                      align="center",
                      opacity=0,
                      visible=0)
+            self.lbl_p2p = Label(app, "0") \
+                .set(w=self.rowHeight * 0.55, h=self.rowHeight - 2,
+                     x=self.rowHeight * 6, y=self.final_y + 2,
+                     font_size=self.fontSize - 3,
+                     align="center",
+                     opacity=0,
+                     visible=0)
+            self.lbl_p2p.setAnimationSpeed("rgb", 0.08)
             self.lbl_pit.setAnimationSpeed("rgb", 0.08)
             self.lbl_position.setAnimationMode("y", "spring")
+            self.lbl_p2p.setAnimationMode("y", "spring")
             self.lbl_pit.setAnimationMode("y", "spring")
         self.lbl_time = Label(app, "+0.000") \
             .set(w=self.rowHeight * 4.7, h=self.rowHeight,
@@ -151,6 +163,7 @@ class Driver:
         ac.focusCar(driver)
 
     def redraw_size(self, height):
+        self.cur_theme.setValue(Colors.general_theme)
         # Fonts
         self.font_offset = Font.get_font_offset()
         self.lbl_name.update_font()
@@ -158,6 +171,7 @@ class Driver:
         if not self.isLapLabel:
             self.lbl_position.update_font()
             self.lbl_pit.update_font()
+            self.lbl_p2p.update_font()
         # UI
         if self.isDisplayed:
             self.lbl_name.set(background=Colors.background_tower(), color=Colors.font_color())
@@ -176,38 +190,36 @@ class Driver:
                 self.lbl_name.setSize(self.rowHeight * 6 + 4, self.rowHeight).setPos(0, self.final_y).setFontSize(
                     font_size)
         else:
-            if self.is_compact_mode():
-                pit_x = 2.9
-                name_width = 1.9
-            else:
-                pit_x = 6
-                name_width = 5
-            if self.isInPit.value and not self.race:
+            if self.isInPit.value and (not self.race or self.is_compact_mode()):
                 if Colors.border_direction == 1:
-                    self.lbl_name.setSize(self.rowHeight * (name_width + 0.6) + 8, self.rowHeight) \
+                    self.lbl_name.setSize(self.get_name_width(), self.rowHeight) \
                         .setPos(self.rowHeight + 8, self.final_y) \
                         .setFontSize(font_size)
                 else:
-                    self.lbl_name.setSize(self.rowHeight * (name_width + 0.6) + 4, self.rowHeight) \
+                    self.lbl_name.setSize(self.get_name_width(), self.rowHeight) \
                         .setPos(self.rowHeight + 4, self.final_y) \
                         .setFontSize(font_size)
             else:
                 if Colors.border_direction == 1:
-                    self.lbl_name.setSize(self.rowHeight * name_width, self.rowHeight) \
+                    self.lbl_name.setSize(self.get_name_width(), self.rowHeight) \
                         .setPos(self.rowHeight + 8, self.final_y) \
                         .setFontSize(font_size)
                 else:
-                    self.lbl_name.setSize(self.rowHeight * name_width, self.rowHeight) \
+                    self.lbl_name.setSize(self.get_name_width(), self.rowHeight) \
                         .setPos(self.rowHeight + 4, self.final_y) \
                         .setFontSize(font_size)
             self.lbl_position.setSize(self.rowHeight + 4, self.rowHeight) \
                 .setPos(0, self.final_y).setFontSize(font_size)
             if Colors.border_direction == 1:
                 self.lbl_pit.setSize(self.rowHeight * 0.6, self.rowHeight - 2) \
-                    .setPos(self.rowHeight * pit_x + 7, self.final_y + 2).setFontSize(font_size - 3)
+                    .setPos(self.get_pit_x(), self.final_y + 2).setFontSize(font_size - 3)
+                self.lbl_p2p.setSize(self.rowHeight * 0.55, self.rowHeight - 2) \
+                    .setPos(self.get_pit_x(), self.final_y + 5).setFontSize(font_size - 6)
             else:
                 self.lbl_pit.setSize(self.rowHeight * 0.6, self.rowHeight - 2) \
-                    .setPos(self.rowHeight * pit_x + 4, self.final_y + 2).setFontSize(font_size - 3)
+                    .setPos(self.get_pit_x(), self.final_y + 2).setFontSize(font_size - 3)
+                self.lbl_p2p.setSize(self.rowHeight * 0.55, self.rowHeight - 2) \
+                    .setPos(self.get_pit_x(), self.final_y + 5).setFontSize(font_size - 6)
         if Colors.border_direction == 1:
             self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
                 .setPos(self.rowHeight + 8, self.final_y).setFontSize(font_size)
@@ -222,6 +234,13 @@ class Driver:
     def show(self, needs_tlc=True, race=True, compact=False):
         self.race = race
         self.compact_mode = compact
+        #P2P
+        if not self.isLapLabel:
+            if not self.isInPit.value and self.push_2_pass_status.value > 0 and not self.finished.value:
+                self.lbl_p2p.setX(self.get_pit_x(), self.isDisplayed)
+                self.lbl_p2p.showText()
+            else:
+                self.lbl_p2p.hideText()
         if self.showingFullNames and needs_tlc:
             self.set_name()
         elif not self.showingFullNames and not needs_tlc:
@@ -231,19 +250,7 @@ class Driver:
             if not self.is_compact_mode():
                 self.lbl_time.setColor(Colors.font_color())
             if not self.isLapLabel:
-                #self.lbl_pit.setColor(Colors.pitColor()).setVisible(0)
-                if self.is_compact_mode():
-                    name_width = 1.9
-                else:
-                    name_width = 5
-                if self.isInPit.value:
-                    name_width += 0.6
-                #if self.isInPit.value and not race:
-                #    self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight)
-                #elif not race:
-                #    self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight)
-                #else:
-                self.lbl_name.set(w=self.rowHeight * name_width)
+                self.lbl_name.set(w=self.get_name_width())
             self.isDisplayed = True
         self.lbl_name.show()
 
@@ -268,33 +275,23 @@ class Driver:
                 self.lbl_name.setColor(Colors.yellow_time(), True)
 
     def update_pit(self, session_time):
-        if Colors.border_direction == 1:
-            pit_offset = 7
-        else:
-            pit_offset = 4
-        if self.is_compact_mode():
-            pit_x = 2.9
-            name_width = 1.9
-        else:
-            pit_x = 6
-            name_width = 5
         if not self.isLapLabel and self.isInPit.hasChanged():
             if self.isInPit.value:
                 self.pit_highlight_end = session_time - 5000
                 self.lbl_pit.showText()
-                self.lbl_name.setSize(self.rowHeight * (name_width + 0.6), self.rowHeight, True)
+                self.lbl_name.setSize(self.get_name_width(), self.rowHeight, True)
             else:
                 self.lbl_pit.hideText()
-                self.lbl_name.setSize(self.rowHeight * name_width, self.rowHeight, True)
-                self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
+                self.lbl_name.setSize(self.get_name_width(), self.rowHeight, True)
+                self.lbl_pit.setX(self.get_pit_x())
         if self.isInPit.value and (self.lbl_name.f_params["w"].value < self.rowHeight * 5.6 or self.lbl_pit.f_params["a"].value < 1):
             self.lbl_pit.showText()
-            self.lbl_name.setSize(self.rowHeight * (name_width + 0.6), self.rowHeight, True)
-            self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
+            self.lbl_name.setSize(self.get_name_width(), self.rowHeight, True)
+            self.lbl_pit.setX(self.get_pit_x())
         elif not self.isInPit.value and (self.lbl_name.f_params["w"].value > self.rowHeight * 5 or self.lbl_pit.f_params["a"].value == 1):
             self.lbl_pit.hideText()
-            self.lbl_name.setSize(self.rowHeight * name_width, self.rowHeight, True)
-            self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
+            self.lbl_name.setSize(self.get_name_width(), self.rowHeight, True)
+            self.lbl_pit.setX(self.get_pit_x())
         if session_time == -1:
             self.pit_highlight_end = 0
         self.pit_highlight.setValue(self.pit_highlight_end != 0 and self.pit_highlight_end < session_time)
@@ -308,10 +305,11 @@ class Driver:
         if not self.isLapLabel:
             self.lbl_position.hide()
             self.lbl_pit.hideText()
+            self.lbl_p2p.hideText()
             if self.isInPit.value:
-                self.lbl_name.setSize(self.rowHeight * 5.6, self.rowHeight)
+                self.lbl_name.setSize(self.get_name_width(), self.rowHeight)
             else:
-                self.lbl_name.setSize(self.rowHeight * 5, self.rowHeight)
+                self.lbl_name.setSize(self.get_name_width(), self.rowHeight)
         self.lbl_time.hideText()
         self.lbl_border.hide()
         self.lbl_name.hide()
@@ -334,6 +332,8 @@ class Driver:
             self.inPitFromPitLane = False
             self.hasStartedRace = False
             self.isInPitBox.setValue(False)
+            self.push_2_pass_status.setValue(0)
+            self.push_2_pass_left.setValue(0)
 
     def get_best_lap(self, lap=False):
         if lap:
@@ -481,6 +481,7 @@ class Driver:
                     self.lbl_name.setY(self.final_y)
                     self.lbl_position.setY(self.final_y)
                     self.lbl_pit.setY(self.final_y + 2)
+                    self.lbl_p2p.setY(self.final_y + 5)
                 self.lbl_time.setY(self.final_y)
                 if Colors.border_direction == 1:
                     self.lbl_border.setY(self.final_y)
@@ -495,6 +496,7 @@ class Driver:
                 self.lbl_name.setY(self.final_y, True)
                 self.lbl_position.setY(self.final_y, True)
                 self.lbl_pit.setY(self.final_y + 2, True)
+                self.lbl_p2p.setY(self.final_y + 5, True)
 
             self.lbl_time.setY(self.final_y, True)
             if Colors.border_direction == 1:
@@ -620,53 +622,76 @@ class Driver:
             return True
         return False
 
+    def get_name_width(self):
+        if self.is_compact_mode():
+            name_width = 1.9
+        else:
+            name_width = 5
+        if self.isInPit.value and not self.finished.value:
+            if self.is_compact_mode() or not self.race:
+                name_width += 0.6
+        elif self.push_2_pass_status.value > 0 and not self.finished.value:
+            name_width += 0.6
+        return self.rowHeight * name_width
+
+    def get_pit_x(self):
+        if self.is_compact_mode():
+            pit_x = 2.9
+        else:
+            pit_x = 6
+        if Colors.border_direction == 1:
+            pit_offset = 7
+        else:
+            pit_offset = 4
+        return self.rowHeight * pit_x + pit_offset
+
     def animate(self, session_time_left):
         if session_time_left == -1:
             self.time_highlight_end = 0
         if not self.isLapLabel:
-            # color
-            self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < session_time_left)
-            if not self.race and self.isDisplayed:# self.highlight.hasChanged() and
-                if self.is_compact_mode():
-                    name_width = 1.9
-                else:
-                    name_width = 5
-                if self.isInPit.value:
-                    name_width += 0.6
-                if self.highlight.hasChanged():
-                    if self.highlight.value:
-                        self.lbl_time.setColor(Colors.highlight(), True)
-                        self.lbl_time.showText()
-                        #self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
-                    else:
-                        self.lbl_time.setColor(Colors.font_color(), True)
-                        if self.is_compact_mode():
-                            self.lbl_time.hideText()
-                        else:
+            # Anything that needs live changes
+            if self.isDisplayed:
+                # Push 2 Pass
+                self.push_2_pass_status.setValue(ac.getCarState(self.identifier, acsys.CS.P2PStatus))
+                if self.push_2_pass_status.value > 0:  # OFF = 0
+                    self.push_2_pass_left.setValue(ac.getCarState(self.identifier, acsys.CS.P2PActivations))
+                    if self.push_2_pass_status.hasChanged() or self.cur_theme.hasChanged():
+                        if self.push_2_pass_status.value == 1:  # COOLING = 1
+                            self.lbl_p2p.setColor(Colors.p2pCool())
+                        elif self.push_2_pass_status.value == 2:  # AVAILABLE = 2
+                            self.lbl_p2p.setColor(Colors.pitColor())
+                        elif self.push_2_pass_status.value == 3:  # ACTIVE = 3
+                            self.lbl_p2p.setColor(Colors.p2pActive())
+                    if self.push_2_pass_left.hasChanged():
+                        self.lbl_p2p.setText(str(self.push_2_pass_left.value))
+                self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < session_time_left)
+                if not self.race and self.isDisplayed:# self.highlight.hasChanged() and
+                    if self.highlight.hasChanged():
+                        if self.highlight.value:
+                            self.lbl_time.setColor(Colors.highlight(), True)
                             self.lbl_time.showText()
-                self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
-            elif self.race and self.isDisplayed:
-                if self.is_compact_mode():
-                    name_width = 1.9
-                    if self.isInPit.value and self.isDisplayed and self.isAlive.value:
-                        if Colors.border_direction == 1:
-                            pit_offset = 7
                         else:
-                            pit_offset = 4
-                        name_width += 0.6
-                        pit_x = 2.9
-                        self.lbl_pit.setX(self.rowHeight * pit_x + pit_offset)
-                        self.lbl_pit.setColor(Colors.pitColor())
-                        self.lbl_pit.showText()
+                            self.lbl_time.setColor(Colors.font_color(), True)
+                            if self.is_compact_mode():
+                                self.lbl_time.hideText()
+                            else:
+                                self.lbl_time.showText()
+                    self.lbl_name.set(w=self.get_name_width(), animated=True)
+                elif self.race and self.isDisplayed:
+                    if self.is_compact_mode():
+                        if self.isInPit.value and self.isDisplayed and self.isAlive.value:
+                            self.lbl_pit.setX(self.get_pit_x())
+                            self.lbl_pit.setColor(Colors.pitColor())
+                            self.lbl_pit.showText()
+                        else:
+                            self.lbl_pit.hideText()
                     else:
                         self.lbl_pit.hideText()
-                else:
-                    name_width = 5
-                    self.lbl_pit.hideText()
-                self.lbl_name.set(w=self.rowHeight * name_width, animated=True)
+                    self.lbl_name.set(w=self.get_name_width(), animated=True)
             # not isLapLabel
             self.lbl_position.animate()
             self.lbl_pit.animate()
+            self.lbl_p2p.animate()
         self.lbl_border.animate()
         self.lbl_time.animate()
         self.lbl_name.animate()

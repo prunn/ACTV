@@ -380,6 +380,16 @@ class Colors:
         return rgb([225, 225, 225], bg=bg)
 
     @staticmethod
+    def p2pCool():
+        if Colors.general_theme == 1:
+            return Colors.orange()
+        return Colors.yellow()
+
+    @staticmethod
+    def p2pActive():
+        return Colors.red()
+
+    @staticmethod
     def orange(bg=False):
         return rgb([250, 88, 0], bg=bg)
 
