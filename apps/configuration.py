@@ -12,6 +12,7 @@ class Configuration:
     currentTab = 1
     race_mode = 0
     qual_mode = 0
+    names = 0
     lapCanBeInvalidated = 1
     forceInfoVisible = 0
     max_num_cars = 18
@@ -27,7 +28,7 @@ class Configuration:
     def __init__(self):
         self.session = Value(-1)
         self.listen_active = True
-        self.window = Window(name="ACTV Config", icon=True, width=251, height=558, texture="").setBgOpacity(0.6)
+        self.window = Window(name="ACTV Config", icon=True, width=251, height=600, texture="").setBgOpacity(0.6)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -49,7 +50,7 @@ class Configuration:
 
         y += 70
         self.spin_qual_mode = ac.addSpinner(self.window.app, "Qual tower mode :")
-        ac.setRange(self.spin_qual_mode, 0, 2)
+        ac.setRange(self.spin_qual_mode, 0, 3)
         ac.setPosition(self.spin_qual_mode, 20, y)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
         ac.addOnValueChangeListener(self.spin_qual_mode, self.on_spin_qual_mode_changed)
@@ -78,6 +79,18 @@ class Configuration:
         ac.setPosition(self.spin_row_height, 20, y)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.addOnValueChangeListener(self.spin_row_height, self.on_spin_row_height_changed)
+
+        # Names mode
+        y += 70
+        self.spin_names = ac.addSpinner(self.window.app, "Names :")
+        ac.setRange(self.spin_names, 0, 3)
+        ac.setPosition(self.spin_names, 20, y)
+        ac.setValue(self.spin_names, self.__class__.names)
+        ac.addOnValueChangeListener(self.spin_names, self.on_spin_names_changed)
+        self.lbl_names = Label(self.window.app, "TLC") \
+            .setSize(120, 26).setPos(150, y - 28) \
+            .setFontSize(12).setAlign("left") \
+            .setVisible(1)
 
         # Font
         y += 70
@@ -218,6 +231,9 @@ class Configuration:
         self.__class__.qual_mode = self.cfg.get("SETTINGS", "qual_mode", "int")
         if self.__class__.qual_mode == -1:
             self.__class__.qual_mode = 0
+        self.__class__.names = self.cfg.get("SETTINGS", "names", "int")
+        if self.__class__.names == -1:
+            self.__class__.names = 0
             # RGB
         self.__class__.theme_red = self.cfg.get("SETTINGS", "red", "int")
         if self.__class__.theme_red == -1:
@@ -251,6 +267,7 @@ class Configuration:
 
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
+        ac.setValue(self.spin_names, self.__class__.names)
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
@@ -272,6 +289,7 @@ class Configuration:
         self.set_labels()
         self.cfg.set("SETTINGS", "race_mode", self.__class__.race_mode)
         self.cfg.set("SETTINGS", "qual_mode", self.__class__.qual_mode)
+        self.cfg.set("SETTINGS", "names", self.__class__.names)
         self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)
         self.cfg.set("SETTINGS", "force_info_visible", self.__class__.forceInfoVisible)
         self.cfg.set("SETTINGS", "num_cars_tower", self.__class__.max_num_cars)
@@ -293,8 +311,10 @@ class Configuration:
             self.lbl_qual_mode.setText("Gaps")
         elif self.__class__.qual_mode == 1:
             self.lbl_qual_mode.setText("Times")
-        else:
+        elif self.__class__.qual_mode == 2:
             self.lbl_qual_mode.setText("Compact")
+        else:
+            self.lbl_qual_mode.setText("Off")
         # Race mode
         if self.__class__.race_mode == 0:
             self.lbl_race_mode.setText("Auto")
@@ -305,7 +325,7 @@ class Configuration:
         elif self.__class__.race_mode == 3:
             self.lbl_race_mode.setText("Compact")
         else:
-            self.lbl_race_mode.setText("Names")
+            self.lbl_race_mode.setText("Off")
         # Tower color
         if self.__class__.tower_highlight == 0:
             self.lbl_tower_lap.setText("Red")
@@ -330,6 +350,15 @@ class Configuration:
             self.lbl_border_direction.setText("Horizontal")
         elif Colors.border_direction == 1:
             self.lbl_border_direction.setText("Vertical")
+        # Names mode
+        if self.__class__.names == 0:
+            self.lbl_names.setText("TLC")
+        elif self.__class__.names == 1:
+            self.lbl_names.setText("TLC2")
+        elif self.__class__.names == 2:
+            self.lbl_names.setText("Last")
+        else:
+            self.lbl_names.setText("First")
 
     def change_tab(self):
         if self.__class__.currentTab == 1:
@@ -352,6 +381,7 @@ class Configuration:
             self.lbl_title_themed_info.setVisible(0)
             ac.setVisible(self.spin_race_mode, 1)
             ac.setVisible(self.spin_qual_mode, 1)
+            ac.setVisible(self.spin_names, 1)
             ac.setVisible(self.spin_num_cars, 1)
             ac.setVisible(self.spin_num_laps, 1)
             ac.setVisible(self.spin_row_height, 1)
@@ -361,6 +391,7 @@ class Configuration:
             self.lbl_title_force_info.setVisible(1)
             self.lbl_race_mode.setVisible(1)
             self.lbl_qual_mode.setVisible(1)
+            self.lbl_names.setVisible(1)
 
         else:
             self.btn_tab1.setBgColor(rgb([12, 12, 12], bg=True)).setBgOpacity(0.6)
@@ -382,6 +413,7 @@ class Configuration:
             self.lbl_title_themed_info.setVisible(1)
             ac.setVisible(self.spin_race_mode, 0)
             ac.setVisible(self.spin_qual_mode, 0)
+            ac.setVisible(self.spin_names, 0)
             ac.setVisible(self.spin_num_cars, 0)
             ac.setVisible(self.spin_num_laps, 0)
             ac.setVisible(self.spin_row_height, 0)
@@ -391,6 +423,7 @@ class Configuration:
             self.lbl_title_force_info.setVisible(0)
             self.lbl_race_mode.setVisible(0)
             self.lbl_qual_mode.setVisible(0)
+            self.lbl_names.setVisible(0)
 
     def on_update(self, sim_info):
         self.window.setBgOpacity(0.6).border(0)
@@ -514,6 +547,11 @@ class Configuration:
     @staticmethod
     def on_spin_qual_mode_changed(value):
         Configuration.qual_mode = value
+        Configuration.configChanged = True
+
+    @staticmethod
+    def on_spin_names_changed(value):
+        Configuration.names = value
         Configuration.configChanged = True
 
     @staticmethod

@@ -471,12 +471,15 @@ class ACInfo:
     def on_update(self, sim_info, fl, standings):
         self.standings = standings
         self.session.setValue(sim_info.graphics.session)
+        sim_info_status = sim_info.graphics.status
+        session_time_left = sim_info.graphics.sessionTimeLeft
+        if (sim_info_status != 1 and sim_info_status != 3 and session_time_left != 0 and session_time_left != -1 and session_time_left + 100 < sim_info.graphics.sessionTimeLeft) or sim_info_status == 0:
+            self.session.setValue(-1)
+            self.session.setValue(sim_info.graphics.session)
         self.manage_window()
         self.animate()
         if self.carsCount == 0:
             self.carsCount = ac.getCarsCount()
-        session_time_left = sim_info.graphics.sessionTimeLeft
-        sim_info_status = sim_info.graphics.status
         self.currentVehicle.setValue(ac.getFocusedCar())
         backup_laptime = 0
         backup_last_lap_in_pits = 0
@@ -796,8 +799,23 @@ class ACInfo:
                         if sim_info.graphics.completedLaps > 0 or sim_info.graphics.iCurrentTime > 20000:
                             self.raceStarted = True
                     if not self.raceStarted:
-                        pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
+                        # pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                         # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
+                        # Generate standings from -0.5 to 0.5 for the start of race
+                        standings = []
+                        for i in range(self.carsCount):
+                            bl = ac.getCarState(i, acsys.CS.LapCount) + ac.getCarState(i,acsys.CS.NormalizedSplinePosition)
+                            if bl < 0.5:
+                                bl += 0.5  # 0.1 = 0.6
+                            elif 0.5 <= bl < 1:
+                                bl -= 0.5  # 0.9 = 0.4
+                            standings.append((i, bl))
+                        standings = sorted(standings, key=lambda student: student[1], reverse=True)
+                        p = [i for i, v in enumerate(standings) if v[0] == self.currentVehicle.value]
+                        if len(p) > 0:
+                            pos = p[0] + 1
+                        else:
+                            pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                     else:
                         pos = self.get_race_standings_position(self.currentVehicle.value)
                     if pos > 1:

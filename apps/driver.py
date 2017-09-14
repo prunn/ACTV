@@ -220,14 +220,21 @@ class Driver:
                     .setPos(self.get_pit_x(), self.final_y + 2).setFontSize(font_size - 3)
                 self.lbl_p2p.setSize(self.rowHeight * 0.55, self.rowHeight - 2) \
                     .setPos(self.get_pit_x(), self.final_y + 5).setFontSize(font_size - 6)
+        lbl_multi = 1
+        # Names
+        if Configuration.names == 0 or Configuration.names == 1:  # TLC
+            self.set_name()
+        elif Configuration.names == 2 or Configuration.names == 3:  # First Last
+            self.show_full_name()
+            lbl_multi = 4.1
         if Colors.border_direction == 1:
             self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
-                .setPos(self.rowHeight + 8, self.final_y).setFontSize(font_size)
+                .setX(self.rowHeight*lbl_multi + 8, True).setFontSize(font_size)
             self.lbl_border.setSize(4, self.rowHeight) \
                 .setPos(self.rowHeight + 4, self.final_y)
         else:
             self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
-                .setPos(self.rowHeight + 4, self.final_y).setFontSize(font_size)
+                .setX(self.rowHeight*lbl_multi + 4, True).setFontSize(font_size)
             self.lbl_border.setSize(self.rowHeight * 2.8, 2) \
                 .setPos(0, self.final_y + self.rowHeight - 2)
 
@@ -254,13 +261,18 @@ class Driver:
             self.isDisplayed = True
         self.lbl_name.show()
 
-        if self.isLapLabel or needs_tlc:
-            if not self.is_compact_mode():
-                self.lbl_time.showText()
+        if not self.is_compact_mode():
+            lbl_multi = 1
+            if not needs_tlc:
+                lbl_multi = 4.1
+            if Colors.border_direction == 1:
+                self.lbl_time.setX(self.rowHeight*lbl_multi + 8, True)
             else:
-                self.lbl_time.hideText()
+                self.lbl_time.setX(self.rowHeight*lbl_multi + 4, True)
+            self.lbl_time.showText()
         else:
             self.lbl_time.hideText()
+
         if (self.isLapLabel and Colors.border_direction == 0) or not self.isLapLabel:
             self.lbl_border.show()
         else:
@@ -355,7 +367,10 @@ class Driver:
         if self.isLapLabel:
             self.lbl_name.setText(offset + self.fullName.value)
         else:
-            self.lbl_name.setText(offset + self.format_name_tlc(self.fullName.value))
+            if Configuration.names == 1:
+                self.lbl_name.setText(offset + self.format_name_tlc2(self.fullName.value))
+            else:
+                self.lbl_name.setText(offset + self.format_name_tlc(self.fullName.value))
             self.set_border()
 
     def set_border(self):
@@ -369,11 +384,14 @@ class Driver:
     def show_full_name(self):
         offset = " "
         self.showingFullNames = True
-        self.lbl_time.hideText()
+        # self.lbl_time.hideText()
         if self.isLapLabel:
             self.lbl_name.setText(offset + self.fullName.value)
         else:
-            self.lbl_name.setText(offset + self.format_last_name(self.fullName.value))
+            if Configuration.names == 3:
+                self.lbl_name.setText(offset + self.format_first_name(self.fullName.value))
+            else:
+                self.lbl_name.setText(offset + self.format_last_name(self.fullName.value))
 
     def set_time(self, time, leader, session_time, mode):
         if self.highlight.value:
@@ -589,10 +607,33 @@ class Driver:
             return name[:3]
         return name
 
+    def format_name_tlc2(self, name):
+        first = ""
+        if len(name) > 0:
+            first = name[0].upper()
+        space = name.find(" ")
+        if space > 0:
+            name = name[space:]
+        name = name.strip().upper()
+        if len(name) > 2 and len(first) > 0:
+            return first + name[:2]
+        if len(name) > 2:
+            return name[:3]
+        return name
+
     def format_last_name(self, name):
         space = name.find(" ")
         if space > 0:
             name = name[space:]
+        name = name.strip().upper()
+        if len(name) > 9:
+            return name[:10]
+        return name
+
+    def format_first_name(self, name):
+        space = name.find(" ")
+        if space > 0:
+            name = name[:space]
         name = name.strip().upper()
         if len(name) > 9:
             return name[:10]
@@ -623,10 +664,21 @@ class Driver:
         return False
 
     def get_name_width(self):
+        # Name
+        if Configuration.names == 2 or Configuration.names == 3:
+            name_width = 5
+        else:
+            name_width = 1.9
+        # Time
+        if not self.is_compact_mode():
+            name_width += 3.1
+        '''
         if self.is_compact_mode():
             name_width = 1.9
         else:
             name_width = 5
+        '''
+        # Pit and P2P
         if self.isInPit.value and not self.finished.value:
             if self.is_compact_mode() or not self.race:
                 name_width += 0.6
