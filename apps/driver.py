@@ -212,31 +212,31 @@ class Driver:
                 .setPos(0, self.final_y).setFontSize(font_size)
             if Colors.border_direction == 1:
                 self.lbl_pit.setSize(self.rowHeight * 0.6, self.rowHeight - 2) \
-                    .setPos(self.get_pit_x(), self.final_y + 2).setFontSize(font_size - 3)
+                    .setPos(self.get_pit_x(), self.final_y + 2, True).setFontSize(font_size - 3)
                 self.lbl_p2p.setSize(self.rowHeight * 0.55, self.rowHeight - 2) \
-                    .setPos(self.get_pit_x(), self.final_y + 5).setFontSize(font_size - 6)
+                    .setPos(self.get_pit_x(), self.final_y + 5, True).setFontSize(font_size - 6)
             else:
                 self.lbl_pit.setSize(self.rowHeight * 0.6, self.rowHeight - 2) \
-                    .setPos(self.get_pit_x(), self.final_y + 2).setFontSize(font_size - 3)
+                    .setPos(self.get_pit_x(), self.final_y + 2, True).setFontSize(font_size - 3)
                 self.lbl_p2p.setSize(self.rowHeight * 0.55, self.rowHeight - 2) \
-                    .setPos(self.get_pit_x(), self.final_y + 5).setFontSize(font_size - 6)
-        lbl_multi = 1
-        # Names
-        if Configuration.names == 0 or Configuration.names == 1:  # TLC
-            self.set_name()
-        elif Configuration.names == 2 or Configuration.names == 3:  # First Last
-            self.show_full_name()
-            lbl_multi = 4.1
-        if Colors.border_direction == 1:
-            self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
-                .setX(self.rowHeight*lbl_multi + 8, True).setFontSize(font_size)
-            self.lbl_border.setSize(4, self.rowHeight) \
-                .setPos(self.rowHeight + 4, self.final_y)
-        else:
-            self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
-                .setX(self.rowHeight*lbl_multi + 4, True).setFontSize(font_size)
-            self.lbl_border.setSize(self.rowHeight * 2.8, 2) \
-                .setPos(0, self.final_y + self.rowHeight - 2)
+                    .setPos(self.get_pit_x(), self.final_y + 5, True).setFontSize(font_size - 6)
+            lbl_multi = 1
+            # Names
+            if Configuration.names == 0 or Configuration.names == 1:  # TLC
+                self.set_name()
+            elif Configuration.names == 2 or Configuration.names == 3:  # First Last
+                self.show_full_name()
+                lbl_multi = 4.1
+            if Colors.border_direction == 1:
+                self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
+                    .setX(self.rowHeight*lbl_multi + 8, True).setFontSize(font_size)
+                self.lbl_border.setSize(4, self.rowHeight) \
+                    .setPos(self.rowHeight + 4, self.final_y)
+            else:
+                self.lbl_time.setSize(self.rowHeight * 4.7, self.rowHeight) \
+                    .setX(self.rowHeight*lbl_multi + 4, True).setFontSize(font_size)
+                self.lbl_border.setSize(self.rowHeight * 2.8, 2) \
+                    .setPos(0, self.final_y + self.rowHeight - 2)
 
     def show(self, needs_tlc=True, race=True, compact=False):
         self.race = race
@@ -687,10 +687,28 @@ class Driver:
         return self.rowHeight * name_width
 
     def get_pit_x(self):
-        if self.is_compact_mode():
-            pit_x = 2.9
-        else:
+        # Name
+        if Configuration.names == 2 or Configuration.names == 3:
             pit_x = 6
+        else:
+            pit_x = 2.9
+        # Time
+        if not self.is_compact_mode():
+            pit_x += 3.1
+        '''
+
+        if Configuration.names == 2 or Configuration.names == 3:
+            pit_x = 3.1
+        else:
+            pit_x = 0
+        # Time
+        if not self.is_compact_mode():
+            pit_x += 2.9
+       if self.is_compact_mode():
+            pit_x += 2.9
+        else:
+            pit_x += 6
+        '''
         if Colors.border_direction == 1:
             pit_offset = 7
         else:

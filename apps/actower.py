@@ -462,8 +462,6 @@ class ACTower:
             needs_tlc = False
         if self.race_mode.value >= 1 and not self.force_hidden:
             # Full tower with gaps(1) or without(2)
-            #tick_limit = 20
-            #if self.race_mode.value == 1 or self.race_mode.value == 2 or self.race_mode.value == 3:
             tick_limit = 40
             if not math.isinf(self.sessionTimeLeft) and int(
                             self.sessionTimeLeft / 100) % 18 == 0 and self.tick_race_mode > tick_limit:
