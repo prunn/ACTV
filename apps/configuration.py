@@ -83,7 +83,7 @@ class Configuration:
         # Names mode
         y += 70
         self.spin_names = ac.addSpinner(self.window.app, "Names :")
-        ac.setRange(self.spin_names, 0, 3)
+        ac.setRange(self.spin_names, 0, 4)
         ac.setPosition(self.spin_names, 20, y)
         ac.setValue(self.spin_names, self.__class__.names)
         ac.addOnValueChangeListener(self.spin_names, self.on_spin_names_changed)
@@ -357,6 +357,8 @@ class Configuration:
             self.lbl_names.setText("TLC2")
         elif self.__class__.names == 2:
             self.lbl_names.setText("Last")
+        elif self.__class__.names == 3:
+            self.lbl_names.setText("F.Last")
         else:
             self.lbl_names.setText("First")
 

@@ -304,7 +304,7 @@ class Colors:
     # return rgb([2, 58, 117], bg = True)
     @staticmethod
     def mercedes():
-        return rgb([191, 191, 191], bg=True)
+        return rgb([0, 161, 156], bg=True)
 
     @staticmethod
     def corvette():
@@ -441,12 +441,26 @@ class Colors:
 
         if car.find("ferrari") >= 0:
             return Colors.ferrari()
+        if car.find("sauber") >= 0:
+            return rgb([8, 110, 250], bg=True)
+        if car.find("india") >= 0:
+            return rgb([245, 172, 192], bg=True)
+        if car.find("williams") >= 0:
+            return rgb([250, 250, 250], bg=True)
+        if car.find("haas") >= 0:
+            return rgb([230, 27, 36], bg=True)
+        if car.find("bull") >= 0:
+            return rgb([0, 34, 80], bg=True)
+        if car.find("toro") >= 0:
+            return rgb([36, 55, 90], bg=True)
         if car.find("bmw") >= 0:
             return Colors.bmw()
         if car.find("ford") >= 0 or car.find("shelby") >= 0:
             return Colors.ford()
-        if car.find("merc") >= 0 or car.find("mazda") >= 0:
+        if car.find("merc") >= 0:
             return Colors.mercedes()
+        if car.find("mazda") >= 0:
+            return rgb([191, 191, 191], bg=True)
         if car.find("ruf") >= 0 or car.find("corvette") >= 0 or car.find("lotus") >= 0 or car.find("porsche") >= 0:
             return Colors.corvette()
         if car.find("lamborghini") >= 0 or car.find("pagani") >= 0:
@@ -459,6 +473,8 @@ class Colors:
             return Colors.alfa()
         if car.find("honda") >= 0:
             return rgb([214, 112, 157], bg=True)
+        if car.find("renault") >= 0:
+            return rgb([255, 204, 49], bg=True)
         # if car.find("glickenhaus")>=0 or car.find("p4-5_2011")>=0:
         #	return rgb([0, 0, 0], bg = True)
         if Colors.general_theme == 2:

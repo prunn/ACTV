@@ -19,11 +19,14 @@ class ACDelta:
         self.cursor = Value(False)
         self.session = Value(-1)
         self.performance = Value(0)
+        self.performance_session = Value(0)
         self.spline = Value(0)
         self.laptime = Value(0)
         self.TimeLeftUpdate = Value(0)
         self.referenceLap = []
+        self.referenceLap_session = []
         self.referenceLapTime = Value(0)
+        self.referenceLapTime_session = Value(0)
         self.lastLapTime = Value(0)
         self.lapCount = 0
         self.lastLapIsValid = True
@@ -38,9 +41,15 @@ class ACDelta:
                  font_size=26,
                  align="right",
                  visible=1)
+        self.lbl_session_delta = Label(self.window.app, "+0.000")\
+            .set(w=150, h=36,
+                 x=0, y=40,
+                 font_size=14,
+                 align="right",
+                 visible=1)
         self.lbl_lap = Label(self.window.app, "0.000")\
             .set(w=150, h=32,
-                 x=0, y=86,
+                 x=0, y=80,
                  font_size=17,
                  align="right",
                  visible=1)
@@ -59,6 +68,7 @@ class ACDelta:
         font_name = "Segoe UI"
         if ac.initFont(0, font_name, 0, 0) > 0:
             self.lbl_delta.setFont(font_name, 0, 1)
+            self.lbl_session_delta.setFont(font_name, 0, 1)
         self.cfg = Config("apps/python/prunn/", "config.ini")
         self.load_cfg()
             
@@ -93,6 +103,8 @@ class ACDelta:
             # width=self.rowHeight*5
             self.lbl_delta.setSize(row_height/24*32 + 120, self.rowHeight.value)\
                 .setFontSize(font_size)
+            self.lbl_session_delta.setSize(row_height/24*32 + 120, self.rowHeight.value)\
+                .setFontSize(font_size2)
             self.lbl_lap.setSize(row_height/24*32 + 120, row_height)\
                 .setPos(0, self.rowHeight.value + 54)\
                 .setFontSize(font_size2)
@@ -159,6 +171,18 @@ class ACDelta:
             if l.sector == sector:
                 return time - l.time
         return False  # do not update
+
+    def get_performance_session_gap(self, sector, time):
+        if len(self.referenceLap_session) < 10:
+            return round(ac.getCarState(0, acsys.CS.PerformanceMeter)*1000)
+        if sector > 0.5:
+            reference_lap = reversed(self.referenceLap_session)
+        else:
+            reference_lap = self.referenceLap_session
+        for l in reference_lap:
+            if l.sector == sector:
+                return time - l.time
+        return False  # do not update
     
     def time_splitting(self, ms, full="no"):
         s = ms/1000
@@ -215,9 +239,12 @@ class ACDelta:
                 
     def reset_data(self):
         self.currentLap = []
+        self.referenceLap_session = []
         self.lastLapIsValid = True
         self.lapCount = 0
         self.highlight_end = 0
+        self.referenceLapTime_session.setValue(0)
+        self.performance_session.setValue(0)
                     
     def on_update(self, sim_info):
         if self.__class__.configChanged:
@@ -229,12 +256,15 @@ class ACDelta:
             thread_load.start() 
         if self.__class__.resetPressed:
             self.referenceLapTime.setValue(0)
+            self.referenceLapTime_session.setValue(0)
             self.referenceLap = []
+            self.referenceLap_session = []
             self.__class__.resetPressed = False
         self.session.setValue(sim_info.graphics.session)
         self.manage_window()
         self.lbl_delta.animate()
-        self.lbl_lap.animate()       
+        self.lbl_session_delta.animate()
+        self.lbl_lap.animate()
         sim_info_status = sim_info.graphics.status
         if sim_info_status == 2:  # LIVE
             session_time_left = sim_info.graphics.sessionTimeLeft
@@ -255,17 +285,22 @@ class ACDelta:
                 gap = self.get_performance_gap(self.spline.value, self.laptime.value)
                 if gap != False:
                     self.performance.setValue(gap)
+                gap = self.get_performance_session_gap(self.spline.value, self.laptime.value)
+                if gap != False:
+                    self.performance_session.setValue(gap)
                 # new lap
                 if self.lastLapTime.hasChanged():
                     if (self.referenceLapTime.value == 0 or self.lastLapTime.value < self.referenceLapTime.value) and self.lastLapIsValid and self.lastLapTime.value > 0 and self.lapCount < ac.getCarState(0, acsys.CS.LapCount):  
                         self.referenceLapTime.setValue(self.lastLapTime.value)
+                        self.referenceLapTime_session.setValue(self.lastLapTime.value)
 
-                        self.referenceLap = list(self.currentLap)
+                        self.referenceLap_session = self.referenceLap = list(self.currentLap)
                         if len(self.referenceLap) > 2000:  # 2laps in
                             ac.console("too many laps in reference----")
                             ac.log("too many laps in reference----")
                             how_much = math.floor(len(self.referenceLap)/1000)
                             del self.referenceLap[0:math.floor(len(self.referenceLap)/how_much)]
+                            self.referenceLap_session = self.referenceLap
 
                         thread_save = threading.Thread(target=self.save_delta)
                         thread_save.daemon = True
@@ -273,6 +308,14 @@ class ACDelta:
                         # make it green for 5 sec
                         self.highlight_end = sim_info.graphics.sessionTimeLeft - 6000
                         self.lbl_lap.setColor(Colors.green(), True)
+                    elif (self.referenceLapTime.value == 0 or self.lastLapTime.value < self.referenceLapTime_session.value) and self.lastLapIsValid and self.lastLapTime.value > 0 and self.lapCount < ac.getCarState(0, acsys.CS.LapCount):
+                        self.referenceLapTime_session.setValue(self.lastLapTime.value)
+                        self.referenceLap_session = list(self.currentLap)
+                        if len(self.referenceLap_session) > 2000:  # 2laps in
+                            ac.console("too many laps in referenceLap_session----")
+                            ac.log("too many laps in referenceLap_session----")
+                            how_much = math.floor(len(self.referenceLap_session)/1000)
+                            del self.referenceLap_session[0:math.floor(len(self.referenceLap_session)/how_much)]
 
                     self.currentLap = []
                     self.lapCount = ac.getCarState(0, acsys.CS.LapCount)
@@ -303,6 +346,26 @@ class ACDelta:
                         if not self.lastLapIsValid:
                             color = Colors.red()
                     self.lbl_delta.setText(time_prefix + self.time_splitting(abs(self.performance.value), "yes"))\
+                        .setColor(color, True)
+                if self.performance_session.hasChanged():
+                    time_prefix = ""
+                    color = Colors.white()
+                    if self.performance_session.value > 0:
+                        time_prefix = "+"
+                        if self.lastLapIsValid:
+                            color = Colors.yellow()
+                        else:
+                            color = Colors.red()
+                    elif self.performance_session.value < 0:
+                        time_prefix = "-"
+                        if self.lastLapIsValid:
+                            color = Colors.green()
+                        else:
+                            color = Colors.orange()
+                    else:
+                        if not self.lastLapIsValid:
+                            color = Colors.red()
+                    self.lbl_session_delta.setText(time_prefix + self.time_splitting(abs(self.performance_session.value), "yes"))\
                         .setColor(color, True)
                         
             if self.referenceLapTime.hasChanged():

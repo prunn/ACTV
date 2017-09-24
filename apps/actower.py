@@ -122,22 +122,22 @@ class ACTower:
 
         if Colors.border_direction == 1:
             self.lbl_title_mode.setBgColor(Colors.theme(bg=True))\
-                .setSize(self.rowHeight * 6 + 8, height - 2)\
+                .setSize(self.rowHeight * 6.2 + 8, height - 2)\
                 .setPos(0, -(height - 2))\
                 .setFontSize(font_size2)
-            self.lbl_tire_stint.setSize(self.rowHeight * 6 + 8, height) \
+            self.lbl_tire_stint.setSize(self.rowHeight * 6.2 + 8, height) \
                 .setPos(0, self.rowHeight).setFontSize(font_size)
-            self.lbl_title_stint.setSize(self.rowHeight * 6 + 8, height - 2) \
+            self.lbl_title_stint.setSize(self.rowHeight * 6.2 + 8, height - 2) \
                 .setPos(0, self.rowHeight * 4 - (height - 2)) \
                 .setFontSize(font_size2)
         else:
             self.lbl_title_mode.setBgColor(Colors.theme(bg=True))\
-                .setSize(self.rowHeight * 6 + 4, height - 2)\
+                .setSize(self.rowHeight * 6.2 + 4, height - 2)\
                 .setPos(0, -(height - 2))\
                 .setFontSize(font_size2)
-            self.lbl_tire_stint.setSize(self.rowHeight * 6 + 4, height) \
+            self.lbl_tire_stint.setSize(self.rowHeight * 6.2 + 4, height) \
                 .setPos(0, self.rowHeight).setFontSize(font_size)
-            self.lbl_title_stint.setSize(self.rowHeight * 6 + 4, height - 2) \
+            self.lbl_title_stint.setSize(self.rowHeight * 6.2 + 4, height - 2) \
                 .setPos(0, self.rowHeight * 4 - (height - 2)) \
                 .setFontSize(font_size2)
         for driver in self.drivers:
@@ -204,7 +204,7 @@ class ACTower:
             self.lbl_title_mode.hide()
 
         needs_tlc = True
-        if Configuration.names == 2 or Configuration.names == 3:
+        if Configuration.names >= 2:
             needs_tlc = False
         if (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (
                 self.stint_visible_end != 0 and self.sessionTimeLeft >= self.stint_visible_end):
@@ -214,7 +214,8 @@ class ACTower:
                     p = [i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
                     if len(p) > 0:
                         driver.set_position(p[0] + 1, p[0], False)
-                    driver.show(False, race=False)
+                    driver.show(needs_tlc=False, race=False, compact=True)
+                    driver.update_pit(self.sessionTimeLeft)
                     self.lbl_title_stint.show()
                     self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
                     self.lbl_tire_stint.show()
@@ -287,7 +288,7 @@ class ACTower:
                 l.hide()
 
         needs_tlc = True
-        if Configuration.names == 2 or Configuration.names == 3:
+        if Configuration.names >= 2:
             needs_tlc = False
 
         for driver in self.drivers:
@@ -355,7 +356,7 @@ class ACTower:
         # other checks
         return True
 
-    def update_drivers_race(self, sim_info):
+    def update_drivers_race(self, sim_info, replay=False):
         if self.lbl_title_stint.isVisible.value:
             self.lbl_title_stint.hide()
             self.lbl_tire_stint.hide()
@@ -369,22 +370,23 @@ class ACTower:
         first_driver_sector = 0
         cur_sector = 0
         best_pos = 0
-        if self.race_mode.hasChanged():
-            if self.race_mode.value == 0:
-                self.lbl_title_mode.setText("Auto")
-            elif self.race_mode.value == 1:
-                self.lbl_title_mode.setText("Gaps")
-            elif self.race_mode.value == 2:
-                self.lbl_title_mode.setText("Intervals")
-            elif self.race_mode.value == 3:
-                self.lbl_title_mode.setText("Compact")
+        if not replay:  # Would need real timing
+            if self.race_mode.hasChanged():
+                if self.race_mode.value == 0:
+                    self.lbl_title_mode.setText("Auto")
+                elif self.race_mode.value == 1:
+                    self.lbl_title_mode.setText("Gaps")
+                elif self.race_mode.value == 2:
+                    self.lbl_title_mode.setText("Intervals")
+                elif self.race_mode.value == 3:
+                    self.lbl_title_mode.setText("Compact")
+                else:
+                    self.lbl_title_mode.setText("Off")
+                self.title_mode_visible_end = self.sessionTimeLeft - 6000
+            if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
+                self.lbl_title_mode.show()
             else:
-                self.lbl_title_mode.setText("Off")
-            self.title_mode_visible_end = self.sessionTimeLeft - 6000
-        if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
-            self.lbl_title_mode.show()
-        else:
-            self.lbl_title_mode.hide()
+                self.lbl_title_mode.hide()
         for driver in self.drivers:
             driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
             if driver.isAlive.value:
@@ -458,7 +460,7 @@ class ACTower:
             if nb_drivers_alive > cur_driver_pos:  # showing next driver to user
                 display_offset += 1
         needs_tlc = True
-        if Configuration.names == 2 or Configuration.names == 3:
+        if Configuration.names >= 2:
             needs_tlc = False
         if self.race_mode.value >= 1 and not self.force_hidden:
             # Full tower with gaps(1) or without(2)
@@ -491,7 +493,7 @@ class ACTower:
                                             lap_gap = self.get_max_sector(d) - self.get_max_sector(driver)
                                             break
                             if driver.finished.value:
-                                driver.show(False)
+                                driver.show(needs_tlc=False, compact=True)
                             elif not driver.isAlive.value:
                                 driver.set_time_race_battle("DNF", first_driver.identifier)
                                 driver.show(needs_tlc)
@@ -528,7 +530,7 @@ class ACTower:
                             if driver.completedLapsChanged and driver.completedLaps.value > 1:
                                 driver.last_lap_visible_end = self.sessionTimeLeft - 5000
                             if driver.finished.value:
-                                driver.show(False)
+                                driver.show(needs_tlc=False, compact=True)
                             elif driver.last_lap_visible_end != 0 and driver.last_lap_visible_end < self.sessionTimeLeft and driver.isAlive.value and not driver.isInPit.value:
                                 lastlap = ac.getCarState(driver.identifier, acsys.CS.LastLap)
                                 driver.set_time_race_battle(lastlap, -1)
