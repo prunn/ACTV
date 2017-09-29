@@ -98,6 +98,7 @@ class ACSpeedTrap:
             self.lbl_title.set(background=Colors.background_speedtrap(), opacity=Colors.background_opacity())
             self.lbl_time.set(background=Colors.background(), opacity=Colors.background_opacity(), color=Colors.font_color())
             self.lbl_border.set(background=Colors.theme(bg=True), opacity=Colors.border_opacity())
+        self.lbl_title.set(color=Colors.position_font_color())
         self.rowHeight = self.ui_row_height.value
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         self.lbl_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)

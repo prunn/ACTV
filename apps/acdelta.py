@@ -98,18 +98,18 @@ class ACDelta:
             self.rowHeight.setValue(38)
         if self.rowHeight.hasChanged():
             font_size = getFontSize(self.rowHeight.value)
-            font_size2 = getFontSize(self.rowHeight.value-16)
             row_height = self.rowHeight.value-16
+            font_size2 = getFontSize(row_height)
             # width=self.rowHeight*5
             self.lbl_delta.setSize(row_height/24*32 + 120, self.rowHeight.value)\
                 .setFontSize(font_size)
-            self.lbl_session_delta.setSize(row_height/24*32 + 120, self.rowHeight.value)\
-                .setFontSize(font_size2)
+            self.lbl_session_delta.setSize(row_height/24*32 + 120, row_height)\
+                .setY(60 - font_size2*0.7, True).setFontSize(font_size2)
             self.lbl_lap.setSize(row_height/24*32 + 120, row_height)\
-                .setPos(0, self.rowHeight.value + 54)\
+                .setY(63 + font_size, True)\
                 .setFontSize(font_size2)
             self.btn_reset.setSize(self.rowHeight.value + 26, row_height)\
-                .setPos(90, self.rowHeight.value*2 + 48)\
+                .setPos(90, font_size*2 + 60)\
                 .setFontSize(font_size2)
         
     def get_delta_file_path(self):
@@ -348,26 +348,33 @@ class ACDelta:
                     self.lbl_delta.setText(time_prefix + self.time_splitting(abs(self.performance.value), "yes"))\
                         .setColor(color, True)
                 if self.performance_session.hasChanged():
-                    time_prefix = ""
-                    color = Colors.white()
-                    if self.performance_session.value > 0:
-                        time_prefix = "+"
-                        if self.lastLapIsValid:
-                            color = Colors.yellow()
+                    if self.referenceLapTime.value != self.referenceLapTime_session.value and (self.laptime.value >= 6000 or self.lastLapTime.value == 0):
+                        time_prefix = ""
+                        color = Colors.white()
+                        if self.performance_session.value > 0:
+                            time_prefix = "+"
+                            if self.lastLapIsValid:
+                                color = Colors.yellow()
+                            else:
+                                color = Colors.red()
+                        elif self.performance_session.value < 0:
+                            time_prefix = "-"
+                            if self.lastLapIsValid:
+                                color = Colors.green()
+                            else:
+                                color = Colors.orange()
                         else:
-                            color = Colors.red()
-                    elif self.performance_session.value < 0:
-                        time_prefix = "-"
-                        if self.lastLapIsValid:
-                            color = Colors.green()
-                        else:
-                            color = Colors.orange()
+                            if not self.lastLapIsValid:
+                                color = Colors.red()
+                        self.lbl_session_delta.setText(time_prefix + self.time_splitting(abs(self.performance_session.value), "yes"))\
+                            .setColor(color, True)
                     else:
-                        if not self.lastLapIsValid:
-                            color = Colors.red()
-                    self.lbl_session_delta.setText(time_prefix + self.time_splitting(abs(self.performance_session.value), "yes"))\
-                        .setColor(color, True)
-                        
+                        # showlastlap
+                        color = Colors.white()
+                        #if not self.lastLapIsValid:
+                        #    color = Colors.red()
+                        self.lbl_session_delta.setText("L: " + self.time_splitting(self.lastLapTime.value, "yes")).setColor(color, True)
+
             if self.referenceLapTime.hasChanged():
                 self.lbl_lap.setText(self.time_splitting(self.referenceLapTime.value, "yes"))
             if self.highlight_end == 0 or session_time_left < self.highlight_end:

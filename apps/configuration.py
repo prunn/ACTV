@@ -167,7 +167,7 @@ class Configuration:
         # General theme : 0-Dark 1-white 2-electric
         y += 70
         self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
-        ac.setRange(self.spin_general_theme, 0, 2)
+        ac.setRange(self.spin_general_theme, 0, 3)
         ac.setPosition(self.spin_general_theme, 20, y)
         ac.setValue(self.spin_general_theme, 0)
         ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
@@ -345,6 +345,8 @@ class Configuration:
             self.lbl_general_theme.setText("Light")
         elif Colors.general_theme == 2:
             self.lbl_general_theme.setText("Electric")
+        elif Colors.general_theme == 3:
+            self.lbl_general_theme.setText("Digital")
         # Border direction
         if Colors.border_direction == 0:
             self.lbl_border_direction.setText("Horizontal")

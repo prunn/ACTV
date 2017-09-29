@@ -148,6 +148,7 @@ class Driver:
                  visible=0)
         self.set_name()
         self.lbl_time.setAnimationSpeed("rgb", 0.08)
+        self.lbl_name.setAnimationSpeed("w", 2)
         self.lbl_name.setAnimationMode("y", "spring")
         self.lbl_time.setAnimationMode("y", "spring")
         self.lbl_border.setAnimationMode("y", "spring")
@@ -529,13 +530,13 @@ class Driver:
                 if position == 1 and Colors.general_theme == 0:
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_first(), True) \
-                            .setColor(Colors.white(), True) \
+                            .setColor(Colors.position_font_color(), True) \
                             .setBgOpacity(0.72)
                 elif battles and self.isCurrentVehicule.value:
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True) \
-                            .setColor(Colors.red(), True)  # .setBgOpacity(0.72)
-                    if Colors.general_theme == 2:
+                            .setColor(Colors.font_color_tower_position_highlight(), True)  # .setBgOpacity(0.72)
+                    if Colors.general_theme == 2 or Colors.general_theme == 3:
                         self.lbl_position.setBgOpacity(1)
                     else:
                         self.lbl_position.setBgOpacity(0.72)
@@ -543,8 +544,8 @@ class Driver:
                     if not self.isLapLabel:
                         if self.isAlive.value:
                             self.lbl_position.setBgColor(Colors.background_tower_position_odd(), True) \
-                                .setColor(Colors.white(), True)  # .setBgOpacity(0.72)
-                            if Colors.general_theme == 2:
+                                    .setColor(Colors.position_font_color(), True)  # .setBgOpacity(0.72)
+                            if Colors.general_theme == 2 or Colors.general_theme == 3:
                                 self.lbl_position.setBgOpacity(1)
                             else:
                                 self.lbl_position.setBgOpacity(0.72)
@@ -560,8 +561,8 @@ class Driver:
                 if battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or)
                     if not self.isLapLabel:
                         self.lbl_position.setBgColor(Colors.background_tower_position_highlight(), True) \
-                            .setColor(Colors.red(), True)  # .setBgOpacity(0.68)
-                        if Colors.general_theme == 2:
+                            .setColor(Colors.font_color_tower_position_highlight(), True)  # .setBgOpacity(0.68)
+                        if Colors.general_theme == 2 or Colors.general_theme == 3:
                             self.lbl_position.setBgOpacity(0.96)
                         else:
                             self.lbl_position.setBgOpacity(0.68)
@@ -569,8 +570,8 @@ class Driver:
                     if not self.isLapLabel:
                         if self.isAlive.value:
                             self.lbl_position.setBgColor(Colors.background_tower_position_even(), True) \
-                                .setColor(Colors.white(), True)  # .setBgOpacity(0.58)
-                            if Colors.general_theme == 2:
+                                    .setColor(Colors.position_font_color(), True)  # .setBgOpacity(0.58)
+                            if Colors.general_theme == 2 or Colors.general_theme == 3:
                                 self.lbl_position.setBgOpacity(0.96)
                             else:
                                 self.lbl_position.setBgOpacity(0.58)

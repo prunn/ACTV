@@ -114,7 +114,7 @@ class POINT(ctypes.Structure):
 
 
 class Colors:
-    general_theme = 1  # 0 : Dark, 1 : Light
+    general_theme = 1  # 0 : Dark, 1 : Light, 2 : Electric, 3 : Digital
     border_direction = 1  # 0 : Horizontal, 1 : Vertical
     themed_info = 1
     theme_red = -1
@@ -189,6 +189,8 @@ class Colors:
             return rgb([255, 255, 255], bg=True)
         if Colors.general_theme == 2:
             return rgb([8, 26, 63], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], bg=True)
         return rgb([55, 55, 55], bg=True)
 
     @staticmethod
@@ -197,6 +199,8 @@ class Colors:
             return rgb([255, 255, 255], bg=True)
         if Colors.general_theme == 2:
             return rgb([8, 26, 63], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], bg=True)
         return rgb([20, 20, 20], bg=True)
 
     @staticmethod
@@ -205,6 +209,8 @@ class Colors:
             return rgb([255, 255, 255], bg=True)
         if Colors.general_theme == 2:
             return rgb([8, 26, 63], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], bg=True)
         return rgb([32, 32, 32], bg=True)
 
     @staticmethod
@@ -215,6 +221,8 @@ class Colors:
             return rgb([8, 26, 63], bg=True)
         if Colors.general_theme == 2:
             return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
         return rgb([192, 0, 0], bg=True)
 
     @staticmethod
@@ -223,6 +231,8 @@ class Colors:
             return rgb([5, 48, 110], bg=True)
         if Colors.general_theme == 2:
             return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
@@ -231,10 +241,14 @@ class Colors:
             return rgb([5, 48, 110], bg=True)
         if Colors.general_theme == 2:
             return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
         return rgb([0, 0, 0], bg=True)
 
     @staticmethod
     def background_tower_position_highlight():
+        if Colors.general_theme == 3:
+            return rgb([50, 50, 50], bg=True)
         return rgb([255, 255, 255], bg=True)
 
     @staticmethod
@@ -243,6 +257,8 @@ class Colors:
             return rgb([5, 48, 110], bg=True)
         if Colors.general_theme == 2:
             return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
         return rgb([112, 112, 112], bg=True)
 
     @staticmethod
@@ -251,6 +267,8 @@ class Colors:
             return rgb([5, 48, 110], bg=True)
         if Colors.general_theme == 2:
             return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
         return rgb([12, 12, 12], bg=True)
 
     @staticmethod
@@ -260,10 +278,22 @@ class Colors:
         return Colors.white()
 
     @staticmethod
+    def position_font_color():
+        if Colors.general_theme == 3:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def font_color_tower_position_highlight():
+        if Colors.general_theme == 3:
+            return Colors.white()
+        return Colors.red()
+
+    @staticmethod
     def opacity_tower_odd():
         if Colors.general_theme == 1:
             return 0.9
-        if Colors.general_theme == 2:
+        if Colors.general_theme == 2 or Colors.general_theme == 3:
             return 1
         return 0.72
 
@@ -271,7 +301,7 @@ class Colors:
     def opacity_tower_even():
         if Colors.general_theme == 1:
             return 0.84
-        if Colors.general_theme == 2:
+        if Colors.general_theme == 2 or Colors.general_theme == 3:
             return 1
         return 0.58
 
@@ -279,7 +309,7 @@ class Colors:
     def background_opacity():
         if Colors.general_theme == 1:
             return 0.9
-        if Colors.general_theme == 2:
+        if Colors.general_theme == 2 or Colors.general_theme == 3:
             return 1
         return 0.64
 
@@ -287,7 +317,7 @@ class Colors:
     def border_opacity():
         if Colors.general_theme == 1:
             return 0.85
-        if Colors.general_theme == 2:
+        if Colors.general_theme == 2 or Colors.general_theme == 3:
             return 1
         return 0.7
 

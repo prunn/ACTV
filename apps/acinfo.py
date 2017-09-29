@@ -15,7 +15,6 @@ class ACInfo:
         self.isLapVisuallyEnded = True
         self.raceStarted = False
         self.carsCount = 0
-        self.lbl_position_height = 0
         self.lbl_position_text = Value("")
         self.currentVehicle = Value(-1)
         self.ui_row_height = Value(-1)
@@ -165,10 +164,12 @@ class ACInfo:
         # UI
         if Colors.general_theme == 2:
             self.lbl_timing.set(background=Colors.background_info_position(), opacity=Colors.background_opacity())
+        elif Colors.general_theme == 3:
+            self.lbl_timing.set(background=Colors.background_tower_position_highlight(), opacity=Colors.background_opacity())
         else:
             self.lbl_timing.set(background=Colors.background(), opacity=Colors.background_opacity())
-        self.info_position_lead.set(background=Colors.background_first())
-        if Colors.themed_info == 1 and self.timing_visible.value == 1:
+        self.info_position_lead.set(background=Colors.background_first(), color=Colors.position_font_color())
+        if Colors.themed_info == 1 and self.timing_visible.value == 1 and Colors.general_theme != 3:
             self.lbl_driver_name.setBgColor(Colors.theme(bg=True))
             self.lbl_driver_name_text.setColor(Colors.white())
         else:
@@ -215,7 +216,10 @@ class ACInfo:
         space = name.find(" ")
         if space > 0:
             if len(name) > max_name_length and space + 1 < len(name):
-                return name[space + 1:].upper().lstrip()
+                name = name[space + 1:].upper().lstrip()
+                if len(name) > max_name_length:
+                    return name[:max_name_length + 1]
+                return name
             return name[:space].capitalize().lstrip() + name[space:].upper()
         if len(name) > max_name_length:
             return name[:max_name_length+1].upper().lstrip()
@@ -323,8 +327,8 @@ class ACInfo:
         self.driver_name_text.setValue("")
 
     def set_width_and_name(self):
-        width = self.rowHeight * 8.9
-        name = self.format_name(self.driver_name_text.value, 18)
+        width = self.rowHeight * 8.6
+        name = self.format_name(self.driver_name_text.value, 17)
         if len(name) <= 13:
             width = self.rowHeight * 7.1
         elif len(name) <= 14:
@@ -332,9 +336,7 @@ class ACInfo:
         elif len(name) <= 15:
             width = self.rowHeight * 7.7
         elif len(name) <= 16:
-            width = self.rowHeight * 8.1
-        elif len(name) <= 17:
-            width = self.rowHeight * 8.5
+            width = self.rowHeight * 8.2
 
         self.lbl_driver_name.set(w=width, animated=True)
         self.lbl_driver_name_text.set(w=width, animated=True)
@@ -372,7 +374,7 @@ class ACInfo:
                 self.lbl_driver_name_text.hideText()
                 self.lbl_border.hide()
             else:
-                if Colors.themed_info == 1 and self.timing_visible.value == 1:
+                if Colors.themed_info == 1 and self.timing_visible.value == 1 and Colors.general_theme != 3:
                     self.lbl_driver_name.setBgColor(Colors.theme(bg=True)).show()
                     self.lbl_driver_name_text.setColor(Colors.white()).showText()
                 else:
@@ -402,7 +404,7 @@ class ACInfo:
 
         self.nameOffsetValue.setValue(self.nameOffset)
         if Colors.themed_info == 1 and self.driver_name_visible.value == 1:
-            if Colors.themed_info == 1 and self.timing_visible.value == 1:
+            if Colors.themed_info == 1 and self.timing_visible.value == 1 and Colors.general_theme != 3:
                 self.lbl_driver_name.setBgColor(Colors.theme(bg=True))
                 self.lbl_driver_name_text.setColor(Colors.white())
             else:
@@ -655,9 +657,9 @@ class ACInfo:
                                 pos = self.get_standings_position(self.currentVehicle.value)
 
                             if pos > 1:
-                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
+                                self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                             else:
-                                self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
+                                self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_first()).setBgOpacity(1)
                             self.info_position.setText(str(pos))
                             self.info_position.show()
 
@@ -719,9 +721,9 @@ class ACInfo:
                         if pos == -1:
                             pos = self.get_standings_position(self.currentVehicle.value)
                         if pos > 1:
-                            self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
+                            self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                         else:
-                            self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
+                            self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_first()).setBgOpacity(1)
                         self.info_position.setText(str(pos)).show()
                         self.lbl_position_text.setValue(str(pos))
                         #if Colors.border_direction == 1:
@@ -798,7 +800,6 @@ class ACInfo:
                     if not self.raceStarted:
                         if sim_info.graphics.completedLaps > 0 or sim_info.graphics.iCurrentTime > 20000:
                             self.raceStarted = True
-                    if not self.raceStarted:
                         # pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                         # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
                         # Generate standings from -0.5 to 0.5 for the start of race
@@ -817,11 +818,13 @@ class ACInfo:
                         else:
                             pos = ac.getCarRealTimeLeaderboardPosition(self.currentVehicle.value) + 1
                     else:
+                        if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
+                            self.raceStarted = False
                         pos = self.get_race_standings_position(self.currentVehicle.value)
                     if pos > 1:
-                        self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
+                        self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                     else:
-                        self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
+                        self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_first()).setBgOpacity(1)
                     self.info_position.setText(str(pos)).show()
                     self.timing_visible.setValue(0)
                     self.lbl_fastest_split.hideText()
@@ -864,9 +867,9 @@ class ACInfo:
                     pos = self.get_standings_position(self.currentVehicle.value)
 
                 if pos > 1:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
+                    self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_info_position()).setBgOpacity(1)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
+                    self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_first()).setBgOpacity(1)
                 self.info_position.setText(str(pos))
                 self.info_position.show()
                 self.nameOffset = self.rowHeight * 49 / 36  # 49
@@ -919,10 +922,10 @@ class ACInfo:
                 # pos = ac.getCarLeaderboardPosition(self.currentVehicle.value)
                 pos = self.get_race_standings_position_replay(self.currentVehicle.value)
                 if pos > 1:
-                    self.info_position.setColor(Colors.white()).setBgColor(
+                    self.info_position.setColor(Colors.position_font_color()).setBgColor(
                         Colors.background_info_position()).setBgOpacity(1)
                 else:
-                    self.info_position.setColor(Colors.white()).setBgColor(Colors.background_first()).setBgOpacity(1)
+                    self.info_position.setColor(Colors.position_font_color()).setBgColor(Colors.background_first()).setBgOpacity(1)
                 self.info_position.setText(str(pos)).show()
                 self.timing_visible.setValue(0)
                 self.lbl_fastest_split.hideText()

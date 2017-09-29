@@ -118,10 +118,7 @@ class ACTimer:
         self.ui_row_height.setValue(Configuration.ui_row_height)
         # UI
         self.font.setValue(Font.current)
-        #if self.ui_row_height.hasChanged() or self.font.hasChanged():
         self.redraw_size()
-        self.lbl_session_border.setBgColor(Colors.theme(bg=True, reload=True))
-        self.lbl_session_title.setBgColor(Colors.theme(bg=True, reload=True))
 
     def redraw_size(self):
         # Fonts
@@ -131,24 +128,28 @@ class ACTimer:
         self.lbl_session_single.update_font()
         self.lbl_pit_window_text.update_font()
         # UI
+        self.lbl_session_border.setBgColor(Colors.theme(bg=True, reload=True))
         if Colors.general_theme == 2:
             self.lbl_session_info.set(background=Colors.background_info_position(), opacity=Colors.background_opacity())
             self.lbl_session_single.set(background=Colors.background_info_position(), opacity=Colors.background_opacity())
             self.lbl_pit_window_bg.set(background=Colors.background_info_position(), opacity=Colors.background_opacity())
             self.lbl_session_title.set(background=Colors.background(), opacity=Colors.background_opacity())
         else:
-            self.lbl_session_info.set(background=Colors.background(), opacity=Colors.background_opacity())
+            self.lbl_session_info.set(background=Colors.background(), opacity=Colors.background_opacity(), color=Colors.font_color())
             self.lbl_session_single.set(background=Colors.background(), opacity=Colors.background_opacity())
             self.lbl_pit_window_bg.set(background=Colors.background(), opacity=Colors.background_opacity())
-            self.lbl_session_title.set(background=Colors.theme(bg=True), opacity=Colors.background_opacity())
+            if Colors.general_theme == 3:
+                self.lbl_session_title.set(background=Colors.background_info_position(), opacity=Colors.background_opacity())
+            else:
+                self.lbl_session_title.set(background=Colors.theme(bg=True), opacity=Colors.background_opacity())
 
         self.rowHeight = self.ui_row_height.value
         font_size = Font.get_font_size(self.rowHeight+self.font_offset)
         width = self.rowHeight * 5
         self.lbl_session_info.setSize(self.rowHeight * 4, self.rowHeight).setPos(self.rowHeight, 0).setFontSize(font_size)
-        self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size)
+        self.lbl_session_title.setSize(self.rowHeight, self.rowHeight).setFontSize(font_size).setColor(Colors.position_font_color())
         self.lbl_session_single.setSize(width, self.rowHeight).setFontSize(font_size)
-        self.lbl_session_border.setSize(width, 2).setPos(0, self.rowHeight + 1)
+        self.lbl_session_border.setSize(width, 2).setPos(0, self.rowHeight + 1).setBgOpacity(Colors.border_opacity())
         #self.lbl_pit_window_text.setPos(width, 2).setSize(self.rowHeight * 3, self.rowHeight).setFontSize(font_size-2)
         self.lbl_pit_window_text.setPos(0, -self.rowHeight+2).setSize(width, self.rowHeight).setFontSize(font_size-2)
         #self.lbl_pit_window_bg.setPos(width, 0)
@@ -285,7 +286,7 @@ class ACTimer:
                             self.lbl_session_info.setBgColor(Colors.yellow(True))
                             self.lbl_session_info.setColor(Colors.black(), True)
                             self.lbl_session_border.setBgColor(Colors.black(bg=True), True)
-                            self.lbl_session_title.setBgColor(Colors.black(bg=True), True)
+                            self.lbl_session_title.setBgColor(Colors.black(bg=True), True).setColor(Colors.white(), True)
                         else:
                             if Colors.general_theme == 2:
                                 self.lbl_session_info.setBgColor(Colors.background_info_position())
@@ -293,7 +294,10 @@ class ACTimer:
                                 self.lbl_session_info.setBgColor(Colors.background())
                             self.lbl_session_info.setColor(Colors.font_color(), True)
                             self.lbl_session_border.setBgColor(Colors.theme(bg=True), True)
-                            self.lbl_session_title.setBgColor(Colors.theme(bg=True), True)
+                            if Colors.general_theme == 3:
+                                self.lbl_session_title.setBgColor(Colors.background_info_position(), True).setColor(Colors.position_font_color(), True)
+                            else:
+                                self.lbl_session_title.setBgColor(Colors.theme(bg=True), True).setColor(Colors.position_font_color(), True)
                     self.lbl_session_info.animate()
                     self.lbl_session_title.animate()
             elif self.session.value == 2:
