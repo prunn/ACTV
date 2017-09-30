@@ -216,7 +216,10 @@ class ACInfo:
         space = name.find(" ")
         if space > 0:
             if len(name) > max_name_length and space + 1 < len(name):
-                name = name[space + 1:].upper().lstrip()
+                first = ""
+                if len(name) > 0:
+                    first = name[0].upper() + "."
+                name = first + name[space + 1:].upper().lstrip()
                 if len(name) > max_name_length:
                     return name[:max_name_length + 1]
                 return name

@@ -8,6 +8,13 @@
 
 -
 ###Changelog
+1.3.0
+tower : TLC-Names modes split from timing modes
+delta : Added session delta - last lap
+info : Fixed positions at the start of race
+info : Bug formatting long names
+theme : Digital
+
 1.2.2
 tower : added push to pass status to tower
 tower : added interval mode for race 

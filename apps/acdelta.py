@@ -348,7 +348,7 @@ class ACDelta:
                     self.lbl_delta.setText(time_prefix + self.time_splitting(abs(self.performance.value), "yes"))\
                         .setColor(color, True)
                 if self.performance_session.hasChanged():
-                    if self.referenceLapTime.value != self.referenceLapTime_session.value and (self.laptime.value >= 6000 or self.lastLapTime.value == 0):
+                    if self.referenceLapTime.value != self.referenceLapTime_session.value and (self.laptime.value >= 8000 or self.lastLapTime.value == 0):
                         time_prefix = ""
                         color = Colors.white()
                         if self.performance_session.value > 0:
