@@ -12,7 +12,7 @@ from html.parser import HTMLParser
 class Window:
     # INITIALIZATION
 
-    def __init__(self, name="defaultAppWindow", title="", icon=True, width=100, height=100, scale=1, texture=""):
+    def __init__(self, name="defaultAppWindow", title="", icon=False, width=100, height=100, scale=1, texture=""):
         # local variables
         self.name = name
         self.title = title
@@ -183,6 +183,90 @@ class Colors:
                 return c["t"]
         return False
 
+    # --------------- Timer ---------------
+    @staticmethod
+    def timer_title_bg():
+        if Colors.general_theme == 1:
+            return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
+        return Colors.theme(bg=True)
+
+    @staticmethod
+    def timer_title_txt():
+        if Colors.general_theme == 3:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def timer_time_bg():
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], bg=True)
+        return rgb([55, 55, 55], bg=True)
+
+    @staticmethod
+    def timer_time_txt():
+        if Colors.general_theme == 1:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def timer_pit_window_bg():
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], bg=True)
+        return rgb([55, 55, 55], bg=True)
+
+    @staticmethod
+    def timer_pit_window_txt():
+        if Colors.general_theme == 1:
+            return Colors.black()
+        return Colors.white()
+
+    # --------------- Speedtrap ---------------
+    @staticmethod
+    def speedtrap_title_bg():
+        if Colors.general_theme == 1:
+            return rgb([5, 48, 110], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([234, 179, 62], bg=True)
+        return rgb([12, 12, 12], bg=True)
+
+    @staticmethod
+    def speedtrap_title_txt():
+        if Colors.general_theme == 3:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def speedtrap_speed_bg():
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], bg=True)
+        if Colors.general_theme == 2:
+            return rgb([14, 137, 179], bg=True)
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], bg=True)
+        return rgb([55, 55, 55], bg=True)
+
+    @staticmethod
+    def speedtrap_speed_txt():
+        if Colors.general_theme == 1:
+            return Colors.black()
+        return Colors.white()
+
+    # ----------------------------------------
+
     @staticmethod
     def background():
         if Colors.general_theme == 1:
@@ -260,16 +344,6 @@ class Colors:
         if Colors.general_theme == 3:
             return rgb([234, 179, 62], bg=True)
         return rgb([112, 112, 112], bg=True)
-
-    @staticmethod
-    def background_speedtrap():
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
-        if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
-        if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([12, 12, 12], bg=True)
 
     @staticmethod
     def font_color():
@@ -517,13 +591,14 @@ class Label:
 
     def __init__(self, window, text=""):
         self.text = text
+        self.debug = False
         self.label = ac.addLabel(window, self.text)
         self.params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
                        "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
         self.f_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
                          "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
         self.o_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
-                         "bb": Value(1), "o": Value(1), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
+                         "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
         self.multiplier = {"x": Value(3), "y": Value(3), "w": Value(1), "h": Value(1), "br": Value(0.06),
                            "bg": Value(0.06), "bb": Value(0.06), "o": Value(0.02), "r": Value(0.06), "g": Value(0.06),
                            "b": Value(0.06), "a": Value(0.02)}
@@ -535,10 +610,10 @@ class Label:
         self.bgTexture = ""
         self.fontName = ""
         self.cur_fontName = ""
-        # self.opacity   = 1
         self.visible = 0
         self.isVisible = Value(False)
         self.isTextVisible = Value(False)
+        self.setVisible(0)
 
     # PUBLIC METHODS
     def set(self, text=None, align=None, color=None, font_size=None, font=None, w=None, h=None, x=None, y=None, texture=None, background=None, opacity=None, visible=None, animated=False, text_hidden=False):
@@ -641,7 +716,8 @@ class Label:
         self.f_params["r"].setValue(color[0])
         self.f_params["g"].setValue(color[1])
         self.f_params["b"].setValue(color[2])
-        self.f_params["a"].setValue(color[3])
+        if self.isVisible.value:
+            self.f_params["a"].setValue(color[3])
         if not animated:
             self.o_params["r"].setValue(color[0])
             self.o_params["g"].setValue(color[1])
@@ -650,8 +726,9 @@ class Label:
             self.params["r"].setValue(color[0])
             self.params["g"].setValue(color[1])
             self.params["b"].setValue(color[2])
-            self.params["a"].setValue(color[3])
-            ac.setFontColor(self.label, *color)
+            if self.isVisible.value:
+                self.params["a"].setValue(color[3])
+                ac.setFontColor(self.label, *color)
         return self
 
     def patch_if_hidden(self):
@@ -711,20 +788,35 @@ class Label:
             self.params["bg"].setValue(color[1])
             self.params["bb"].setValue(color[2])
             ac.setBackgroundColor(self.label, *color)
-            if self.f_params["o"].value > 0:
+            if self.isVisible.value:
+                #if self.f_params["o"].value > 0:
                 ac.setBackgroundOpacity(self.label, self.params["o"].value)
+            else:
+                ac.setBackgroundOpacity(self.label, 0)
         return self
 
     def setBgOpacity(self, opacity, animated=False):
-        self.f_params["o"].setValue(opacity)
+        if self.isVisible.value:
+            self.f_params["o"].setValue(opacity)
+            if self.debug:
+                #self.debug_param("Alpha", "a")
+                self.debug_param("setBgOpacity---ooo", "o")
         if not animated:
             self.o_params["o"].setValue(opacity)
-            # self.opacity=opacity
-            self.params["o"].setValue(opacity)
-            ac.setBackgroundOpacity(self.label, self.params["o"].value)
+            if self.isVisible.value:
+                self.params["o"].setValue(opacity)
+                ac.setBackgroundOpacity(self.label, self.params["o"].value)
         return self
 
     ############################## Animations ##############################
+
+    def debug_param(self, title="", param="o"):
+        ac.console(title + ": current:" + str(self.params[param].value) + " final:" + str(self.f_params[param].value) + " origin:" + str(
+            self.o_params[param].value))
+        ac.log(title + ": current:" + str(self.params[param].value) + " final:" + str(self.f_params[param].value) + " origin:" + str(
+            self.o_params[param].value))
+        return self
+
     def setVisible(self, value):
         self.visible = value
         self.isVisible.setValue(bool(value))
@@ -747,21 +839,23 @@ class Label:
         self.setBgOpacity(0, True)
         return self
 
-    def slideUp(self):
+    def slide_up(self):
         self.f_params["h"].setValue(0)
         return self
 
     def show(self):
         self.f_params["o"].setValue(self.o_params["o"].value)
+        if self.debug:
+            #self.debug_param("Alpha", "a")
+            self.debug_param("show---ooo", "o")
+        self.f_params["a"].setValue(self.o_params["a"].value)
         return self
 
-    def slideDown(self):
+    def slide_down(self):
         self.f_params["h"].setValue(self.o_params["h"].value)
         return self
 
     def showText(self):
-        # if self.params["a"].value == self.opacity:
-        #	self.params["a"].setValue(0)
         self.f_params["a"].setValue(self.o_params["a"].value)
         return self
 
@@ -791,6 +885,9 @@ class Label:
         return self
 
     def animate(self):
+        if self.debug:
+            #self.debug_param("Alpha", "a")
+            self.debug_param("Opacity", "o")
         # adjust size +1
         self.adjustParam("w").adjustParam("h")
         # adjust position +3
@@ -811,18 +908,21 @@ class Label:
                 self.isVisible.setValue(True)
         if self.params["br"].hasChanged() or self.params["bg"].hasChanged() or self.params["bb"].hasChanged():
             ac.setBackgroundColor(self.label, self.params["br"].value, self.params["bg"].value, self.params["bb"].value)
-            if self.f_params["o"].value > 0:
-                ac.setBackgroundOpacity(self.label, self.params["o"].value)
-        if self.params["o"].hasChanged():
-            if self.params["o"].value == 0:
-                self.isVisible.setValue(False)
-            else:
-                self.isVisible.setValue(True)
-            changed = self.isVisible.hasChanged()
-            if changed and self.params["o"].value > 0:
-                self.setVisible(1)
-            elif changed:
-                self.setVisible(0)
+            #if self.f_params["o"].value > 0:
+            ac.setBackgroundOpacity(self.label, self.params["o"].value)
+
+
+        opacity_changed = self.params["o"].hasChanged()
+        if opacity_changed:
+            #if self.params["o"].value == 0:
+            #    self.isVisible.setValue(False)
+            #else:
+            #    self.isVisible.setValue(True)
+            #changed = self.isVisible.hasChanged()
+            #if changed and self.params["o"].value > 0:
+            #    self.setVisible(1)
+            #elif changed:
+            #    self.setVisible(0)
             # fg opacity
             ac.setBackgroundOpacity(self.label, self.params["o"].value)
             if self.params["o"].value >= 0.4:
@@ -832,22 +932,44 @@ class Label:
             if self.isTextVisible.hasChanged():
                 if self.isTextVisible.value:
                     ac.setText(self.label, self.text)
+                    ac.setFontColor(self.label, self.params["r"].value,
+                                    self.params["g"].value,
+                                    self.params["b"].value,
+                                    self.params["a"].value)
                 else:
                     ac.setText(self.label, "")
 
-        if self.params["r"].hasChanged() or self.params["g"].hasChanged() or self.params["b"].hasChanged() or self.params["a"].hasChanged():
-            ac.setFontColor(self.label, self.params["r"].value, self.params["g"].value, self.params["b"].value,
+        alpha_changed = self.params["a"].hasChanged()
+        if self.params["r"].hasChanged() or self.params["g"].hasChanged() or self.params["b"].hasChanged() or alpha_changed:
+            ac.setFontColor(self.label,
+                            self.params["r"].value,
+                            self.params["g"].value,
+                            self.params["b"].value,
                             self.params["a"].value)
-            if self.params["a"].value == 0:
-                self.isVisible.setValue(False)
-            else:
-                self.isVisible.setValue(True)
-            changed = self.isVisible.hasChanged()
-            if changed and self.params["a"].value > 0:
-                self.setVisible(1)
-            elif changed:
-                self.setVisible(0)
+            #if self.params["a"].value == 0:
+            #    self.isVisible.setValue(False)
+            #else:
+            #    self.isVisible.setValue(True)
+            #changed = self.isVisible.hasChanged()
+            #if changed and self.params["a"].value > 0:
+            #    #self.setVisible(1)
+            #    if self.debug:
+            #        # self.debug_param("Alpha", "a")
+            #        self.debug_param("setVisible---222" + str(self.params["r"].old), "r")
+            #        self.debug_param("setVisible---222" + str(self.params["g"].old), "g")
+            #        self.debug_param("setVisible---222" + str(self.params["b"].old), "b")
+            #        self.debug_param("setVisible---222" + str(self.params["a"].old), "a")
+            #elif changed:
+            #    self.setVisible(0)
 
+        if opacity_changed or alpha_changed:
+            if self.params["o"].value > 0 or (self.o_params["o"].value == 0 and self.params["a"].value > 0):
+                self.setVisible(1)
+            else:
+                self.setVisible(0)
+                if self.debug:
+                    self.debug_param("A", "a")
+                    self.debug_param("O", "o")
 
 # -#####################################################################################################################################-#
 
@@ -1069,6 +1191,14 @@ class Font:
 
     @staticmethod
     def get_font_size(row_height):
+        if row_height == 57 or row_height == 56:
+            return 38
+        if row_height == 55 or row_height == 54:
+            return 37
+        if row_height == 53 or row_height == 52:
+            return 36
+        if row_height == 52 or row_height == 51:
+            return 35
         if row_height == 50 or row_height == 49:
             return 34
         if row_height == 48 or row_height == 47:

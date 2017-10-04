@@ -52,7 +52,7 @@ class ACInfo:
         self.fastestLapSectors = [0, 0, 0, 0, 0, 0]
         self.session = Value(-1)
         # self.session.setValue()
-        self.window = Window(name="ACTV Info", icon=False, width=332, height=self.rowHeight * 2, texture="")
+        self.window = Window(name="ACTV Info", width=332, height=self.rowHeight * 2)
 
         self.lbl_driver_name = Label(self.window.app, "")\
             .set(w=284, h=self.rowHeight,
@@ -426,7 +426,6 @@ class ACInfo:
             else:
                 self.lbl_driver_name.show()
                 self.lbl_driver_name_text.showText()
-                #if dir==1 and lblpos visible ==0:hide
                 if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                     self.lbl_border.hide()
                 else:

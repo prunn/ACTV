@@ -47,7 +47,7 @@ class ACTower:
         self.qual_mode = Value(0)
         self.ui_row_height = Value(-1)
         self.numCarsToFinish = 0
-        self.window = Window(name="ACTV Tower", icon=False, width=268, height=114, texture="")
+        self.window = Window(name="ACTV Tower", width=268, height=114)
         self.minLapCount = 1
         self.curLapCount = Value()
         self.stint_visible_end = 0
