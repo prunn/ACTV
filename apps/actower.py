@@ -10,12 +10,12 @@ from .util.classes import Window, Label, Value, POINT, Colors, Log, raceGaps, Fo
 from .configuration import Configuration
 from .driver import Driver
 
+
 class ACTower:
 
     # INITIALIZATION
     def __init__(self):
-        self.rowHeight = 36
-        self.font_offset = 0
+        rowHeight = 36
         self.fontName = ""
         self.drivers = []
         self.stintLabels = []
@@ -29,6 +29,7 @@ class ACTower:
         self.lapsCompleted = Value()
         self.currentVehicule = Value(0)
         self.font = Value(0)
+        self.theme = Value(-1)
         self.fastestLap = 0
         self.race_show_end = 0
         self.driver_shown = 0
@@ -57,31 +58,23 @@ class ACTower:
         self.minlap_stint = 5
         self.iLastTime = Value()
         self.lbl_title_stint = Label(self.window.app, "Current Stint")\
-            .set(w=self.rowHeight * 6, h=self.rowHeight - 4,
-                 x=0, y=self.rowHeight * 4 - self.rowHeight - 6,
+            .set(w=rowHeight * 6, h=rowHeight - 4,
+                 x=0, y=rowHeight * 4 - rowHeight - 6,
                  font_size=23,
-                 align="center",
-                 background=Colors.background_dark(),
                  opacity=0.8,
-                 color=Colors.font_color(),
-                 visible=0)
+                 align="center")
         self.lbl_tire_stint = Label(self.window.app, "")\
-            .set(w=self.rowHeight * 6, h=self.rowHeight,
-                 x=0, y=self.rowHeight * 4 - (self.rowHeight - 4),
+            .set(w=rowHeight * 6, h=rowHeight,
+                 x=0, y=rowHeight * 4 - (rowHeight - 4),
                  font_size=24,
-                 align="center",
-                 background=Colors.background_tower(),
-                 color=Colors.font_color(),
                  opacity=0.58,
-                 visible=0)
+                 align="center")
         self.lbl_title_mode = Label(self.window.app, "Mode") \
-            .set(w=self.rowHeight * 6, h=self.rowHeight - 4,
-                 x=0, y=-(self.rowHeight - 4),
-                 font_size=23,
-                 align="center",
-                 background=Colors.theme(bg=True),
+            .set(w=rowHeight * 6, h=rowHeight - 4,
+                 x=0, y=-(rowHeight - 4),
                  opacity=0.8,
-                 visible=0)
+                 font_size=23,
+                 align="center")
         track = ac.getTrackName(0)
         config = ac.getTrackConfiguration(0)
         if track.find("ks_nordschleife") >= 0 and config.find("touristenfahrten") >= 0:
@@ -98,53 +91,45 @@ class ACTower:
         self.qual_mode.setValue(Configuration.qual_mode)
         self.ui_row_height.setValue(Configuration.ui_row_height)
         Colors.highlight(reload=True)
+        self.theme.setValue(Colors.general_theme + Colors.theme_red + Colors.theme_green + Colors.theme_blue)
         self.font.setValue(Font.current)
-        #if self.ui_row_height.hasChanged() or self.font.hasChanged():
-        #    self.redraw_size()
-        #else:
         self.redraw_size()
         for driver in self.drivers:
             driver.set_border()
 
     def redraw_size(self):
-        # Fonts
-        self.font_offset = Font.get_font_offset()
-        self.lbl_title_stint.update_font()
-        self.lbl_tire_stint.update_font()
-        self.lbl_title_mode.update_font()
-        # UI
-        self.lbl_title_stint.set(background=Colors.background_dark(), color=Colors.font_color()).patch_if_hidden()
-        self.lbl_tire_stint.set(background=Colors.background_tower(), color=Colors.font_color()).patch_if_hidden()
-        self.rowHeight = self.ui_row_height.value
-        height = self.rowHeight - 2
-        font_size = Font.get_font_size(height + self.font_offset)
-        font_size2 = Font.get_font_size(height - 2 + self.font_offset)
+        # Colors
+        if self.theme.hasChanged():
+            self.lbl_title_stint.set(background=Colors.tower_stint_title_bg(), color=Colors.tower_stint_title_txt())
+            self.lbl_tire_stint.set(background=Colors.tower_stint_tire_bg(), color=Colors.tower_stint_tire_txt())
+            self.lbl_title_mode.set(background=Colors.tower_mode_title_bg(), color=Colors.tower_mode_title_txt())
+        if self.ui_row_height.hasChanged() or self.font.hasChanged():
+            # Fonts
+            self.lbl_title_stint.update_font()
+            self.lbl_tire_stint.update_font()
+            self.lbl_title_mode.update_font()
+            # UI
+            font_offset = Font.get_font_offset()
+            height = self.ui_row_height.value - 2
+            font_size = Font.get_font_size(height + font_offset)
+            font_size2 = Font.get_font_size(height - 2 + font_offset)
 
-        if Colors.border_direction == 1:
-            self.lbl_title_mode.setBgColor(Colors.theme(bg=True))\
-                .setSize(self.rowHeight * 6.2 + 8, height - 2)\
-                .setPos(0, -(height - 2))\
-                .setFontSize(font_size2)
-            self.lbl_tire_stint.setSize(self.rowHeight * 6.2 + 8, height) \
-                .setPos(0, self.rowHeight).setFontSize(font_size)
-            self.lbl_title_stint.setSize(self.rowHeight * 6.2 + 8, height - 2) \
-                .setPos(0, self.rowHeight * 4 - (height - 2)) \
-                .setFontSize(font_size2)
-        else:
-            self.lbl_title_mode.setBgColor(Colors.theme(bg=True))\
-                .setSize(self.rowHeight * 6.2 + 4, height - 2)\
-                .setPos(0, -(height - 2))\
-                .setFontSize(font_size2)
-            self.lbl_tire_stint.setSize(self.rowHeight * 6.2 + 4, height) \
-                .setPos(0, self.rowHeight).setFontSize(font_size)
-            self.lbl_title_stint.setSize(self.rowHeight * 6.2 + 4, height - 2) \
-                .setPos(0, self.rowHeight * 4 - (height - 2)) \
-                .setFontSize(font_size2)
+            if Colors.border_direction == 1:
+                border_offset = 8
+            else:
+                border_offset = 4
+            width = self.ui_row_height.value * 6.2 + border_offset
+            self.lbl_title_stint.set(w=width, h=height - 2, y=self.ui_row_height.value * 4 - (height - 2),
+                                     font_size=font_size2)
+            self.lbl_tire_stint.set(w=width, h=height, y=self.ui_row_height.value,
+                                    font_size=font_size)
+            self.lbl_title_mode.set(w=width, h=height - 2, y=-(height - 2),
+                                    font_size=font_size2)
         for driver in self.drivers:
-            driver.redraw_size(self.rowHeight)
+            driver.redraw_size()
             driver.set_border()
         for lbl in self.stintLabels:
-            lbl.redraw_size(self.rowHeight)
+            lbl.redraw_size()
 
     def animate(self):
         self.lbl_title_stint.animate()
@@ -168,7 +153,7 @@ class ACTower:
         if self.numCars.value > self.numCars.old:
             # init difference
             for i in range(self.numCars.old, self.numCars.value):
-                self.drivers.append(Driver(self.window.app, self.rowHeight, i, ac.getDriverName(i), i))
+                self.drivers.append(Driver(self.window.app, i, ac.getDriverName(i), i))
             self.drivers_inited = True
 
     def next_driver_is_shown(self, pos):
@@ -223,7 +208,7 @@ class ACTower:
                     if len(self.curDriverLaps) > len(self.stintLabels):
                         for i in range(len(self.stintLabels), len(self.curDriverLaps)):
                             self.stintLabels.append(
-                                Driver(self.window.app, self.rowHeight, 0, "Lap " + str(i + 1), i + 2,
+                                Driver(self.window.app, 0, "Lap " + str(i + 1), i + 2,
                                        True))
                     i = 0
                     j = 0

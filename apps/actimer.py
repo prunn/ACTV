@@ -108,7 +108,7 @@ class ACTimer:
                                       color=Colors.timer_time_txt())
             self.lbl_session_title.set(background=Colors.timer_title_bg(),
                                        opacity=Colors.background_opacity(),
-                                       color=Colors.position_font_color())
+                                       color=Colors.timer_title_txt())
             self.lbl_pit_window.set(background=Colors.timer_pit_window_bg(),
                                     opacity=Colors.background_opacity(),
                                     color=Colors.timer_pit_window_txt())
@@ -253,7 +253,7 @@ class ACTimer:
                             self.lbl_session_info.setBgColor(Colors.timer_time_bg()).setColor(Colors.timer_time_txt(), True)
                             self.lbl_session_border.setBgColor(Colors.theme(bg=True), True)
                             self.lbl_session_title.set(background=Colors.timer_title_bg(),
-                                                       color=Colors.position_font_color(),
+                                                       color=Colors.timer_title_txt(),
                                                        animated=True)
             elif self.session.value == 2:
                 # Race

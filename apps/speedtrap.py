@@ -58,7 +58,6 @@ class ACSpeedTrap:
 
     def redraw_size(self):
         # Colors
-        #self.lbl_time.debug = True
         if self.theme.hasChanged():
             self.lbl_title.set(background=Colors.speedtrap_title_bg(),
                                opacity=Colors.background_opacity(),
@@ -77,10 +76,12 @@ class ACSpeedTrap:
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
             self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
                                font_size=font_size)
-            self.lbl_time.set(w=self.row_height.value * 4.8, h=self.row_height.value,
+            #self.lbl_time.set(w=self.row_height.value * 4.8, h=self.row_height.value,
+            #                  x=self.row_height.value, font_size=font_size)
+            self.lbl_time.set(w=self.row_height.value * 6.6, h=self.row_height.value,
                               x=self.row_height.value, font_size=font_size)
-            self.lbl_border.set(w=self.row_height.value * 5.8, y=self.row_height.value + 1)
-        #self.reset_visibility()
+            #self.lbl_border.set(w=self.row_height.value * 5.8, y=self.row_height.value + 1)
+            self.lbl_border.set(w=self.row_height.value * 7.6, y=self.row_height.value + 1)
 
     def check_mph(self):
         cfg_path = None
@@ -180,9 +181,7 @@ class ACSpeedTrap:
             self.lastLapInvalidated = lap_count
         self.animate()
 
-        if sim_info_status == 2:
-            #if self.session.value != 5:
-            # Qual-Practise every time
+        if sim_info_status == 2:  # Live
             is_in_pit = (bool(ac.isCarInPitline(self.current_vehicle.value)) or
                          bool(ac.isCarInPit(self.current_vehicle.value)))
             if is_in_pit:
@@ -194,7 +193,8 @@ class ACSpeedTrap:
                 if self.useMPH:
                     self.speedText = "%.1f mph" % self.curTopSpeedMPH.value
                 else:
-                    self.speedText = "%.1f kph" % self.curTopSpeed.value
+                    self.speedText = "%.1f | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
+                    #self.speedText = "%.1f | %.1f kph" % (self.curTopSpeed.value, self.userTopSpeed.value)
                     # ac.console(str(self.userTopSpeed.value))  # Want to show
                 self.time_end = session_time_left - 14000
                 self.lbl_title.setText("S", hidden=True)

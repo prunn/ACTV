@@ -28,6 +28,8 @@ class Configuration:
     def __init__(self):
         self.session = Value(-1)
         self.listen_active = True
+        Colors.load_themes()
+
         self.window = Window(name="ACTV Config", icon=True, width=251, height=600, texture="").setBgOpacity(0.6)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
@@ -167,7 +169,7 @@ class Configuration:
         # General theme : 0-Dark 1-white 2-electric
         y += 70
         self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
-        ac.setRange(self.spin_general_theme, 0, 3)
+        ac.setRange(self.spin_general_theme, 0, 3 + len(Colors.theme_files))
         ac.setPosition(self.spin_general_theme, 20, y)
         ac.setValue(self.spin_general_theme, 0)
         ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
@@ -347,6 +349,8 @@ class Configuration:
             self.lbl_general_theme.setText("Electric")
         elif Colors.general_theme == 3:
             self.lbl_general_theme.setText("Digital")
+        else:
+            self.lbl_general_theme.setText(str(Colors.theme_files[Colors.general_theme-4]['name']))
         # Border direction
         if Colors.border_direction == 0:
             self.lbl_border_direction.setText("Horizontal")
