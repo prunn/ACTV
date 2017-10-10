@@ -61,7 +61,7 @@ class ACTower:
             .set(w=rowHeight * 6, h=rowHeight - 4,
                  x=0, y=rowHeight * 4 - rowHeight - 6,
                  font_size=23,
-                 opacity=0.8,
+                 opacity=0,
                  align="center")
         self.lbl_tire_stint = Label(self.window.app, "")\
             .set(w=rowHeight * 6, h=rowHeight,
@@ -72,7 +72,7 @@ class ACTower:
         self.lbl_title_mode = Label(self.window.app, "Mode") \
             .set(w=rowHeight * 6, h=rowHeight - 4,
                  x=0, y=-(rowHeight - 4),
-                 opacity=0.8,
+                 opacity=0,
                  font_size=23,
                  align="center")
         track = ac.getTrackName(0)
@@ -100,9 +100,15 @@ class ACTower:
     def redraw_size(self):
         # Colors
         if self.theme.hasChanged():
-            self.lbl_title_stint.set(background=Colors.tower_stint_title_bg(), color=Colors.tower_stint_title_txt())
-            self.lbl_tire_stint.set(background=Colors.tower_stint_tire_bg(), color=Colors.tower_stint_tire_txt())
-            self.lbl_title_mode.set(background=Colors.tower_mode_title_bg(), color=Colors.tower_mode_title_txt())
+            self.lbl_title_stint.set(background=Colors.tower_stint_title_bg(),
+                                     color=Colors.tower_stint_title_txt(),
+                                     animated=True, init=True)
+            self.lbl_tire_stint.set(background=Colors.tower_stint_tire_bg(),
+                                    color=Colors.tower_stint_tire_txt(),
+                                    animated=True, init=True)
+            self.lbl_title_mode.set(background=Colors.tower_mode_title_bg(),
+                                    color=Colors.tower_mode_title_txt(),
+                                    animated=True, init=True)
         if self.ui_row_height.hasChanged() or self.font.hasChanged():
             # Fonts
             self.lbl_title_stint.update_font()

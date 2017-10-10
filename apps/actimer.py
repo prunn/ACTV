@@ -99,19 +99,20 @@ class ACTimer:
         # Colors
         if self.theme.hasChanged():
             self.lbl_session_border.set(background=Colors.theme(bg=True),
-                                        opacity=Colors.border_opacity())
+                                        opacity=Colors.border_opacity(),
+                                        animated=True, init=True)
             self.lbl_session_single.set(background=Colors.timer_time_bg(),
-                                        opacity=Colors.background_opacity(),
-                                        color=Colors.timer_time_txt())
+                                        color=Colors.timer_time_txt(),
+                                        animated=True, init=True)
             self.lbl_session_info.set(background=Colors.timer_time_bg(),
-                                      opacity=Colors.background_opacity(),
-                                      color=Colors.timer_time_txt())
+                                      color=Colors.timer_time_txt(),
+                                      animated=True, init=True)
             self.lbl_session_title.set(background=Colors.timer_title_bg(),
-                                       opacity=Colors.background_opacity(),
-                                       color=Colors.timer_title_txt())
+                                       color=Colors.timer_title_txt(),
+                                       animated=True, init=True)
             self.lbl_pit_window.set(background=Colors.timer_pit_window_bg(),
-                                    opacity=Colors.background_opacity(),
-                                    color=Colors.timer_pit_window_txt())
+                                    color=Colors.timer_pit_window_txt(),
+                                    animated=True, init=True)
         if self.row_height.hasChanged() or self.font.hasChanged():
             # Fonts
             self.lbl_session_info.update_font()
@@ -185,7 +186,7 @@ class ACTimer:
 
     def destroy_finish(self):
         # Destroy
-        self.lbl_session_single.setBgColor(Colors.timer_time_bg()).setBgOpacity(Colors.background_opacity()).hide()
+        self.lbl_session_single.setBgColor(Colors.timer_time_bg()).hide()
         for label in self.finish_labels:
             label.hide()
         self.finish_initialised = False

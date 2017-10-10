@@ -23,6 +23,7 @@ class Configuration:
     theme_blue = 0
     tower_highlight = 0
     carColorsBy = 0
+    theme_ini = ''
 
     # INITIALIZATION
     def __init__(self):
@@ -122,8 +123,19 @@ class Configuration:
             .setFontSize(16).setAlign("left")\
             .setVisible(1)
 
-        # RGB
+        # --------- Theme RGB ----------
         y = 50
+        # General theme : 0-Dark 1-white 2-electric
+        self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
+        ac.setRange(self.spin_general_theme, 0, 3 + len(Colors.theme_files))
+        ac.setPosition(self.spin_general_theme, 20, y)
+        ac.setValue(self.spin_general_theme, 0)
+        ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
+        ac.setVisible(self.spin_general_theme, 0)
+        self.lbl_general_theme = Label(self.window.app, "Dark").setSize(120, 26).setPos(152, y - 28).setFontSize(
+            12).setAlign("left").setVisible(0)
+
+        y += 70
         self.spin_theme_red = ac.addSpinner(self.window.app, "Red")
         ac.setRange(self.spin_theme_red, 0, 255)
         ac.setPosition(self.spin_theme_red, 20, y)
@@ -164,17 +176,6 @@ class Configuration:
         ac.addOnValueChangeListener(self.spin_colors_by, self.on_spin_colors_by_changed)
         ac.setVisible(self.spin_colors_by, 0)
         self.lbl_colors_by = Label(self.window.app, "Brand").setSize(120, 26).setPos(178, y - 28).setFontSize(
-            12).setAlign("left").setVisible(0)
-
-        # General theme : 0-Dark 1-white 2-electric
-        y += 70
-        self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
-        ac.setRange(self.spin_general_theme, 0, 3 + len(Colors.theme_files))
-        ac.setPosition(self.spin_general_theme, 20, y)
-        ac.setValue(self.spin_general_theme, 0)
-        ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
-        ac.setVisible(self.spin_general_theme, 0)
-        self.lbl_general_theme = Label(self.window.app, "Dark").setSize(120, 26).setPos(152, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
 
         # Border direction - Horizontal vertical none
@@ -257,9 +258,26 @@ class Configuration:
             font = 2  # Open Sans
         Font.set_font(font)
 
-        general_theme = self.cfg.get("SETTINGS", "general_theme", "int")
-        if general_theme >= 0:
-            Colors.general_theme = general_theme
+        theme_ini = self.cfg.get("SETTINGS", "theme_ini", "string")
+        if theme_ini != -1:
+            Colors.theme_ini = theme_ini
+        else:
+            Colors.theme_ini = ''
+
+        if Colors.theme_ini != '' and len(Colors.theme_files):
+            #  Get_theme number from ini
+            #for k, t in Colors.theme_files:
+            for i in range(0, len(Colors.theme_files)):
+                #ac.log("theme_files " + str(k) + ":"+str(t))
+                #ac.console("theme_files " + str(k) + ":"+str(t))
+                if Colors.theme_files[i]['file'] == Colors.theme_ini:
+                    Colors.general_theme = i + 4
+                    break
+        else:
+            general_theme = self.cfg.get("SETTINGS", "general_theme", "int")
+            if general_theme >= 0:
+                Colors.general_theme = general_theme
+
         border_direction = self.cfg.get("SETTINGS", "border_direction", "int")
         if border_direction >= 0:
             Colors.border_direction = border_direction
@@ -306,6 +324,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "general_theme", Colors.general_theme)
         self.cfg.set("SETTINGS", "border_direction", Colors.border_direction)
         self.cfg.set("SETTINGS", "themed_info", Colors.themed_info)
+        self.cfg.set("SETTINGS", "theme_ini", Colors.theme_ini)
 
     def set_labels(self):
         # Qualifying mode
@@ -505,6 +524,10 @@ class Configuration:
     @staticmethod
     def on_spin_general_theme_changed(value):
         Colors.general_theme = value
+        if Colors.general_theme > 3:
+            Colors.theme_ini = Colors.theme_files[Colors.general_theme-4]['file']
+        else:
+            Colors.theme_ini = ''
         Configuration.configChanged = True
 
     @staticmethod

@@ -59,14 +59,16 @@ class ACSpeedTrap:
     def redraw_size(self):
         # Colors
         if self.theme.hasChanged():
+            #self.lbl_title.debug=True
             self.lbl_title.set(background=Colors.speedtrap_title_bg(),
-                               opacity=Colors.background_opacity(),
-                               color=Colors.speedtrap_title_txt())
+                               color=Colors.speedtrap_title_txt(),
+                               animated=True, init=True)
             self.lbl_time.set(background=Colors.speedtrap_speed_bg(),
-                              opacity=Colors.background_opacity(),
-                              color=Colors.speedtrap_speed_txt())
+                              color=Colors.speedtrap_speed_txt(),
+                              animated=True, init=True)
             self.lbl_border.set(background=Colors.theme(bg=True),
-                                opacity=Colors.border_opacity())
+                                opacity=Colors.border_opacity(),
+                                animated=True, init=True)
 
         if self.row_height.hasChanged() or self.font.hasChanged():
             # Fonts
@@ -74,14 +76,23 @@ class ACSpeedTrap:
             self.lbl_time.update_font()
             # Size
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
-            self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
+            self.lbl_title.set(w=self.row_height.value*5, h=self.row_height.value,
+                               x=self.row_height.value*2.6,
                                font_size=font_size)
+            self.lbl_time.set(w=self.row_height.value * 7.6, h=self.row_height.value,
+                              x=0, y=self.row_height.value,
+                              font_size=font_size)
+            self.lbl_border.set(w=self.row_height.value * 7.6, y=self.row_height.value*2 + 1)
+            #v1.4
+            #self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
+            #                   font_size=font_size)
+            #self.lbl_time.set(w=self.row_height.value * 6.6, h=self.row_height.value,
+            #                  x=self.row_height.value, font_size=font_size)
+            #v1
             #self.lbl_time.set(w=self.row_height.value * 4.8, h=self.row_height.value,
             #                  x=self.row_height.value, font_size=font_size)
-            self.lbl_time.set(w=self.row_height.value * 6.6, h=self.row_height.value,
-                              x=self.row_height.value, font_size=font_size)
             #self.lbl_border.set(w=self.row_height.value * 5.8, y=self.row_height.value + 1)
-            self.lbl_border.set(w=self.row_height.value * 7.6, y=self.row_height.value + 1)
+            #self.lbl_border.set(w=self.row_height.value * 7.6, y=self.row_height.value + 1)
 
     def check_mph(self):
         cfg_path = None
@@ -197,7 +208,7 @@ class ACSpeedTrap:
                     #self.speedText = "%.1f | %.1f kph" % (self.curTopSpeed.value, self.userTopSpeed.value)
                     # ac.console(str(self.userTopSpeed.value))  # Want to show
                 self.time_end = session_time_left - 14000
-                self.lbl_title.setText("S", hidden=True)
+                self.lbl_title.setText("Speedtrap", hidden=True)
                 self.lbl_time.setText(self.speedText, hidden=True)
                 self.lbl_time.show()
                 self.lbl_border.show()

@@ -66,7 +66,7 @@ class Driver:
                      x=0, y=0,
                      font_size=fontSize,
                      align="left",
-                     opacity=0.6)#background=Colors.background_tower(),
+                     opacity=0)
         elif self.is_results:
             self.lbl_name = Label(app, str_offset + self.format_name_tlc(name)) \
                 .set(w=self.rowHeight * 5, h=self.rowHeight,
@@ -79,8 +79,7 @@ class Driver:
                      x=0, y=0,
                      font_size=fontSize,
                      align="center",
-                     color=Colors.white(),
-                     opacity=1)#background=Colors.tower_position_odd_bg(),
+                     opacity=0)
             self.lbl_pit = Label(app, "P") \
                 .set(w=self.rowHeight * 0.6, h=self.rowHeight - 2,
                      x=self.rowHeight * 6, y=self.final_y + 2,
@@ -96,14 +95,13 @@ class Driver:
                      x=self.rowHeight, y=0,
                      font_size=fontSize,
                      align="left",
-                     opacity=0.6)#background=Colors.background_tower(),
+                     opacity=0)
             self.lbl_position = Label(app, str(pos + 1)) \
                 .set(w=self.rowHeight, h=self.rowHeight,
                      x=0, y=0,
                      font_size=fontSize,
                      align="center",
-                     color=Colors.white(),
-                     opacity=1)#background=Colors.tower_position_odd_bg(),
+                     opacity=0)
             self.lbl_pit = Label(app, "P") \
                 .set(w=self.rowHeight * 0.6, h=self.rowHeight - 2,
                      x=self.rowHeight * 6, y=self.final_y + 2,
@@ -124,17 +122,14 @@ class Driver:
         self.lbl_time = Label(app, "+0.000") \
             .set(w=self.rowHeight * 4.7, h=self.rowHeight,
                  x=self.rowHeight, y=0,
-                 color=Colors.grey(),
                  font_size=fontSize,
                  align="right",
-                 opacity=0,
-                 visible=0)
+                 opacity=0)
         self.lbl_border = Label(app, "") \
             .set(w=self.rowHeight * 2.8, h=2,
                  x=0, y=self.rowHeight - 2,
                  background=Colors.red(bg=True),
-                 opacity=Colors.border_opacity(),
-                 visible=0)
+                 opacity=Colors.border_opacity())
         self.set_name()
         self.lbl_time.setAnimationSpeed("rgb", 0.08)
         self.lbl_name.setAnimationSpeed("w", 2)
@@ -165,81 +160,93 @@ class Driver:
             border_offset = 4
         # Colors
         if self.theme.hasChanged():
-            self.lbl_time.setColor(Colors.tower_time_txt())
             if not self.isLapLabel:
-                self.lbl_pit.setColor(Colors.pitColor())
-            ######################################################
+                if self.pit_highlight.value:
+                    self.lbl_pit.set(color=Colors.tower_pit_highlight_txt(), animated=True, init=True)
+                else:
+                    self.lbl_pit.set(color=Colors.tower_pit_txt(), animated=True, init=True)
             if self.race:
                 battles = True
             else:
                 battles = False
-            position = self.position.value
-            if position % 2 == 1:
-                if self.isAlive.value:
-                    self.lbl_name.setBgOpacity(Colors.opacity_tower_odd())
-                else:
-                    self.lbl_name.setBgOpacity(0.52)
-
+            if self.position.value % 2 == 1:
                 if not self.isLapLabel:
-                    if position == 1 and Colors.tower_first_position_different():
-                        self.lbl_name.set(background=Colors.tower_driver_odd_bg(), color=Colors.tower_driver_odd_txt())
-                        self.lbl_position.setBgColor(Colors.tower_position_first_bg(), True)\
-                            .setColor(Colors.tower_position_first_txt(), True)\
-                            .setBgOpacity(0.72)
+                    if self.position.value == 1 and Colors.tower_first_position_different():
+                        self.lbl_name.set(background=Colors.tower_driver_odd_bg(),
+                                          color=Colors.tower_driver_odd_txt(),
+                                          animated=True, init=True)
+                        self.lbl_time.set(color=Colors.tower_time_odd_txt(),
+                                          animated=True, init=True)
+                        self.lbl_position.set(background=Colors.tower_position_first_bg(),
+                                              color=Colors.tower_position_first_txt(),
+                                              animated=True, init=True)
                     elif battles and self.isCurrentVehicule.value:
-                        self.lbl_name.set(background=Colors.tower_driver_highlight_bg(), color=Colors.tower_driver_highlight_txt())
-                        self.lbl_position.setBgColor(Colors.tower_position_highlight_bg(), True)\
-                            .setColor(Colors.tower_position_highlight_txt(), True)
-                        if Colors.general_theme == 2 or Colors.general_theme == 3:
-                            self.lbl_position.setBgOpacity(1)
-                        else:
-                            self.lbl_position.setBgOpacity(0.72)
+                        self.lbl_name.set(background=Colors.tower_driver_highlight_bg(),
+                                          color=Colors.tower_driver_highlight_txt(),
+                                          animated=True, init=True)
+                        self.lbl_time.set(color=Colors.tower_time_highlight_txt(),
+                                          animated=True, init=True)
+                        self.lbl_position.set(background=Colors.tower_position_highlight_bg(),
+                                              color=Colors.tower_position_highlight_txt(),
+                                              animated=True, init=True)
                     else:
-                        self.lbl_name.set(background=Colors.tower_driver_odd_bg(), color=Colors.tower_driver_odd_txt())
+                        self.lbl_time.set(color=Colors.tower_time_odd_txt(),
+                                          animated=True, init=True)
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(Colors.tower_position_odd_bg(), True) \
-                                    .setColor(Colors.tower_position_odd_txt(), True)
-                            if Colors.general_theme == 2 or Colors.general_theme == 3:
-                                self.lbl_position.setBgOpacity(1)
-                            else:
-                                self.lbl_position.setBgOpacity(0.72)
+                            self.lbl_name.set(background=Colors.tower_driver_odd_bg(),
+                                              color=Colors.tower_driver_odd_txt(),
+                                              animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_odd_bg(),
+                                                  color=Colors.tower_position_odd_txt(),
+                                                  animated=True, init=True)
                         else:
-                            self.lbl_position.setBgColor(Colors.tower_position_odd_bg(), True) \
-                                .setColor(Colors.grey(), True) \
-                                .setBgOpacity(0.62)
+                            self.lbl_name.set(background=Colors.tower_driver_retired_bg(),
+                                              color=Colors.tower_driver_retired_txt(),
+                                              animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_odd_bg(),
+                                                  color=Colors.tower_position_retired_txt(),
+                                                  animated=True, init=True)
                 else:
-                    self.lbl_name.set(background=Colors.tower_driver_odd_bg(), color=Colors.tower_driver_odd_txt())
+                    self.lbl_name.set(background=Colors.tower_driver_odd_bg(),
+                                      color=Colors.tower_driver_odd_txt(),
+                                      animated=True, init=True)
+                    self.lbl_time.set(color=Colors.tower_time_odd_txt(),
+                                      animated=True, init=True)
 
             else:
-                if self.isAlive.value:
-                    self.lbl_name.setBgOpacity(Colors.opacity_tower_even())
-                else:
-                    self.lbl_name.setBgOpacity(0.44)
-
                 if not self.isLapLabel:
                     if battles and self.isCurrentVehicule.value:
-                        self.lbl_name.set(background=Colors.tower_driver_highlight_bg(), color=Colors.tower_driver_highlight_txt())
-                        self.lbl_position.setBgColor(Colors.tower_position_highlight_bg(), True) \
-                            .setColor(Colors.tower_position_highlight_txt(), True)  # .setBgOpacity(0.68)
-                        if Colors.general_theme == 2 or Colors.general_theme == 3:
-                            self.lbl_position.setBgOpacity(0.96)
-                        else:
-                            self.lbl_position.setBgOpacity(0.68)
+                        self.lbl_name.set(background=Colors.tower_driver_highlight_bg(),
+                                          color=Colors.tower_driver_highlight_txt(),
+                                          animated=True, init=True)
+                        self.lbl_time.set(color=Colors.tower_time_highlight_txt(),
+                                          animated=True, init=True)
+                        self.lbl_position.set(background=Colors.tower_position_highlight_bg(),
+                                              color=Colors.tower_position_highlight_txt(),
+                                              animated=True, init=True)
                     else:
-                        self.lbl_name.set(background=Colors.tower_driver_even_bg(), color=Colors.tower_driver_even_txt())
+                        self.lbl_time.set(color=Colors.tower_time_even_txt(),
+                                          animated=True, init=True)
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(Colors.tower_position_even_bg(), True) \
-                                    .setColor(Colors.tower_position_even_txt(), True)
-                            if Colors.general_theme == 2 or Colors.general_theme == 3:
-                                self.lbl_position.setBgOpacity(0.96)
-                            else:
-                                self.lbl_position.setBgOpacity(0.58)
+                            self.lbl_name.set(background=Colors.tower_driver_even_bg(),
+                                              color=Colors.tower_driver_even_txt(),
+                                              animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_even_bg(),
+                                                  color=Colors.tower_position_even_txt(),
+                                                  animated=True, init=True)
                         else:
-                            self.lbl_position.setBgColor(Colors.tower_position_even_bg(), True) \
-                                .setColor(Colors.grey(), True) \
-                                .setBgOpacity(0.52)
+                            self.lbl_name.set(background=Colors.tower_driver_retired_bg(),
+                                              color=Colors.tower_driver_retired_txt(),
+                                              animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_even_bg(),
+                                                  color=Colors.tower_position_retired_txt(),
+                                                  animated=True, init=True)
                 else:
-                    self.lbl_name.set(background=Colors.tower_driver_even_bg(), color=Colors.tower_driver_even_txt())
+                    self.lbl_name.set(background=Colors.tower_driver_even_bg(),
+                                      color=Colors.tower_driver_even_txt(),
+                                      animated=True, init=True)
+                    self.lbl_time.set(color=Colors.tower_time_even_txt(),
+                                      animated=True, init=True)
 
         if self.row_height.hasChanged() or self.font.hasChanged():
             # Fonts
@@ -300,9 +307,6 @@ class Driver:
         elif not self.showingFullNames and not needs_tlc:
             self.show_full_name()
         if not self.isDisplayed:
-            #self.lbl_name.set(background=Colors.background_tower())
-            if not self.is_compact_mode():
-                self.lbl_time.setColor(Colors.tower_time_txt())
             if not self.isLapLabel:
                 self.lbl_name.set(w=self.get_name_width())
             self.isDisplayed = True
@@ -320,14 +324,16 @@ class Driver:
         if not self.isLapLabel:
             self.lbl_position.show()
             if not self.isAlive.value and not self.finished.value:
-                self.lbl_name.setColor(Colors.grey(), True)
+                self.lbl_name.setColor(Colors.tower_driver_retired_txt(), True)
             elif self.isInPit.value or ac.getCarState(self.identifier, acsys.CS.SpeedKMH) > 30 or self.finished.value:
-                if self.position.value % 2 == 1:
+                if self.race and self.isCurrentVehicule.value:
+                    self.lbl_name.setColor(Colors.tower_driver_highlight_txt(), True)
+                elif self.position.value % 2 == 1:
                     self.lbl_name.setColor(Colors.tower_driver_odd_txt(), True)
                 else:
                     self.lbl_name.setColor(Colors.tower_driver_even_txt(), True)
             else:
-                self.lbl_name.setColor(Colors.yellow_time(), True)
+                self.lbl_name.setColor(Colors.tower_driver_stopped_txt(), True)
 
     def update_pit(self, session_time):
         if not self.isLapLabel and self.isInPit.hasChanged():
@@ -346,15 +352,14 @@ class Driver:
         elif not self.isInPit.value and (self.lbl_name.f_params["w"].value > self.rowHeight * 5 or self.lbl_pit.f_params["a"].value == 1):
             self.lbl_pit.hideText()
             self.lbl_name.setSize(self.get_name_width(), self.rowHeight, True)
-            #self.lbl_pit.setX(self.get_pit_x())
         if session_time == -1:
             self.pit_highlight_end = 0
         self.pit_highlight.setValue(self.pit_highlight_end != 0 and self.pit_highlight_end < session_time)
         if self.pit_highlight.hasChanged():
             if self.pit_highlight.value:
-                self.lbl_pit.setColor(Colors.red())
+                self.lbl_pit.setColor(Colors.tower_pit_highlight_txt())
             else:
-                self.lbl_pit.setColor(Colors.pitColor(), True)
+                self.lbl_pit.setColor(Colors.tower_pit_txt(), True)
 
     def hide(self, reset=False):
         if not self.isLapLabel:
@@ -418,13 +423,12 @@ class Driver:
 
     def set_border(self):
         colors_by_class = bool(Configuration.carColorsBy == 1)
-        self.lbl_border.setBgColor(Colors.colorFromCar(self.carName, colors_by_class)).setBgOpacity(
-            Colors.border_opacity())
+        self.lbl_border.set(background=Colors.colorFromCar(self.carName, colors_by_class),
+                            opacity=Colors.border_opacity(), init=True)
 
     def show_full_name(self):
         offset = " "
         self.showingFullNames = True
-        # self.lbl_time.hideText()
         if self.isLapLabel:
             self.lbl_name.setText(offset + self.fullName.value)
         else:
@@ -455,51 +459,57 @@ class Driver:
         self.time.setValue(time)
         self.gap.setValue(time)
         if self.time.hasChanged() or self.gap.hasChanged():
-            self.lbl_time.change_font_if_needed().setText(self.format_time(self.time.value))  # .setVisible(1)
-            self.lbl_time.setColor(Colors.grey())
+            self.lbl_time.change_font_if_needed().setText(self.format_time(self.time.value))
             if valid:
-                self.lbl_time.setColor(Colors.tower_time_txt())
+                if self.position.value % 2 == 1:
+                    self.lbl_time.setColor(Colors.tower_time_odd_txt())
+                else:
+                    self.lbl_time.setColor(Colors.tower_time_even_txt())
             else:
-                self.lbl_time.setColor(Colors.red())
-                # self.lbl_time.showText()
+                self.lbl_time.setColor(Colors.tower_stint_lap_invalid_txt())
 
     def set_time_race(self, time, leader, session_time):
         if self.position.value == 1:
-            self.lbl_time.change_font_if_needed().setText("Lap " + str(time)).setColor(Colors.tower_time_txt())
+            self.lbl_time.change_font_if_needed().setText("Lap " + str(time)).setColor(Colors.tower_time_odd_txt())
+        elif self.position.value % 2 == 1:
+            self.lbl_time.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(Colors.tower_time_odd_txt())
         else:
-            self.lbl_time.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(
-                Colors.tower_time_txt())
+            self.lbl_time.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(Colors.tower_time_even_txt())
 
     def set_time_race_battle(self, time, identifier, lap=False, intervals=False):
+        if self.isCurrentVehicule.value:
+            normal_color = Colors.tower_time_highlight_txt()
+        elif self.position.value % 2 == 1:
+            normal_color = Colors.tower_time_odd_txt()
+        else:
+            normal_color = Colors.tower_time_even_txt()
         if time == "PIT":
-            self.lbl_time.change_font_if_needed().setText("PIT").setColor(Colors.yellow_time(), True)
+            self.lbl_time.change_font_if_needed().setText("PIT").setColor(Colors.tower_time_pit_txt(), True)
         elif time == "DNF":
-            self.lbl_time.change_font_if_needed().setText("DNF").setColor(Colors.dnf(), True)
+            self.lbl_time.change_font_if_needed().setText("DNF").setColor(Colors.tower_time_retired_txt(), True)
         elif time == "UP":
-            self.lbl_time.change_font_if_needed(1).setText(u"\u25B2").setColor(Colors.green(), True)
+            self.lbl_time.change_font_if_needed(1).setText(u"\u25B2").setColor(Colors.tower_time_place_gain_txt(), True)
         elif time == "DOWN":
-            self.lbl_time.change_font_if_needed(1).setText(u"\u25BC").setColor(Colors.red(), True)
+            self.lbl_time.change_font_if_needed(1).setText(u"\u25BC").setColor(Colors.tower_time_place_lost_txt(), True)
         elif self.identifier == identifier or time == 600000:
-            self.lbl_time.change_font_if_needed().setText("").setColor(Colors.tower_time_txt(), True)
+            self.lbl_time.change_font_if_needed().setText("").setColor(normal_color, True)
         elif lap:
             str_time = "+" + str(math.floor(abs(time)))
             if abs(time) >= 2:
                 str_time += " Laps"
             else:
                 str_time += " Lap"
-            self.lbl_time.change_font_if_needed().setText(str_time).setColor(Colors.tower_time_txt(), True)
+            self.lbl_time.change_font_if_needed().setText(str_time).setColor(normal_color, True)
         elif identifier == -1:
             if time <= ac.getCarState(self.identifier, acsys.CS.BestLap):
-                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.purple(), True)
+                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.tower_time_best_lap_txt(), True)
             else:
-                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.red(), True)
+                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.tower_time_last_lap_txt(), True)
         else:
             if intervals:
-                self.lbl_time.change_font_if_needed().setText("+" + self.format_time(time)).setColor(
-                    Colors.tower_time_txt(), True)
+                self.lbl_time.change_font_if_needed().setText("+" + self.format_time(time)).setColor(normal_color, True)
             else:
-                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.tower_time_txt(),
-                                                                                               True)
+                self.lbl_time.change_font_if_needed().setText(self.format_time(time)).setColor(normal_color, True)
 
     def optimise(self):
         if len(self.race_gaps) > 132:
@@ -563,63 +573,75 @@ class Driver:
                 self.lbl_border.setY(self.final_y, True)
             else:
                 self.lbl_border.setY(self.final_y + self.rowHeight - 2, True)
+            # ------------------- Colors -----------------
             if position % 2 == 1:
-                if self.isAlive.value:
-                    self.lbl_name.setBgOpacity(Colors.opacity_tower_odd())
-                else:
-                    self.lbl_name.setBgOpacity(0.52)
-                if position == 1 and Colors.general_theme == 0:
-                    if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.tower_position_first_bg(), True) \
-                            .setColor(Colors.tower_position_first_txt(), True) \
-                            .setBgOpacity(0.72)
-                elif battles and self.isCurrentVehicule.value:
-                    if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.tower_position_highlight_bg(), True) \
-                            .setColor(Colors.tower_position_highlight_txt(), True)  # .setBgOpacity(0.72)
-                    if Colors.general_theme == 2 or Colors.general_theme == 3:
-                        self.lbl_position.setBgOpacity(1)
+                if not self.isLapLabel:
+                    if position == 1 and Colors.tower_first_position_different():
+                        self.lbl_name.set(background=Colors.tower_driver_odd_bg(),
+                                          color=Colors.tower_driver_odd_txt(),
+                                          animated=True)
+                        self.lbl_position.set(background=Colors.tower_position_first_bg(),
+                                              color=Colors.tower_position_first_txt(),
+                                              animated=True)
+                    elif battles and self.isCurrentVehicule.value:
+                        self.lbl_name.set(background=Colors.tower_driver_highlight_bg(),
+                                          color=Colors.tower_driver_highlight_txt(),
+                                          animated=True)
+                        self.lbl_position.set(background=Colors.tower_position_highlight_bg(),
+                                              color=Colors.tower_position_highlight_txt(),
+                                              animated=True)
                     else:
-                        self.lbl_position.setBgOpacity(0.72)
-                else:
-                    if not self.isLapLabel:
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(Colors.tower_position_odd_bg(), True) \
-                                    .setColor(Colors.tower_position_odd_txt(), True)  # .setBgOpacity(0.72)
-                            if Colors.general_theme == 2 or Colors.general_theme == 3:
-                                self.lbl_position.setBgOpacity(1)
-                            else:
-                                self.lbl_position.setBgOpacity(0.72)
+                            self.lbl_name.set(background=Colors.tower_driver_odd_bg(),
+                                              color=Colors.tower_driver_odd_txt(),
+                                              animated=True)
+                            self.lbl_position.set(background=Colors.tower_position_odd_bg(),
+                                                  color=Colors.tower_position_odd_txt(),
+                                                  animated=True)
                         else:
-                            self.lbl_position.setBgColor(Colors.tower_position_odd_bg(), True) \
-                                .setColor(Colors.grey(), True) \
-                                .setBgOpacity(0.62)
+                            self.lbl_name.set(background=Colors.tower_driver_retired_bg(),
+                                              color=Colors.tower_driver_retired_txt(),
+                                              animated=True)
+                            self.lbl_position.set(background=Colors.tower_position_odd_bg(),
+                                                  color=Colors.tower_position_retired_txt(),
+                                                  animated=True)
+                else:
+                    self.lbl_name.set(background=Colors.tower_driver_odd_bg(),
+                                      color=Colors.tower_driver_odd_txt(),
+                                      animated=True)
+                    self.lbl_time.set(color=Colors.tower_time_odd_txt(),
+                                      animated=True)
             else:
-                if self.isAlive.value:
-                    self.lbl_name.setBgOpacity(Colors.opacity_tower_even())
-                else:
-                    self.lbl_name.setBgOpacity(0.44)
-                if battles and self.isCurrentVehicule.value:  # (self.identifier == 0 or)
-                    if not self.isLapLabel:
-                        self.lbl_position.setBgColor(Colors.tower_position_highlight_bg(), True) \
-                            .setColor(Colors.tower_position_highlight_txt(), True)  # .setBgOpacity(0.68)
-                        if Colors.general_theme == 2 or Colors.general_theme == 3:
-                            self.lbl_position.setBgOpacity(0.96)
-                        else:
-                            self.lbl_position.setBgOpacity(0.68)
-                else:
-                    if not self.isLapLabel:
+                if not self.isLapLabel:
+                    if battles and self.isCurrentVehicule.value:
+                        self.lbl_name.set(background=Colors.tower_driver_highlight_bg(),
+                                          color=Colors.tower_driver_highlight_txt(),
+                                          animated=True)
+                        self.lbl_position.set(background=Colors.tower_position_highlight_bg(),
+                                              color=Colors.tower_position_highlight_txt(),
+                                              animated=True)
+                    else:
                         if self.isAlive.value:
-                            self.lbl_position.setBgColor(Colors.tower_position_even_bg(), True) \
-                                    .setColor(Colors.tower_position_even_txt(), True)  # .setBgOpacity(0.58)
-                            if Colors.general_theme == 2 or Colors.general_theme == 3:
-                                self.lbl_position.setBgOpacity(0.96)
-                            else:
-                                self.lbl_position.setBgOpacity(0.58)
+                            self.lbl_name.set(background=Colors.tower_driver_even_bg(),
+                                              color=Colors.tower_driver_even_txt(),
+                                              animated=True)
+                            self.lbl_position.set(background=Colors.tower_position_even_bg(),
+                                                  color=Colors.tower_position_even_txt(),
+                                                  animated=True)
                         else:
-                            self.lbl_position.setBgColor(Colors.tower_position_even_bg(), True) \
-                                .setColor(Colors.grey(), True) \
-                                .setBgOpacity(0.52)
+                            self.lbl_name.set(background=Colors.tower_driver_retired_bg(),
+                                              color=Colors.tower_driver_retired_txt(),
+                                              animated=True)
+                            self.lbl_position.set(background=Colors.tower_position_even_bg(),
+                                                  color=Colors.tower_position_retired_txt(),
+                                                  animated=True)
+                else:
+                    self.lbl_name.set(background=Colors.tower_driver_even_bg(),
+                                      color=Colors.tower_driver_even_txt(),
+                                      animated=True)
+                    self.lbl_time.set(color=Colors.tower_time_even_txt(),
+                                      animated=True)
+
         if not self.isLapLabel:
             self.fullName.setValue(ac.getDriverName(self.identifier))
             if self.fullName.hasChanged():
@@ -762,21 +784,25 @@ class Driver:
                     self.push_2_pass_left.setValue(ac.getCarState(self.identifier, acsys.CS.P2PActivations))
                     if self.push_2_pass_status.hasChanged() or self.cur_theme.hasChanged():
                         if self.push_2_pass_status.value == 1:  # COOLING = 1
-                            self.lbl_p2p.setColor(Colors.p2pCool())
+                            self.lbl_p2p.setColor(Colors.tower_p2p_cooling())
                         elif self.push_2_pass_status.value == 2:  # AVAILABLE = 2
-                            self.lbl_p2p.setColor(Colors.pitColor())
+                            self.lbl_p2p.setColor(Colors.tower_pit_txt())
                         elif self.push_2_pass_status.value == 3:  # ACTIVE = 3
-                            self.lbl_p2p.setColor(Colors.p2pActive())
+                            self.lbl_p2p.setColor(Colors.tower_p2p_active())
                     if self.push_2_pass_left.hasChanged():
                         self.lbl_p2p.setText(str(self.push_2_pass_left.value))
                 self.highlight.setValue(self.time_highlight_end != 0 and self.time_highlight_end < session_time_left)
                 if not self.race and self.isDisplayed:
                     if self.highlight.hasChanged():
                         if self.highlight.value:
-                            self.lbl_time.setColor(Colors.highlight(), True)
+                            self.lbl_time.setColor(Colors.tower_time_qualification_highlight_txt(), True)
                             self.lbl_time.showText()
                         else:
-                            self.lbl_time.setColor(Colors.tower_time_txt(), True)
+                            if self.position.value % 2 == 1:
+                                self.lbl_time.setColor(Colors.tower_time_odd_txt(), True)
+                            else:
+                                self.lbl_time.setColor(Colors.tower_time_even_txt(), True)
+
                             if self.is_compact_mode():
                                 self.lbl_time.hideText()
                             else:
@@ -786,7 +812,7 @@ class Driver:
                 elif self.race and self.isDisplayed:
                     if self.is_compact_mode() and self.isInPit.value and self.isDisplayed and self.isAlive.value and not self.finished.value:
                         self.lbl_pit.setX(self.get_pit_x(), True)
-                        self.lbl_pit.setColor(Colors.pitColor())
+                        self.lbl_pit.setColor(Colors.tower_pit_txt())
                         self.lbl_pit.showText()
                     else:
                         self.lbl_pit.hideText()

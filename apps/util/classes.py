@@ -124,7 +124,71 @@ class Colors:
     dataCarsClasses = []
     carsClassesLoaded = False
     theme_files = []
-    current_theme = {}
+    current_theme = {
+        'tower_time_odd_txt': rgb([0, 0, 0]),
+        'tower_time_even_txt': rgb([0, 0, 0]),
+        'tower_time_highlight_txt': rgb([0, 0, 0]),
+        'tower_time_qualification_highlight_txt': rgb([0, 0, 0]),
+        'tower_time_retired_txt': rgb([0, 0, 0]),
+        'tower_time_best_lap_txt': rgb([0, 0, 0]),
+        'tower_time_last_lap_txt': rgb([0, 0, 0]),
+        'tower_time_place_gain_txt': rgb([0, 0, 0]),
+        'tower_time_place_lost_txt': rgb([0, 0, 0]),
+        'tower_time_pit_txt': rgb([0, 0, 0]),
+        'tower_driver_odd_bg': rgb([0, 0, 0]),
+        'tower_driver_odd_txt': rgb([0, 0, 0]),
+        'tower_driver_even_bg': rgb([0, 0, 0]),
+        'tower_driver_even_txt': rgb([0, 0, 0]),
+        'tower_driver_highlight_bg': rgb([0, 0, 0]),
+        'tower_driver_highlight_txt': rgb([0, 0, 0]),
+        'tower_driver_stopped_txt': rgb([0, 0, 0]),
+        'tower_driver_retired_bg': rgb([0, 0, 0]),
+        'tower_driver_retired_txt': rgb([0, 0, 0]),
+        'tower_position_first_bg': rgb([0, 0, 0]),
+        'tower_position_first_txt': rgb([0, 0, 0]),
+        'tower_position_odd_bg': rgb([0, 0, 0]),
+        'tower_position_odd_txt': rgb([0, 0, 0]),
+        'tower_position_even_bg': rgb([0, 0, 0]),
+        'tower_position_even_txt': rgb([0, 0, 0]),
+        'tower_position_highlight_bg': rgb([0, 0, 0]),
+        'tower_position_highlight_txt': rgb([0, 0, 0]),
+        'tower_position_retired_txt': rgb([0, 0, 0]),
+        'tower_pit_txt': rgb([0, 0, 0]),
+        'tower_pit_highlight_txt': rgb([0, 0, 0]),
+        'tower_stint_lap_invalid_txt': rgb([0, 0, 0]),
+        'tower_p2p_cooling': rgb([0, 0, 0]),
+        'tower_p2p_active': rgb([0, 0, 0]),
+        'tower_mode_title_bg': rgb([0, 0, 0]),
+        'tower_mode_title_txt': rgb([0, 0, 0]),
+        'tower_stint_title_bg': rgb([0, 0, 0]),
+        'tower_stint_title_txt': rgb([0, 0, 0]),
+        'tower_stint_tire_bg': rgb([0, 0, 0]),
+        'tower_stint_tire_txt': rgb([0, 0, 0]),
+        'info_driver_bg': rgb([0, 0, 0]),
+        'info_driver_txt': rgb([0, 0, 0]),
+        'info_driver_single_bg': rgb([0, 0, 0]),
+        'info_driver_single_txt': rgb([0, 0, 0]),
+        'info_split_txt': rgb([0, 0, 0]),
+        'info_split_positive_txt': rgb([0, 0, 0]),
+        'info_split_negative_txt': rgb([0, 0, 0]),
+        'info_timing_bg': rgb([0, 0, 0]),
+        'info_timing_txt': rgb([0, 0, 0]),
+        'info_position_first_bg': rgb([0, 0, 0]),
+        'info_position_first_txt': rgb([0, 0, 0]),
+        'info_position_bg': rgb([0, 0, 0]),
+        'info_position_txt': rgb([0, 0, 0]),
+        'info_fastest_time_txt': rgb([0, 0, 0]),
+        'timer_title_bg': rgb([0, 0, 0]),
+        'timer_title_txt': rgb([0, 0, 0]),
+        'timer_time_bg': rgb([0, 0, 0]),
+        'timer_time_txt': rgb([0, 0, 0]),
+        'timer_pit_window_bg': rgb([0, 0, 0]),
+        'timer_pit_window_txt': rgb([0, 0, 0]),
+        'speedtrap_title_bg': rgb([0, 0, 0]),
+        'speedtrap_title_txt': rgb([0, 0, 0]),
+        'speedtrap_speed_bg': rgb([0, 0, 0]),
+        'speedtrap_speed_txt': rgb([0, 0, 0])
+    }
 
     @staticmethod
     def theme(bg=False, reload=False):
@@ -132,6 +196,9 @@ class Colors:
             return rgb([8, 26, 63], bg=bg)
         # get theme color
         if reload or Colors.theme_red < 0 or Colors.theme_green < 0 or Colors.theme_blue < 0:
+            if reload and Colors.general_theme > 3:
+                Colors.load_theme_values()
+
             cfg = Config("apps/python/prunn/", "config.ini")
             Colors.theme_red = cfg.get("SETTINGS", "red", "int")
             if Colors.theme_red < 0 or Colors.theme_red > 255:
@@ -216,7 +283,7 @@ class Colors:
     def get_color_for_key(key):
         if key in Colors.current_theme:
             return Colors.current_theme[key]
-        return None
+        return rgb([0, 0, 0])
 
     @staticmethod
     def txt_to_rgba(value):
@@ -226,23 +293,30 @@ class Colors:
             # RGB or RGBA split
             if len(array_values) == 3:
                 #RGB
-                return rgb([array_values[0], array_values[1], array_values[2]])
+                return rgb([int(array_values[0]),
+                            int(array_values[1]),
+                            int(array_values[2])])
             if len(array_values) == 4:
                 #RGBA
-                return rgb([array_values[0], array_values[1], array_values[2]], a=array_values[3])
+                return rgb([int(array_values[0]),
+                            int(array_values[1]),
+                            int(array_values[2])],
+                           a=float(array_values[3]))
             ac.console('Error loading color :' + str(value))
             ac.log('Error loading color :' + str(value))
         value = value.lstrip('#')
         if len(value) == 6:
+            test = 1
             # HEX RGB
             #lv = len(value)
             #return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
-            return value
+            #return value
         if len(value) == 8:
+            test = 1
             # HEX ARGB
             #lv = len(value)
             #return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
-            return value
+            #return value
         ac.console('Error loading color :' + str(value))
         ac.log('Error loading color :' + str(value))
         return rgb([0, 0, 0])
@@ -255,158 +329,328 @@ class Colors:
         return False
 
     @staticmethod
-    def tower_time_txt():
+    def tower_time_odd_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_odd_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
-    def tower_driver_odd_bg():
+    def tower_time_even_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_even_txt')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def tower_time_highlight_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_highlight_txt')
+        if Colors.general_theme == 1:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def tower_time_qualification_highlight_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_qualification_highlight_txt')
+        if Colors.theme_highlight == 1:
+            return Colors.green()
+        return Colors.red()
+
+    @staticmethod
+    def tower_time_retired_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_retired_txt')
+        return rgb([168, 48, 48])
+
+    @staticmethod
+    def tower_time_best_lap_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_best_lap_txt')
+        return rgb([135, 31, 144])
+
+    @staticmethod
+    def tower_time_last_lap_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_last_lap_txt')
+        return rgb([191, 0, 0])
+
+    @staticmethod
+    def tower_time_place_gain_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_place_gain_txt')
+        if Colors.general_theme == 1:
+            return rgb([12, 152, 11])
+        return rgb([32, 192, 31])
+
+    @staticmethod
+    def tower_time_place_lost_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_place_lost_txt')
+        return rgb([191, 0, 0])
+
+    @staticmethod
+    def tower_time_pit_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_time_pit_txt')
+        if Colors.general_theme == 1:
+            return Colors.red()
+        return Colors.yellow()
+
+    @staticmethod
+    def tower_driver_odd_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_odd_bg')
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], a=Colors.opacity_tower_odd())
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=Colors.opacity_tower_odd())
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([32, 32, 32], bg=True)
+            return rgb([22, 117, 165], a=Colors.opacity_tower_odd())
+        return rgb([32, 32, 32], a=Colors.opacity_tower_odd())
 
     @staticmethod
     def tower_driver_odd_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_odd_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_driver_even_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_even_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=Colors.opacity_tower_even())
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=Colors.opacity_tower_even())
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([32, 32, 32], bg=True)
+            return rgb([22, 117, 165], a=Colors.opacity_tower_even())
+        return rgb([32, 32, 32], a=Colors.opacity_tower_even())
 
     @staticmethod
     def tower_driver_even_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_even_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_driver_highlight_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_highlight_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=Colors.opacity_tower_even())
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=Colors.opacity_tower_even())
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([32, 32, 32], bg=True)
+            return rgb([22, 117, 165], a=Colors.opacity_tower_even())
+        return rgb([32, 32, 32], a=Colors.opacity_tower_even())
 
     @staticmethod
     def tower_driver_highlight_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_highlight_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
-    def tower_position_first_bg():
+    def tower_driver_stopped_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_stopped_txt')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return Colors.red()
+        return Colors.yellow()
+
+    @staticmethod
+    def tower_driver_retired_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_retired_bg')
+        if Colors.general_theme == 1:
+            return Colors.black()
+        return Colors.white()
+
+    @staticmethod
+    def tower_driver_retired_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_retired_txt')
+        return rgb([112, 112, 112])
+
+    @staticmethod
+    def tower_position_first_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_first_bg')
+        if Colors.general_theme == 1:
+            return rgb([5, 48, 110], a=0.62)
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=0.62)
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=0.62)
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([192, 0, 0], bg=True)
+            return rgb([234, 179, 62], a=0.62)
+        return rgb([192, 0, 0], a=0.62)
 
     @staticmethod
     def tower_position_first_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_first_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_position_odd_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_odd_bg')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return rgb([5, 48, 110], a=0.62)
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=0.62)
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([12, 12, 12], bg=True)
+            return rgb([234, 179, 62], a=0.96)
+        return rgb([12, 12, 12], a=0.62)
 
     @staticmethod
     def tower_position_odd_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_odd_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_position_even_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_even_bg')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return rgb([5, 48, 110], a=0.58)
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=0.96)
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([0, 0, 0], bg=True)
+            return rgb([234, 179, 62], a=0.96)
+        return rgb([0, 0, 0], a=0.58)
 
     @staticmethod
     def tower_position_even_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_even_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_position_highlight_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_highlight_bg')
         if Colors.general_theme == 3:
-            return rgb([50, 50, 50], bg=True)
-        return rgb([255, 255, 255], bg=True)
+            return rgb([50, 50, 50], a=0.96)
+        if Colors.general_theme == 2:
+            return rgb([255, 255, 255], a=0.96)
+        return rgb([255, 255, 255], a=0.96)
 
     @staticmethod
     def tower_position_highlight_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_highlight_txt')
         if Colors.general_theme == 3:
             return Colors.white()
+        return Colors.red()
+
+    @staticmethod
+    def tower_position_retired_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_retired_txt')
+        return rgb([112, 112, 112])
+
+    @staticmethod
+    def tower_pit_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_pit_txt')
+        if Colors.general_theme == 1:
+            return rgb([12, 12, 12])
+        return rgb([225, 225, 225])
+
+    @staticmethod
+    def tower_pit_highlight_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_pit_highlight_txt')
+        return rgb([191, 0, 0])
+
+    @staticmethod
+    def tower_stint_lap_invalid_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_stint_lap_invalid_txt')
+        return rgb([191, 0, 0])
+
+    @staticmethod
+    def tower_p2p_cooling():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_p2p_cooling')
+        if Colors.general_theme == 1:
+            return Colors.orange()
+        return Colors.yellow()
+
+    @staticmethod
+    def tower_p2p_active():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_p2p_active')
         return Colors.red()
 
     # --------------- Tower --------------
     @staticmethod
     def tower_mode_title_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_mode_title_bg')
         return Colors.theme(bg=True)
 
     @staticmethod
     def tower_mode_title_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_mode_title_txt')
         return Colors.white()
 
     @staticmethod
     def tower_stint_title_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_stint_title_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=0.8)
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=0.8)
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([20, 20, 20], bg=True)
+            return rgb([22, 117, 165], a=0.8)
+        return rgb([20, 20, 20], a=0.8)
 
     @staticmethod
     def tower_stint_title_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_stint_title_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_stint_tire_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_stint_tire_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=0.58)
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=0.58)
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([32, 32, 32], bg=True)
+            return rgb([22, 117, 165], a=0.58)
+        return rgb([32, 32, 32], a=0.58)
 
     @staticmethod
     def tower_stint_tire_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_stint_tire_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
@@ -414,94 +658,126 @@ class Colors:
     # --------------- Info ---------------
     @staticmethod
     def info_driver_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_driver_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=0.8)
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=0.8)
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([20, 20, 20], bg=True)
+            return rgb([22, 117, 165], a=0.8)
+        return rgb([20, 20, 20], a=0.8)
 
     @staticmethod
     def info_driver_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_driver_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def info_driver_single_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_driver_single_bg')
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], a=0.8)
         return Colors.theme(bg=True)
 
     @staticmethod
     def info_driver_single_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_driver_single_txt')
         return Colors.white()
 
     @staticmethod
     def info_split_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_split_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def info_split_positive_txt():
-        return Colors.yellow_time()
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_split_positive_txt')
+        if Colors.general_theme == 1:
+            return Colors.red()
+        return Colors.yellow()
 
     @staticmethod
     def info_split_negative_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_split_negative_txt')
         return Colors.green()
 
     @staticmethod
     def info_timing_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_timing_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=Colors.background_opacity())
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=Colors.background_opacity())
         if Colors.general_theme == 3:
-            return rgb([50, 50, 50], bg=True)
-        return rgb([55, 55, 55], bg=True)
+            return rgb([50, 50, 50], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=Colors.background_opacity())
 
     @staticmethod
     def info_timing_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_timing_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def info_position_first_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_position_first_bg')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return rgb([5, 48, 110])
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179])
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179])
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([192, 0, 0], bg=True)
+            return rgb([234, 179, 62])
+        return rgb([192, 0, 0])
 
     @staticmethod
     def info_position_first_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_position_first_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def info_position_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_position_bg')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return rgb([5, 48, 110])
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179])
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([112, 112, 112], bg=True)
+            return rgb([234, 179, 62])
+        return rgb([112, 112, 112])
 
     @staticmethod
     def info_position_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_position_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def info_fastest_time_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_fastest_time_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
@@ -509,48 +785,60 @@ class Colors:
     # --------------- Timer ---------------
     @staticmethod
     def timer_title_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_title_bg')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return rgb([5, 48, 110], a=Colors.background_opacity())
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=Colors.background_opacity())
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return Colors.theme(bg=True)
+            return rgb([234, 179, 62], a=Colors.background_opacity())
+        return Colors.theme(bg=False)
 
     @staticmethod
     def timer_title_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_title_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def timer_time_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_time_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=Colors.background_opacity())
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=Colors.background_opacity())
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([55, 55, 55], bg=True)
+            return rgb([22, 117, 165], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=Colors.background_opacity())
 
     @staticmethod
     def timer_time_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_time_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def timer_pit_window_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_pit_window_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=Colors.background_opacity())
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=Colors.background_opacity())
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([55, 55, 55], bg=True)
+            return rgb([22, 117, 165], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=Colors.background_opacity())
 
     @staticmethod
     def timer_pit_window_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_pit_window_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
@@ -558,89 +846,45 @@ class Colors:
     # --------------- Speedtrap ---------------
     @staticmethod
     def speedtrap_title_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('speedtrap_title_bg')
         if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
+            return rgb([5, 48, 110], a=Colors.background_opacity())
         if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
+            return rgb([8, 26, 63], a=Colors.background_opacity())
         if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([12, 12, 12], bg=True)
+            return rgb([234, 179, 62], a=Colors.background_opacity())
+        return rgb([12, 12, 12], a=Colors.background_opacity())
 
     @staticmethod
     def speedtrap_title_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('speedtrap_title_txt')
         if Colors.general_theme == 3:
             return Colors.black()
         return Colors.white()
 
     @staticmethod
     def speedtrap_speed_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('speedtrap_speed_bg')
         if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
+            return rgb([255, 255, 255], a=Colors.background_opacity())
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
+            return rgb([14, 137, 179], a=Colors.background_opacity())
         if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([55, 55, 55], bg=True)
+            return rgb([22, 117, 165], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=Colors.background_opacity())
 
     @staticmethod
     def speedtrap_speed_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('speedtrap_speed_txt')
         if Colors.general_theme == 1:
             return Colors.black()
         return Colors.white()
 
     # ----------------------------------------
-
-    '''
-    @staticmethod
-    def background():
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
-        if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
-        if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([55, 55, 55], bg=True)
-
-    @staticmethod
-    def background_dark():
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
-        if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
-        if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([20, 20, 20], bg=True)
-
-    @staticmethod
-    def background_tower():
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], bg=True)
-        if Colors.general_theme == 2:
-            return rgb([8, 26, 63], bg=True)
-        if Colors.general_theme == 3:
-            return rgb([22, 117, 165], bg=True)
-        return rgb([32, 32, 32], bg=True)
-
-    @staticmethod
-    def background_info_position():
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], bg=True)
-        if Colors.general_theme == 2:
-            return rgb([14, 137, 179], bg=True)
-        if Colors.general_theme == 3:
-            return rgb([234, 179, 62], bg=True)
-        return rgb([112, 112, 112], bg=True)
-    @staticmethod
-    def position_font_color():
-        if Colors.general_theme == 3:
-            return Colors.black()
-        return Colors.white()
-    @staticmethod
-    def font_color():
-        if Colors.general_theme == 1:
-            return Colors.black()
-        return Colors.white()
-    '''
 
     @staticmethod
     def opacity_tower_odd():
@@ -676,15 +920,12 @@ class Colors:
 
     @staticmethod
     def bmw():
-        # return rgb([42, 101, 198], bg = True)
         return rgb([40, 152, 211], bg=True)
 
     @staticmethod
     def ford():
-        # return rgb([0, 165, 255], bg = True)
         return rgb([62, 121, 218], bg=True)
 
-    # return rgb([2, 58, 117], bg = True)
     @staticmethod
     def mercedes():
         return rgb([0, 161, 156], bg=True)
@@ -711,7 +952,6 @@ class Colors:
 
     @staticmethod
     def alfa():
-        # return rgb([0, 154, 100], bg = True)
         return rgb([54, 172, 68], bg=True)
 
     @staticmethod
@@ -727,10 +967,6 @@ class Colors:
     @staticmethod
     def red(bg=False):
         return rgb([191, 0, 0], bg=bg)
-
-    @staticmethod
-    def dnf(bg=False):
-        return rgb([168, 48, 48], bg=bg)
 
     @staticmethod
     def green(bg=False):
@@ -751,26 +987,6 @@ class Colors:
     @staticmethod
     def grey(bg=False):
         return rgb([112, 112, 112], bg=bg)
-
-    @staticmethod
-    def purple(bg=False):
-        return rgb([135, 31, 144], bg=bg)
-
-    @staticmethod
-    def pitColor(bg=False):
-        if Colors.general_theme == 1:
-            return rgb([12, 12, 12], bg=bg)
-        return rgb([225, 225, 225], bg=bg)
-
-    @staticmethod
-    def p2pCool():
-        if Colors.general_theme == 1:
-            return Colors.orange()
-        return Colors.yellow()
-
-    @staticmethod
-    def p2pActive():
-        return Colors.red()
 
     @staticmethod
     def orange(bg=False):
@@ -871,11 +1087,12 @@ class Label:
     def __init__(self, window, text=""):
         self.text = text
         self.debug = False
+        self.animating_txt = False
         self.label = ac.addLabel(window, self.text)
         self.params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
-                       "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
+                       "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
         self.f_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
-                         "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
+                         "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
         self.o_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
                          "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
         self.multiplier = {"x": Value(3), "y": Value(3), "w": Value(1), "h": Value(1), "br": Value(0.06),
@@ -895,7 +1112,7 @@ class Label:
         self.setVisible(0)
 
     # PUBLIC METHODS
-    def set(self, text=None, align=None, color=None, font_size=None, font=None, w=None, h=None, x=None, y=None, texture=None, background=None, opacity=None, visible=None, animated=False, text_hidden=False):
+    def set(self, text=None, align=None, color=None, font_size=None, font=None, w=None, h=None, x=None, y=None, texture=None, background=None, opacity=None, visible=None, animated=False, text_hidden=False, init=False):
         # Text
         if text is not None:
             self.setText(text, text_hidden)
@@ -918,7 +1135,7 @@ class Label:
             self.setY(y, animated)
         # Font color
         if color is not None:
-            self.setColor(color, animated)
+            self.setColor(color, animated, init)
         # Font
         if font is not None:
             self.setFont(font, 0, 0)
@@ -930,10 +1147,10 @@ class Label:
             self.setBgTexture(texture)
         # Background color
         if background is not None:
-            self.setBgColor(background, animated)
+            self.setBgColor(background, animated, init)
         # Background opacity
         if opacity is not None:
-            self.setBgOpacity(opacity, animated)
+            self.setBgOpacity(opacity, animated, init)
         # Visibility
         if visible is not None:
             self.setVisible(visible)
@@ -991,17 +1208,18 @@ class Label:
                 ac.setPosition(self.label, self.params["x"].value, self.params["y"].value)
         return self
 
-    def setColor(self, color, animated=False):
+    def setColor(self, color, animated=False, init=False):
         self.f_params["r"].setValue(color[0])
         self.f_params["g"].setValue(color[1])
         self.f_params["b"].setValue(color[2])
-        if self.isVisible.value:
-            self.f_params["a"].setValue(color[3])
-        if not animated:
+        if init:
             self.o_params["r"].setValue(color[0])
             self.o_params["g"].setValue(color[1])
             self.o_params["b"].setValue(color[2])
             self.o_params["a"].setValue(color[3])
+        if self.isVisible.value:
+            self.f_params["a"].setValue(color[3])
+        if not animated:
             self.params["r"].setValue(color[0])
             self.params["g"].setValue(color[1])
             self.params["b"].setValue(color[2])
@@ -1043,33 +1261,42 @@ class Label:
         ac.setBackgroundTexture(self.label, self.bgTexture)
         return self
 
-    def setBgColor(self, color, animated=False):
+    def setBgColor(self, color, animated=False, init=False):
         self.f_params["br"].setValue(color[0])
         self.f_params["bg"].setValue(color[1])
         self.f_params["bb"].setValue(color[2])
-        if not animated:
+        if init:
             self.o_params["br"].setValue(color[0])
             self.o_params["bg"].setValue(color[1])
             self.o_params["bb"].setValue(color[2])
+        if not animated:
+            #self.o_params["br"].setValue(color[0])
+            #self.o_params["bg"].setValue(color[1])
+            #self.o_params["bb"].setValue(color[2])
             self.params["br"].setValue(color[0])
             self.params["bg"].setValue(color[1])
             self.params["bb"].setValue(color[2])
-            ac.setBackgroundColor(self.label, *color)
+            ac.setBackgroundColor(self.label, color[0], color[1], color[2])
             if self.isVisible.value:
-                #if self.f_params["o"].value > 0:
                 ac.setBackgroundOpacity(self.label, self.params["o"].value)
             else:
                 ac.setBackgroundOpacity(self.label, 0)
+        if len(color) > 3:
+            if self.debug:
+                self.debug_param("setBgOpacity---" + str(color[3]), "o")
+            self.setBgOpacity(color[3], animated, init)
         return self
 
-    def setBgOpacity(self, opacity, animated=False):
+    def setBgOpacity(self, opacity, animated=False, init=False):
+        if init:
+            self.o_params["o"].setValue(opacity)
         if self.isVisible.value:
+            #self.o_params["o"].setValue(opacity)
             self.f_params["o"].setValue(opacity)
             if self.debug:
                 #self.debug_param("Alpha", "a")
                 self.debug_param("setBgOpacity---", "o")
         if not animated:
-            self.o_params["o"].setValue(opacity)
             if self.isVisible.value:
                 self.params["o"].setValue(opacity)
                 ac.setBackgroundOpacity(self.label, self.params["o"].value)
@@ -1091,8 +1318,6 @@ class Label:
         self.visible = value
         self.isVisible.setValue(bool(value))
         ac.setVisible(self.label, value)
-        # self.params = self.o_params
-        # self.f_params = self.o_params
         return self
 
     def setAnimationSpeed(self, param, value):
@@ -1106,6 +1331,7 @@ class Label:
         return self
 
     def hide(self):
+        self.animating_txt = False
         self.setBgOpacity(0, True)
         return self
 
@@ -1114,6 +1340,7 @@ class Label:
         return self
 
     def show(self):
+        self.animating_txt = False
         self.f_params["o"].setValue(self.o_params["o"].value)
         if self.debug:
             #self.debug_param("Alpha", "a")
@@ -1126,10 +1353,12 @@ class Label:
         return self
 
     def showText(self):
+        self.animating_txt = True
         self.f_params["a"].setValue(self.o_params["a"].value)
         return self
 
     def hideText(self):
+        self.animating_txt = True
         self.f_params["a"].setValue(0)
         return self
 
@@ -1209,6 +1438,7 @@ class Label:
                             self.params["a"].value)
 
         if opacity_changed or alpha_changed:
+            #if self.params["o"].value > 0 or (self.animating_txt and self.params["a"].value > 0):
             if self.params["o"].value > 0 or (self.o_params["o"].value == 0 and self.params["a"].value > 0):
                 self.setVisible(1)
             else:
