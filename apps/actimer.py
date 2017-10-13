@@ -4,7 +4,7 @@ import os.path
 import json
 import ctypes
 from .util.func import rgb
-from .util.classes import Window, Label, Value, POINT, Colors, Font
+from .util.classes import Window, Label, Value, Colors, Font
 from .configuration import Configuration
 
 
@@ -90,7 +90,7 @@ class ACTimer:
     # ---------------------------------------------------------------------------------------------------------------------------------------------
     def load_cfg(self):
         self.row_height.setValue(Configuration.ui_row_height)
-        Colors.theme(bg=True, reload=True)
+        Colors.theme(reload=True)
         self.theme.setValue(Colors.general_theme + Colors.theme_red + Colors.theme_green + Colors.theme_blue)
         self.font.setValue(Font.current)
         self.redraw_size()
@@ -98,8 +98,7 @@ class ACTimer:
     def redraw_size(self):
         # Colors
         if self.theme.hasChanged():
-            self.lbl_session_border.set(background=Colors.theme(bg=True),
-                                        opacity=Colors.border_opacity(),
+            self.lbl_session_border.set(background=Colors.timer_border_bg(),
                                         animated=True, init=True)
             self.lbl_session_single.set(background=Colors.timer_time_bg(),
                                         color=Colors.timer_time_txt(),
@@ -160,7 +159,6 @@ class ACTimer:
         self.lbl_session_info.hide()
         self.lbl_session_title.hide()
         self.lbl_session_border.hide()
-        self.lbl_session_single.show()
         self.lbl_session_single.setText("").setBgColor(rgb([255, 255, 255], bg=True)).setBgOpacity(0.76).show()
         if len(self.finish_labels) > 0:
             for label in self.finish_labels:
@@ -173,14 +171,14 @@ class ACTimer:
                         self.finish_labels.append(Label(self.window.app)
                                                   .setSize(height, height)
                                                   .setPos(height + j * height * 2, i * height)
-                                                  .setBgColor(rgb([0, 0, 0], bg=True))
-                                                  .setBgOpacity(0.8).show())
+                                                  .setBgColor(rgb([0, 0, 0], bg=True), init=True)
+                                                  .setBgOpacity(0.8, init=True).show())
                     elif i % 2 == 0:
                         self.finish_labels.append(Label(self.window.app)
                                                   .setSize(height, height)
                                                   .setPos(j * height * 2, i * height)
-                                                  .setBgColor(rgb([0, 0, 0], bg=True))
-                                                  .setBgOpacity(0.8).show())
+                                                  .setBgColor(rgb([0, 0, 0], bg=True), init=True)
+                                                  .setBgOpacity(0.8, init=True).show())
 
         self.finish_initialised = True
 
@@ -244,18 +242,23 @@ class ACTimer:
                     if not self.finish_initialised:
                         if sim_info.graphics.flag == 2:
                             # Yellow Flag
-                            self.lbl_session_info.setBgColor(Colors.yellow(True))
-                            self.lbl_session_info.setColor(Colors.black(), True)
-                            self.lbl_session_border.setBgColor(Colors.black(bg=True), True)
-                            self.lbl_session_title.set(background=Colors.black(bg=True),
-                                                       color=Colors.white(),
+                            self.lbl_session_info.set(background=Colors.timer_time_yellow_flag_bg(),
+                                                      color=Colors.timer_time_yellow_flag_txt(),
+                                                      animated=True)
+                            self.lbl_session_title.set(background=Colors.timer_title_yellow_flag_bg(),
+                                                       color=Colors.timer_title_yellow_flag_txt(),
                                                        animated=True)
+                            self.lbl_session_border.set(background=Colors.timer_border_yellow_flag_bg(),
+                                                        animated=True)
                         else:
-                            self.lbl_session_info.setBgColor(Colors.timer_time_bg()).setColor(Colors.timer_time_txt(), True)
-                            self.lbl_session_border.setBgColor(Colors.theme(bg=True), True)
+                            self.lbl_session_info.set(background=Colors.timer_time_bg(),
+                                                      color=Colors.timer_time_txt(),
+                                                      animated=True)
                             self.lbl_session_title.set(background=Colors.timer_title_bg(),
                                                        color=Colors.timer_title_txt(),
                                                        animated=True)
+                            self.lbl_session_border.set(background=Colors.timer_border_bg(),
+                                                        animated=True)
             elif self.session.value == 2:
                 # Race
                 completed = 0
@@ -307,15 +310,15 @@ class ACTimer:
                 if self.pitWindowActive:
                     self.lbl_pit_window.show()
                     if self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
-                        self.lbl_pit_window.setColor(Colors.green())
+                        self.lbl_pit_window.setColor(Colors.timer_pit_window_open_txt())
                     elif sim_info.graphics.MandatoryPitDone:
-                        self.lbl_pit_window.setColor(rgb([172, 172, 172]), True)
+                        self.lbl_pit_window.setColor(Colors.timer_pit_window_done_txt(), True)
                     else:
                         self.lbl_pit_window.setColor(Colors.timer_pit_window_txt(), True)
                     self.lbl_pit_window.setText("Pits open" + pit_window_remain)
                 elif self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
                     self.lbl_pit_window.show()
-                    self.lbl_pit_window.setText("Pits closed").setColor(Colors.red(), True)
+                    self.lbl_pit_window.setText("Pits closed").setColor(Colors.timer_pit_window_close_txt(), True)
                 else:
                     self.lbl_pit_window.hide()
 
@@ -360,16 +363,16 @@ class ACTimer:
                         self.lbl_session_single.setText("0:00" + txt_extra_lap)
                 if not self.finish_initialised:
                     if sim_info.graphics.flag == 2:  # Yellow flag
-                        self.lbl_session_single.set(background=Colors.yellow(True),
-                                                    color=Colors.black(),
+                        self.lbl_session_single.set(background=Colors.timer_time_yellow_flag_bg(),
+                                                    color=Colors.timer_time_yellow_flag_txt(),
                                                     animated=True)
-                        self.lbl_session_border.set(background=Colors.black(bg=True),
+                        self.lbl_session_border.set(background=Colors.timer_border_yellow_flag_bg(),
                                                     animated=True)
                     else:
                         self.lbl_session_single.set(background=Colors.timer_time_bg(),
                                                     color=Colors.timer_time_txt(),
                                                     animated=True)
-                        self.lbl_session_border.set(background=Colors.theme(bg=True),
+                        self.lbl_session_border.set(background=Colors.timer_border_bg(),
                                                     animated=True)
             else:
                 self.lbl_session_info.hide()

@@ -189,17 +189,6 @@ class Configuration:
         self.lbl_border_direction = Label(self.window.app, "Horizontal").setSize(120, 26).setPos(192, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
 
-        # Themed info - checkbox
-        y += 52
-        self.chk_themed_info = ac.addCheckBox(self.window.app, "")
-        ac.setPosition(self.chk_themed_info, 20, y)
-        ac.addOnCheckBoxChanged(self.chk_themed_info, self.on_check_themed_info_changed)
-        ac.setVisible(self.chk_themed_info, 0)
-        self.lbl_title_themed_info = Label(self.window.app, "Themed info")\
-            .setSize(200, 26).setPos(65, y + 1)\
-            .setFontSize(16).setAlign("left")\
-            .setVisible(0)
-
         self.cfg_loaded = False
         self.cfg = Config("apps/python/prunn/", "config.ini")
         self.load_cfg()
@@ -281,9 +270,6 @@ class Configuration:
         border_direction = self.cfg.get("SETTINGS", "border_direction", "int")
         if border_direction >= 0:
             Colors.border_direction = border_direction
-        themed_info = self.cfg.get("SETTINGS", "themed_info", "int")
-        if themed_info >= 0:
-            Colors.themed_info = themed_info
 
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
@@ -301,7 +287,6 @@ class Configuration:
         ac.setValue(self.spin_font, font)
         ac.setValue(self.spin_general_theme, Colors.general_theme)
         ac.setValue(self.spin_border_direction, Colors.border_direction)
-        ac.setValue(self.chk_themed_info, Colors.themed_info)
         self.set_labels()
         self.cfg_loaded = True
 
@@ -323,7 +308,6 @@ class Configuration:
         self.cfg.set("SETTINGS", "font", Font.current)
         self.cfg.set("SETTINGS", "general_theme", Colors.general_theme)
         self.cfg.set("SETTINGS", "border_direction", Colors.border_direction)
-        self.cfg.set("SETTINGS", "themed_info", Colors.themed_info)
         self.cfg.set("SETTINGS", "theme_ini", Colors.theme_ini)
 
     def set_labels(self):
@@ -404,8 +388,6 @@ class Configuration:
             self.lbl_general_theme.setVisible(0)
             ac.setVisible(self.spin_border_direction, 0)
             self.lbl_border_direction.setVisible(0)
-            ac.setVisible(self.chk_themed_info, 0)
-            self.lbl_title_themed_info.setVisible(0)
             ac.setVisible(self.spin_race_mode, 1)
             ac.setVisible(self.spin_qual_mode, 1)
             ac.setVisible(self.spin_names, 1)
@@ -436,8 +418,6 @@ class Configuration:
             self.lbl_general_theme.setVisible(1)
             ac.setVisible(self.spin_border_direction, 1)
             self.lbl_border_direction.setVisible(1)
-            ac.setVisible(self.chk_themed_info, 1)
-            self.lbl_title_themed_info.setVisible(1)
             ac.setVisible(self.spin_race_mode, 0)
             ac.setVisible(self.spin_qual_mode, 0)
             ac.setVisible(self.spin_names, 0)
@@ -504,11 +484,6 @@ class Configuration:
     @staticmethod
     def on_check_force_info_changed(name, state):
         Configuration.forceInfoVisible = state
-        Configuration.configChanged = True
-
-    @staticmethod
-    def on_check_themed_info_changed(name, state):
-        Colors.themed_info = state
         Configuration.configChanged = True
 
     @staticmethod

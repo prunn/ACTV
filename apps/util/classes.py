@@ -116,7 +116,6 @@ class POINT(ctypes.Structure):
 class Colors:
     general_theme = 1  # 0 : Dark, 1 : Light, 2 : Electric, 3 : Digital
     border_direction = 1  # 0 : Horizontal, 1 : Vertical
-    themed_info = 1
     theme_red = -1
     theme_green = -1
     theme_blue = -1
@@ -139,8 +138,10 @@ class Colors:
         'tower_driver_odd_txt': rgb([0, 0, 0]),
         'tower_driver_even_bg': rgb([0, 0, 0]),
         'tower_driver_even_txt': rgb([0, 0, 0]),
-        'tower_driver_highlight_bg': rgb([0, 0, 0]),
-        'tower_driver_highlight_txt': rgb([0, 0, 0]),
+        'tower_driver_highlight_odd_bg': rgb([0, 0, 0]),
+        'tower_driver_highlight_even_bg': rgb([0, 0, 0]),
+        'tower_driver_highlight_odd_txt': rgb([0, 0, 0]),
+        'tower_driver_highlight_even_txt': rgb([0, 0, 0]),
         'tower_driver_stopped_txt': rgb([0, 0, 0]),
         'tower_driver_retired_bg': rgb([0, 0, 0]),
         'tower_driver_retired_txt': rgb([0, 0, 0]),
@@ -150,14 +151,17 @@ class Colors:
         'tower_position_odd_txt': rgb([0, 0, 0]),
         'tower_position_even_bg': rgb([0, 0, 0]),
         'tower_position_even_txt': rgb([0, 0, 0]),
-        'tower_position_highlight_bg': rgb([0, 0, 0]),
-        'tower_position_highlight_txt': rgb([0, 0, 0]),
+        'tower_position_highlight_odd_bg': rgb([0, 0, 0]),
+        'tower_position_highlight_even_bg': rgb([0, 0, 0]),
+        'tower_position_highlight_odd_txt': rgb([0, 0, 0]),
+        'tower_position_highlight_even_txt': rgb([0, 0, 0]),
         'tower_position_retired_txt': rgb([0, 0, 0]),
         'tower_pit_txt': rgb([0, 0, 0]),
         'tower_pit_highlight_txt': rgb([0, 0, 0]),
         'tower_stint_lap_invalid_txt': rgb([0, 0, 0]),
         'tower_p2p_cooling': rgb([0, 0, 0]),
         'tower_p2p_active': rgb([0, 0, 0]),
+        'tower_border_default_bg': rgb([0, 0, 0]),
         'tower_mode_title_bg': rgb([0, 0, 0]),
         'tower_mode_title_txt': rgb([0, 0, 0]),
         'tower_stint_title_bg': rgb([0, 0, 0]),
@@ -178,20 +182,31 @@ class Colors:
         'info_position_bg': rgb([0, 0, 0]),
         'info_position_txt': rgb([0, 0, 0]),
         'info_fastest_time_txt': rgb([0, 0, 0]),
+        'info_border_default_bg': rgb([0, 0, 0]),
         'timer_title_bg': rgb([0, 0, 0]),
         'timer_title_txt': rgb([0, 0, 0]),
+        'timer_title_yellow_flag_bg': rgb([0, 0, 0]),
+        'timer_title_yellow_flag_txt': rgb([0, 0, 0]),
         'timer_time_bg': rgb([0, 0, 0]),
         'timer_time_txt': rgb([0, 0, 0]),
+        'timer_time_yellow_flag_bg': rgb([0, 0, 0]),
+        'timer_time_yellow_flag_txt': rgb([0, 0, 0]),
         'timer_pit_window_bg': rgb([0, 0, 0]),
         'timer_pit_window_txt': rgb([0, 0, 0]),
+        'timer_pit_window_open_txt': rgb([0, 0, 0]),
+        'timer_pit_window_done_txt': rgb([0, 0, 0]),
+        'timer_pit_window_close_txt': rgb([0, 0, 0]),
+        'timer_border_bg': rgb([0, 0, 0]),
+        'timer_border_yellow_flag_bg': rgb([0, 0, 0]),
         'speedtrap_title_bg': rgb([0, 0, 0]),
         'speedtrap_title_txt': rgb([0, 0, 0]),
         'speedtrap_speed_bg': rgb([0, 0, 0]),
-        'speedtrap_speed_txt': rgb([0, 0, 0])
+        'speedtrap_speed_txt': rgb([0, 0, 0]),
+        'speedtrap_border_bg': rgb([0, 0, 0])
     }
 
     @staticmethod
-    def theme(bg=False, reload=False):
+    def theme(bg=False, reload=False, a=1):
         if Colors.general_theme == 2:
             return rgb([8, 26, 63], bg=bg)
         # get theme color
@@ -210,7 +225,7 @@ class Colors:
             if Colors.theme_blue < 0 or Colors.theme_blue > 255:
                 Colors.theme_blue = 0
         # return rgb([40, 152, 211], bg = bg)
-        return rgb([Colors.theme_red, Colors.theme_green, Colors.theme_blue], bg=bg)
+        return rgb([Colors.theme_red, Colors.theme_green, Colors.theme_blue], bg=bg, a=a)
 
     @staticmethod
     def highlight(bg=False, reload=False):
@@ -333,7 +348,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_time_odd_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -341,7 +356,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_time_even_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -349,7 +364,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_time_highlight_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -417,7 +432,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_driver_odd_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -437,13 +452,25 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_driver_even_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
-    def tower_driver_highlight_bg():
+    def tower_driver_highlight_odd_bg():
         if Colors.general_theme > 3:
-            return Colors.get_color_for_key('tower_driver_highlight_bg')
+            return Colors.get_color_for_key('tower_driver_highlight_odd_bg')
+        if Colors.general_theme == 1:
+            return rgb([255, 255, 255], a=Colors.opacity_tower_odd())
+        if Colors.general_theme == 2:
+            return rgb([8, 26, 63], a=Colors.opacity_tower_odd())
+        if Colors.general_theme == 3:
+            return rgb([22, 117, 165], a=Colors.opacity_tower_odd())
+        return rgb([32, 32, 32], a=Colors.opacity_tower_odd())
+
+    @staticmethod
+    def tower_driver_highlight_even_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_highlight_even_bg')
         if Colors.general_theme == 1:
             return rgb([255, 255, 255], a=Colors.opacity_tower_even())
         if Colors.general_theme == 2:
@@ -453,11 +480,19 @@ class Colors:
         return rgb([32, 32, 32], a=Colors.opacity_tower_even())
 
     @staticmethod
-    def tower_driver_highlight_txt():
+    def tower_driver_highlight_odd_txt():
         if Colors.general_theme > 3:
-            return Colors.get_color_for_key('tower_driver_highlight_txt')
+            return Colors.get_color_for_key('tower_driver_highlight_odd_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
+        return Colors.white()
+
+    @staticmethod
+    def tower_driver_highlight_even_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_driver_highlight_even_txt')
+        if Colors.general_theme == 1:
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -501,7 +536,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_position_first_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -511,7 +546,7 @@ class Colors:
         if Colors.general_theme == 1:
             return rgb([5, 48, 110], a=0.62)
         if Colors.general_theme == 2:
-            return rgb([14, 137, 179], a=0.62)
+            return rgb([14, 137, 179], a=0.96)
         if Colors.general_theme == 3:
             return rgb([234, 179, 62], a=0.96)
         return rgb([12, 12, 12], a=0.62)
@@ -521,7 +556,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_position_odd_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -541,13 +576,23 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_position_even_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
-    def tower_position_highlight_bg():
+    def tower_position_highlight_odd_bg():
         if Colors.general_theme > 3:
-            return Colors.get_color_for_key('tower_position_highlight_bg')
+            return Colors.get_color_for_key('tower_position_highlight_odd_bg')
+        if Colors.general_theme == 3:
+            return rgb([50, 50, 50], a=0.96)
+        if Colors.general_theme == 2:
+            return rgb([255, 255, 255], a=0.96)
+        return rgb([255, 255, 255], a=0.96)
+
+    @staticmethod
+    def tower_position_highlight_even_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_highlight_even_bg')
         if Colors.general_theme == 3:
             return rgb([50, 50, 50], a=0.96)
         if Colors.general_theme == 2:
@@ -558,6 +603,22 @@ class Colors:
     def tower_position_highlight_txt():
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_position_highlight_txt')
+        if Colors.general_theme == 3:
+            return Colors.white()
+        return Colors.red()
+
+    @staticmethod
+    def tower_position_highlight_odd_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_highlight_odd_txt')
+        if Colors.general_theme == 3:
+            return Colors.white()
+        return Colors.red()
+
+    @staticmethod
+    def tower_position_highlight_even_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_position_highlight_even_txt')
         if Colors.general_theme == 3:
             return Colors.white()
         return Colors.red()
@@ -602,12 +663,18 @@ class Colors:
             return Colors.get_color_for_key('tower_p2p_active')
         return Colors.red()
 
+    @staticmethod
+    def tower_border_default_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_border_default_bg')
+        return Colors.theme(a=Colors.border_opacity())
+
     # --------------- Tower --------------
     @staticmethod
     def tower_mode_title_bg():
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_mode_title_bg')
-        return Colors.theme(bg=True)
+        return Colors.theme()
 
     @staticmethod
     def tower_mode_title_txt():
@@ -632,7 +699,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_stint_title_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -652,7 +719,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_stint_tire_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     # --------------- Info ---------------
@@ -673,7 +740,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('info_driver_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -682,7 +749,7 @@ class Colors:
             return Colors.get_color_for_key('info_driver_single_bg')
         if Colors.general_theme == 3:
             return rgb([22, 117, 165], a=0.8)
-        return Colors.theme(bg=True)
+        return Colors.theme()
 
     @staticmethod
     def info_driver_single_txt():
@@ -695,7 +762,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('info_split_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -729,7 +796,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('info_timing_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -751,7 +818,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('info_position_first_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -771,7 +838,7 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('info_position_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -779,8 +846,14 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('info_fastest_time_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
+
+    @staticmethod
+    def info_border_default_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('info_border_default_bg')
+        return Colors.theme(a=Colors.border_opacity())
 
     # --------------- Timer ---------------
     @staticmethod
@@ -793,14 +866,26 @@ class Colors:
             return rgb([8, 26, 63], a=Colors.background_opacity())
         if Colors.general_theme == 3:
             return rgb([234, 179, 62], a=Colors.background_opacity())
-        return Colors.theme(bg=False)
+        return Colors.theme(a=Colors.background_opacity())
 
     @staticmethod
     def timer_title_txt():
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('timer_title_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
+        return Colors.white()
+
+    @staticmethod
+    def timer_title_yellow_flag_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_title_yellow_flag_bg')
+        return Colors.black()
+
+    @staticmethod
+    def timer_title_yellow_flag_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_title_yellow_flag_txt')
         return Colors.white()
 
     @staticmethod
@@ -820,8 +905,20 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('timer_time_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
+
+    @staticmethod
+    def timer_time_yellow_flag_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_time_yellow_flag_bg')
+        return Colors.yellow(True)
+
+    @staticmethod
+    def timer_time_yellow_flag_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_time_yellow_flag_txt')
+        return Colors.black_txt()
 
     @staticmethod
     def timer_pit_window_bg():
@@ -840,8 +937,38 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('timer_pit_window_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
+
+    @staticmethod
+    def timer_pit_window_open_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_pit_window_open_txt')
+        return Colors.green()
+
+    @staticmethod
+    def timer_pit_window_done_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_pit_window_done_txt')
+        return rgb([172, 172, 172])
+
+    @staticmethod
+    def timer_pit_window_close_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_pit_window_close_txt')
+        return Colors.red()
+
+    @staticmethod
+    def timer_border_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_border_bg')
+        return Colors.theme(a=Colors.border_opacity())
+
+    @staticmethod
+    def timer_border_yellow_flag_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('timer_border_yellow_flag_bg')
+        return Colors.black()
 
     # --------------- Speedtrap ---------------
     @staticmethod
@@ -854,14 +981,15 @@ class Colors:
             return rgb([8, 26, 63], a=Colors.background_opacity())
         if Colors.general_theme == 3:
             return rgb([234, 179, 62], a=Colors.background_opacity())
-        return rgb([12, 12, 12], a=Colors.background_opacity())
+        return Colors.theme(a=Colors.background_opacity())
+        #return rgb([12, 12, 12], a=Colors.background_opacity())
 
     @staticmethod
     def speedtrap_title_txt():
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('speedtrap_title_txt')
         if Colors.general_theme == 3:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
@@ -881,8 +1009,14 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('speedtrap_speed_txt')
         if Colors.general_theme == 1:
-            return Colors.black()
+            return Colors.black_txt()
         return Colors.white()
+
+    @staticmethod
+    def speedtrap_border_bg():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('speedtrap_border_bg')
+        return Colors.theme(a=Colors.border_opacity())
 
     # ----------------------------------------
 
@@ -919,50 +1053,52 @@ class Colors:
         return 0.7
 
     @staticmethod
-    def bmw():
-        return rgb([40, 152, 211], bg=True)
+    def bmw(a):
+        return rgb([40, 152, 211], a=a)
 
     @staticmethod
-    def ford():
-        return rgb([62, 121, 218], bg=True)
+    def ford(a):
+        return rgb([62, 121, 218], a=a)
 
     @staticmethod
-    def mercedes():
-        return rgb([0, 161, 156], bg=True)
+    def mercedes(a):
+        return rgb([0, 161, 156], a=a)
 
     @staticmethod
-    def corvette():
-        return rgb([240, 171, 1], bg=True)
+    def corvette(a):
+        return rgb([240, 171, 1], a=a)
 
     @staticmethod
-    def lamborghini():
-        return rgb([150, 191, 13], bg=True)
+    def lamborghini(a):
+        return rgb([150, 191, 13], a=a)
 
     @staticmethod
-    def ktm():
-        return rgb([250, 88, 0], bg=True)
+    def ktm(a):
+        return rgb([250, 88, 0], a=a)
 
     @staticmethod
-    def nissan():
-        return rgb([175, 71, 169], bg=True)
+    def nissan(a):
+        return rgb([175, 71, 169], a=a)
 
     @staticmethod
-    def ferrari():
-        return rgb([191, 0, 0], bg=True)
+    def ferrari(a):
+        return rgb([191, 0, 0], a=a)
 
     @staticmethod
-    def alfa():
-        return rgb([54, 172, 68], bg=True)
+    def alfa(a):
+        return rgb([54, 172, 68], a=a)
 
     @staticmethod
-    def white(bg=False):
-        return rgb([255, 255, 255], bg=bg)
+    def white(bg=False, a=1):
+        return rgb([255, 255, 255], bg=bg, a=a)
 
     @staticmethod
-    def black(bg=False):
-        if bg:
-            return rgb([0, 0, 0], bg=bg)
-        return rgb([12, 12, 12], bg=bg)
+    def black():
+        return rgb([0, 0, 0], a=1)
+
+    @staticmethod
+    def black_txt():
+        return rgb([12, 12, 12])
 
     @staticmethod
     def red(bg=False):
@@ -993,92 +1129,99 @@ class Colors:
         return rgb([250, 88, 0], bg=bg)
 
     @staticmethod
-    def lmp1():
-        return rgb([205, 0, 0], bg=True)
+    def lmp1(a):
+        return rgb([205, 0, 0], a=a)
 
     @staticmethod
-    def gte():
-        return rgb([0, 150, 54], bg=True)
+    def gte(a):
+        return rgb([0, 150, 54], a=a)
 
     @staticmethod
-    def colorFromCar(car, byclass=False):
+    def colorFromCar(car, byclass=False, default=None):
+        if default is not None and len(default) > 3:
+            #get alpha from default
+            alpha = default[3]
+        else:
+            alpha = 1
         if byclass:
             if not Colors.carsClassesLoaded:
                 Colors.loadCarClasses()
             cl = Colors.getClassForCar(car)
             if cl != False:
                 if cl == 'lmp1':
-                    return Colors.lmp1()
+                    return Colors.lmp1(alpha)
                 if cl == 'lmp3':
-                    return Colors.nissan()
+                    return Colors.nissan(alpha)
                 if cl == 'proto c':
-                    return rgb([0, 86, 198], bg=True)  # blue
+                    return rgb([0, 86, 198], a=alpha)  # blue
                 if cl == 'gte-gt3':
-                    return Colors.gte()
+                    return Colors.gte(alpha)
                 if cl == 'gt4':
-                    return Colors.ktm()
+                    return Colors.ktm(alpha)
                 if cl == 'suv':
-                    return rgb([10, 10, 10], bg=True)
+                    return rgb([10, 10, 10], a=alpha)
                 if cl == 'hypercars':
-                    return rgb([240, 212, 0], bg=True)
+                    return rgb([240, 212, 0], a=alpha)
                 if cl == 'hypercars r':
-                    return Colors.lamborghini()
+                    return Colors.lamborghini(alpha)
                 if cl == 'supercars':
-                    return rgb([97, 168, 219], bg=True)
+                    return rgb([97, 168, 219], a=alpha)
                 if cl == 'sportscars':
-                    return Colors.mercedes()
+                    return Colors.mercedes(alpha)
                 if cl == 'vintage supercars':
-                    return rgb([214, 112, 157], bg=True)
+                    return rgb([214, 112, 157], a=alpha)
                 if cl == 'vintage gt':
-                    return rgb([98, 203, 236], bg=True)
+                    return rgb([98, 203, 236], a=alpha)
                 if cl == 'vintage touring':
-                    return Colors.alfa()
+                    return Colors.alfa(alpha)
                 if cl == 'small sports':
-                    return Colors.nissan()
+                    return Colors.nissan(alpha)
                 if cl == '90s touring':
-                    return Colors.gte()
+                    return Colors.gte(alpha)
 
         if car.find("ferrari") >= 0:
-            return Colors.ferrari()
+            return Colors.ferrari(alpha)
         if car.find("sauber") >= 0:
-            return rgb([8, 110, 250], bg=True)
+            return rgb([8, 110, 250], a=alpha)
         if car.find("india") >= 0:
-            return rgb([245, 172, 192], bg=True)
+            return rgb([245, 172, 192], a=alpha)
         if car.find("williams") >= 0:
-            return rgb([250, 250, 250], bg=True)
+            return rgb([250, 250, 250], a=alpha)
         if car.find("haas") >= 0:
-            return rgb([230, 27, 36], bg=True)
+            return rgb([230, 27, 36], a=alpha)
         if car.find("bull") >= 0:
-            return rgb([0, 34, 80], bg=True)
+            return rgb([0, 34, 80], a=alpha)
         if car.find("toro") >= 0:
-            return rgb([36, 55, 90], bg=True)
+            return rgb([36, 55, 90], a=alpha)
         if car.find("bmw") >= 0:
-            return Colors.bmw()
+            return Colors.bmw(alpha)
         if car.find("ford") >= 0 or car.find("shelby") >= 0:
-            return Colors.ford()
+            return Colors.ford(alpha)
         if car.find("merc") >= 0:
-            return Colors.mercedes()
+            return Colors.mercedes(alpha)
         if car.find("mazda") >= 0:
-            return rgb([191, 191, 191], bg=True)
+            return rgb([191, 191, 191], a=alpha)
         if car.find("ruf") >= 0 or car.find("corvette") >= 0 or car.find("lotus") >= 0 or car.find("porsche") >= 0:
-            return Colors.corvette()
+            return Colors.corvette(alpha)
         if car.find("lamborghini") >= 0 or car.find("pagani") >= 0:
-            return Colors.lamborghini()
+            return Colors.lamborghini(alpha)
         if car.find("ktm") >= 0 or car.find("mclaren") >= 0:
-            return Colors.ktm()
+            return Colors.ktm(alpha)
         if car.find("nissan") >= 0:
-            return Colors.nissan()
+            return Colors.nissan(alpha)
         if car.find("alfa") >= 0:
-            return Colors.alfa()
+            return Colors.alfa(alpha)
         if car.find("honda") >= 0:
-            return rgb([214, 112, 157], bg=True)
+            return rgb([214, 112, 157], a=alpha)
         if car.find("renault") >= 0:
-            return rgb([255, 204, 49], bg=True)
+            return rgb([255, 204, 49], a=alpha)
         # if car.find("glickenhaus")>=0 or car.find("p4-5_2011")>=0:
         #	return rgb([0, 0, 0], bg = True)
         if Colors.general_theme == 2:
-            return Colors.white(bg=True)
-        return Colors.theme(bg=True)
+            return Colors.white(a=alpha)
+        if default is not None:
+            return default
+        return Colors.theme(a=alpha)
 
 
 class Label:
@@ -1087,7 +1230,7 @@ class Label:
     def __init__(self, window, text=""):
         self.text = text
         self.debug = False
-        self.animating_txt = False
+        self.is_hiding = True
         self.label = ac.addLabel(window, self.text)
         self.params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
                        "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
@@ -1212,7 +1355,7 @@ class Label:
         self.f_params["r"].setValue(color[0])
         self.f_params["g"].setValue(color[1])
         self.f_params["b"].setValue(color[2])
-        if init:
+        if init or not animated:
             self.o_params["r"].setValue(color[0])
             self.o_params["g"].setValue(color[1])
             self.o_params["b"].setValue(color[2])
@@ -1265,14 +1408,11 @@ class Label:
         self.f_params["br"].setValue(color[0])
         self.f_params["bg"].setValue(color[1])
         self.f_params["bb"].setValue(color[2])
-        if init:
+        if init or not animated:
             self.o_params["br"].setValue(color[0])
             self.o_params["bg"].setValue(color[1])
             self.o_params["bb"].setValue(color[2])
         if not animated:
-            #self.o_params["br"].setValue(color[0])
-            #self.o_params["bg"].setValue(color[1])
-            #self.o_params["bb"].setValue(color[2])
             self.params["br"].setValue(color[0])
             self.params["bg"].setValue(color[1])
             self.params["bb"].setValue(color[2])
@@ -1282,20 +1422,14 @@ class Label:
             else:
                 ac.setBackgroundOpacity(self.label, 0)
         if len(color) > 3:
-            if self.debug:
-                self.debug_param("setBgOpacity---" + str(color[3]), "o")
             self.setBgOpacity(color[3], animated, init)
         return self
 
     def setBgOpacity(self, opacity, animated=False, init=False):
-        if init:
+        if init or not animated:
             self.o_params["o"].setValue(opacity)
         if self.isVisible.value:
-            #self.o_params["o"].setValue(opacity)
             self.f_params["o"].setValue(opacity)
-            if self.debug:
-                #self.debug_param("Alpha", "a")
-                self.debug_param("setBgOpacity---", "o")
         if not animated:
             if self.isVisible.value:
                 self.params["o"].setValue(opacity)
@@ -1312,12 +1446,13 @@ class Label:
         return self
 
     def setVisible(self, value):
-        if self.debug:
-            #self.debug_param("Alpha", "a")
-            self.debug_param("setVisible---", "o")
         self.visible = value
         self.isVisible.setValue(bool(value))
         ac.setVisible(self.label, value)
+        if self.isVisible.value:
+            self.is_hiding = False
+        else:
+            self.is_hiding = True
         return self
 
     def setAnimationSpeed(self, param, value):
@@ -1331,8 +1466,12 @@ class Label:
         return self
 
     def hide(self):
-        self.animating_txt = False
-        self.setBgOpacity(0, True)
+        self.is_hiding = True
+        if self.o_params["o"].value == 0:
+            self.hideText()
+        else:
+            #self.setBgOpacity(0, True)
+            self.f_params["o"].setValue(0)
         return self
 
     def slide_up(self):
@@ -1340,12 +1479,12 @@ class Label:
         return self
 
     def show(self):
-        self.animating_txt = False
-        self.f_params["o"].setValue(self.o_params["o"].value)
-        if self.debug:
-            #self.debug_param("Alpha", "a")
-            self.debug_param("show---ooo", "o")
-        self.f_params["a"].setValue(self.o_params["a"].value)
+        self.is_hiding = False
+        if self.o_params["o"].value == 0:
+            self.showText()
+        else:
+            self.f_params["o"].setValue(self.o_params["o"].value)
+            self.f_params["a"].setValue(self.o_params["a"].value)
         return self
 
     def slide_down(self):
@@ -1353,12 +1492,12 @@ class Label:
         return self
 
     def showText(self):
-        self.animating_txt = True
+        self.is_hiding = False
         self.f_params["a"].setValue(self.o_params["a"].value)
         return self
 
     def hideText(self):
-        self.animating_txt = True
+        self.is_hiding = True
         self.f_params["a"].setValue(0)
         return self
 
@@ -1385,8 +1524,8 @@ class Label:
 
     def animate(self):
         if self.debug:
-            #self.debug_param("Alpha", "a")
-            self.debug_param("Opacity", "o")
+            self.debug_param("A", "a")
+            self.debug_param("O", "o")
         # adjust size +1
         self.adjustParam("w").adjustParam("h")
         # adjust position +3
@@ -1417,7 +1556,7 @@ class Label:
             ac.setBackgroundOpacity(self.label, self.params["o"].value)
             if self.params["o"].value >= 0.4:
                 self.isTextVisible.setValue(True)
-            else:
+            elif self.is_hiding:
                 self.isTextVisible.setValue(False)
             if self.isTextVisible.hasChanged():
                 if self.isTextVisible.value:
@@ -1428,6 +1567,9 @@ class Label:
                                     self.params["a"].value)
                 else:
                     ac.setText(self.label, "")
+                    if self.debug:
+                        self.debug_param("setText", "a")
+                        self.debug_param("setText", "o")
 
         alpha_changed = self.params["a"].hasChanged()
         if self.params["r"].hasChanged() or self.params["g"].hasChanged() or self.params["b"].hasChanged() or alpha_changed:
@@ -1438,15 +1580,30 @@ class Label:
                             self.params["a"].value)
 
         if opacity_changed or alpha_changed:
-            #if self.params["o"].value > 0 or (self.animating_txt and self.params["a"].value > 0):
-            if self.params["o"].value > 0 or (self.o_params["o"].value == 0 and self.params["a"].value > 0):
+            if self.is_hiding and opacity_changed and self.params["o"].value == 0:
+                self.setVisible(0)
+            elif self.is_hiding and alpha_changed and self.params["a"].value == 0:
+                self.setVisible(0)
+            elif not self.is_hiding:
                 self.setVisible(1)
+            '''
+            else:
+                if self.debug:
+                    self.debug_param("setVisible Nothing", "a")
+                    self.debug_param("setVisible Nothing", "o")
+            #if self.params["o"].value > 0 or (self.animating_txt and self.params["a"].value > 0): and not self.animating_txt
+            if not self.is_hiding and self.params["o"].value > 0:
+                self.setVisible(1)
+            elif not self.is_hiding and self.params["a"].value > 0:# self.params["o"].value == 0 == self.o_params["o"].value and
+                self.setVisible(1)
+                #elif self.o_params["o"].value == 0 and self.params["a"].value > 0:
+                #    self.setVisible(1)
             else:
                 self.setVisible(0)
                 if self.debug:
                     self.debug_param("A", "a")
                     self.debug_param("O", "o")
-
+            '''
 # -#####################################################################################################################################-#
 
 

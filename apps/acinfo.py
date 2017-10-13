@@ -139,7 +139,7 @@ class ACInfo:
             self.info_position_lead.set(background=Colors.info_position_first_bg(),
                                         color=Colors.info_position_first_txt(),
                                         animated=True, init=True)
-            if Colors.themed_info == 1 and self.timing_visible.value == 1:
+            if self.timing_visible.value == 1:
                 self.lbl_driver_name.set(background=Colors.info_driver_single_bg(), animated=True, init=True)
                 self.lbl_driver_name_text.set(color=Colors.info_driver_single_txt(), animated=True, init=True)
             else:
@@ -147,12 +147,12 @@ class ACInfo:
                 self.lbl_driver_name_text.set(color=Colors.info_driver_txt(), animated=True, init=True)
             self.lbl_fastest_split.set(color=Colors.info_fastest_time_txt(), animated=True, init=True)
             self.lbl_timing_text.set(color=Colors.info_timing_txt(), animated=True, init=True)
-            # self.info_position.setBgColor(Colors.theme(bg = True))
+
             if Colors.border_direction == 1:
-                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value),
+                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()),
                                     opacity=1, animated=True, init=True)
             else:
-                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value),
+                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()),
                                     opacity=Colors.border_opacity(), animated=True, init=True)
             if self.pos > 1:
                 self.info_position.set(background=Colors.info_position_bg(),
@@ -195,10 +195,10 @@ class ACInfo:
             self.info_position_lead.set(w=self.row_height.value, h=self.row_height.value,
                                         x=width - self.row_height.value, y=self.rowHeight,
                                         font_size=font_size2)
-            if Colors.border_direction == 1:
-                self.lbl_border.set(w=4, h=self.rowHeight, x=self.rowHeight + 4, y=0)
-            else:
-                self.lbl_border.set(w=width, h=2, x=0, y=self.rowHeight)
+        if Colors.border_direction == 1:
+            self.lbl_border.set(w=4, h=self.rowHeight, x=self.rowHeight + 4, y=0)
+        else:
+            self.lbl_border.set(w=self.rowHeight * 7, h=2, x=0, y=self.rowHeight)
 
     def format_name(self, name, max_name_length):
         space = name.find(" ")
@@ -351,7 +351,7 @@ class ACInfo:
         else:
             self.lbl_timing.show()
             self.lbl_timing_text.showText()
-        if Colors.themed_info == 1 and self.driver_name_visible.value == 1:
+        if self.driver_name_visible.value == 1:
             if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
@@ -362,7 +362,7 @@ class ACInfo:
                 self.lbl_driver_name_text.hideText()
                 self.lbl_border.hide()
             else:
-                if Colors.themed_info == 1 and self.timing_visible.value == 1:
+                if self.timing_visible.value == 1:
                     self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg()).show()
                     self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt()).showText()
                 else:
@@ -389,8 +389,8 @@ class ACInfo:
             self.lbl_timing_text.showText()
 
         self.nameOffsetValue.setValue(self.nameOffset)
-        if Colors.themed_info == 1 and self.driver_name_visible.value == 1:
-            if Colors.themed_info == 1 and self.timing_visible.value == 1:
+        if self.driver_name_visible.value == 1:
+            if self.timing_visible.value == 1:
                 self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg())
                 self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt())
             else:
@@ -401,7 +401,6 @@ class ACInfo:
             else:
                 self.lbl_border.show()
 
-        #if self.driver_name_visible.hasChanged():
         if self.driver_name_visible.value == 0:
             self.lbl_driver_name.hide()
             self.lbl_driver_name_text.hideText()
@@ -492,12 +491,12 @@ class ACInfo:
         current_vehicle_changed = self.currentVehicle.hasChanged()
         if self.colorsByClass.hasChanged() and not self.fastestLapBorderActive:
             car = ac.getCarName(self.currentVehicle.value)
-            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value))
+            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()))
 
         if current_vehicle_changed or (self.fastestLapBorderActive and session_time_left < self.visible_end - 2000):
             self.fastestLapBorderActive = False
             car = ac.getCarName(self.currentVehicle.value)
-            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value))
+            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()))
 
         if sim_info_status == 2:
             # LIVE
@@ -761,7 +760,7 @@ class ACInfo:
                 if self.race_fastest_lap.hasChanged() and self.race_fastest_lap.value > 0:
                     self.fastestLapBorderActive = True
                     car = ac.getCarName(self.race_fastest_lap_driver.value)
-                    self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value))
+                    self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()))
                     self.visible_end = session_time_left - 10000
                     self.driver_name_visible.setValue(1)
                     self.driver_name_text.setValue(ac.getDriverName(self.race_fastest_lap_driver.value))
