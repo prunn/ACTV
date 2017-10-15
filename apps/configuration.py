@@ -1,5 +1,5 @@
 import ac
-import acsys
+#import acsys
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
 from .util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
@@ -31,7 +31,7 @@ class Configuration:
         self.listen_active = True
         Colors.load_themes()
 
-        self.window = Window(name="ACTV Config", icon=True, width=251, height=600, texture="").setBgOpacity(0.6)
+        self.window = Window(name="ACTV Config", icon=True, width=251, height=580, texture="").setBgOpacity(0.6)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -95,16 +95,6 @@ class Configuration:
             .setFontSize(12).setAlign("left") \
             .setVisible(1)
 
-        # Font
-        y += 70
-        self.spin_font = ac.addSpinner(self.window.app, "Font :")
-        ac.setRange(self.spin_font, 0, len(Font.fonts) - 1)
-        ac.setPosition(self.spin_font, 20, y)
-        ac.setValue(self.spin_font, Font.current)
-        ac.addOnValueChangeListener(self.spin_font, self.on_spin_font_changed)
-        self.lbl_font = Label(self.window.app, "Default").setSize(120, 26).setPos(148, y - 28).setFontSize(
-            12).setAlign("left").setVisible(1)
-
         y += 52
         self.chk_invalidated = ac.addCheckBox(self.window.app, "")
         ac.setPosition(self.chk_invalidated, 20, y)
@@ -135,6 +125,17 @@ class Configuration:
         self.lbl_general_theme = Label(self.window.app, "Dark").setSize(120, 26).setPos(152, y - 28).setFontSize(
             12).setAlign("left").setVisible(0)
 
+        # Font
+        y += 70
+        self.spin_font = ac.addSpinner(self.window.app, "Font :")
+        ac.setRange(self.spin_font, 0, len(Font.fonts) - 1)
+        ac.setPosition(self.spin_font, 20, y)
+        ac.setValue(self.spin_font, Font.current)
+        ac.addOnValueChangeListener(self.spin_font, self.on_spin_font_changed)
+        ac.setVisible(self.spin_font, 0)
+        self.lbl_font = Label(self.window.app, "Default").setSize(120, 26).setPos(148, y - 28).setFontSize(
+            12).setAlign("left").setVisible(0)
+
         y += 70
         self.spin_theme_red = ac.addSpinner(self.window.app, "Red")
         ac.setRange(self.spin_theme_red, 0, 255)
@@ -157,7 +158,7 @@ class Configuration:
         ac.setVisible(self.spin_theme_green, 0)
         ac.setVisible(self.spin_theme_blue, 0)
 
-        y += 70
+        #y += 70
         self.spin_tower_lap = ac.addSpinner(self.window.app, "Tower Highlight :")
         ac.setRange(self.spin_tower_lap, 0, 1)
         ac.setPosition(self.spin_tower_lap, 20, y)
@@ -380,10 +381,10 @@ class Configuration:
             ac.setVisible(self.spin_theme_blue, 0)
             ac.setVisible(self.spin_tower_lap, 0)
             ac.setVisible(self.spin_colors_by, 0)
-            ac.setVisible(self.spin_font, 1)
+            ac.setVisible(self.spin_font, 0)
             self.lbl_tower_lap.setVisible(0)
             self.lbl_colors_by.setVisible(0)
-            self.lbl_font.setVisible(1)
+            self.lbl_font.setVisible(0)
             ac.setVisible(self.spin_general_theme, 0)
             self.lbl_general_theme.setVisible(0)
             ac.setVisible(self.spin_border_direction, 0)
@@ -408,12 +409,12 @@ class Configuration:
             ac.setVisible(self.spin_theme_red, 1)
             ac.setVisible(self.spin_theme_green, 1)
             ac.setVisible(self.spin_theme_blue, 1)
-            ac.setVisible(self.spin_tower_lap, 1)
+            ac.setVisible(self.spin_tower_lap, 0)
             ac.setVisible(self.spin_colors_by, 1)
-            ac.setVisible(self.spin_font, 0)
-            self.lbl_tower_lap.setVisible(1)
+            ac.setVisible(self.spin_font, 1)
+            self.lbl_tower_lap.setVisible(0)
             self.lbl_colors_by.setVisible(1)
-            self.lbl_font.setVisible(0)
+            self.lbl_font.setVisible(1)
             ac.setVisible(self.spin_general_theme, 1)
             self.lbl_general_theme.setVisible(1)
             ac.setVisible(self.spin_border_direction, 1)

@@ -159,6 +159,7 @@ class Colors:
         'tower_pit_txt': rgb([0, 0, 0]),
         'tower_pit_highlight_txt': rgb([0, 0, 0]),
         'tower_stint_lap_invalid_txt': rgb([0, 0, 0]),
+        'tower_p2p_txt': rgb([0, 0, 0]),
         'tower_p2p_cooling': rgb([0, 0, 0]),
         'tower_p2p_active': rgb([0, 0, 0]),
         'tower_border_default_bg': rgb([0, 0, 0]),
@@ -648,6 +649,14 @@ class Colors:
         if Colors.general_theme > 3:
             return Colors.get_color_for_key('tower_stint_lap_invalid_txt')
         return rgb([191, 0, 0])
+
+    @staticmethod
+    def tower_p2p_txt():
+        if Colors.general_theme > 3:
+            return Colors.get_color_for_key('tower_p2p_txt')
+        if Colors.general_theme == 1:
+            return rgb([12, 12, 12])
+        return rgb([225, 225, 225])
 
     @staticmethod
     def tower_p2p_cooling():
@@ -1232,12 +1241,12 @@ class Label:
         self.debug = False
         self.is_hiding = True
         self.label = ac.addLabel(window, self.text)
-        self.params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
-                       "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
-        self.f_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
-                         "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
-        self.o_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(1), "bg": Value(1),
-                         "bb": Value(1), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
+        self.params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(0), "bg": Value(0),
+                       "bb": Value(0), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
+        self.f_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(0), "bg": Value(0),
+                         "bb": Value(0), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(0)}
+        self.o_params = {"x": Value(0), "y": Value(0), "w": Value(0), "h": Value(0), "br": Value(0), "bg": Value(0),
+                         "bb": Value(0), "o": Value(0), "r": Value(1), "g": Value(1), "b": Value(1), "a": Value(1)}
         self.multiplier = {"x": Value(3), "y": Value(3), "w": Value(1), "h": Value(1), "br": Value(0.06),
                            "bg": Value(0.06), "bb": Value(0.06), "o": Value(0.02), "r": Value(0.06), "g": Value(0.06),
                            "b": Value(0.06), "a": Value(0.02)}
@@ -1405,6 +1414,10 @@ class Label:
         return self
 
     def setBgColor(self, color, animated=False, init=False):
+        if self.debug:
+            #self.debug_param("A", "a")
+            #self.debug_param("O", "o")
+            self.debug_param("setBgColor" + str(color[0]), "br")
         self.f_params["br"].setValue(color[0])
         self.f_params["bg"].setValue(color[1])
         self.f_params["bb"].setValue(color[2])
@@ -1524,8 +1537,11 @@ class Label:
 
     def animate(self):
         if self.debug:
-            self.debug_param("A", "a")
-            self.debug_param("O", "o")
+            #self.debug_param("A", "a")
+            #self.debug_param("O", "o")
+            self.debug_param("br", "br")
+            #self.debug_param("g", "g")
+            #self.debug_param("b", "b")
         # adjust size +1
         self.adjustParam("w").adjustParam("h")
         # adjust position +3
@@ -1572,7 +1588,8 @@ class Label:
                         self.debug_param("setText", "o")
 
         alpha_changed = self.params["a"].hasChanged()
-        if self.params["r"].hasChanged() or self.params["g"].hasChanged() or self.params["b"].hasChanged() or alpha_changed:
+        if self.params["r"].hasChanged() or self.params["g"].hasChanged() \
+                or self.params["b"].hasChanged() or alpha_changed:
             ac.setFontColor(self.label,
                             self.params["r"].value,
                             self.params["g"].value,
@@ -1580,30 +1597,12 @@ class Label:
                             self.params["a"].value)
 
         if opacity_changed or alpha_changed:
-            if self.is_hiding and opacity_changed and self.params["o"].value == 0:
-                self.setVisible(0)
-            elif self.is_hiding and alpha_changed and self.params["a"].value == 0:
+            if self.is_hiding and ((opacity_changed and self.params["o"].value == 0)
+                                   or (alpha_changed and self.params["a"].value == 0)):
                 self.setVisible(0)
             elif not self.is_hiding:
                 self.setVisible(1)
-            '''
-            else:
-                if self.debug:
-                    self.debug_param("setVisible Nothing", "a")
-                    self.debug_param("setVisible Nothing", "o")
-            #if self.params["o"].value > 0 or (self.animating_txt and self.params["a"].value > 0): and not self.animating_txt
-            if not self.is_hiding and self.params["o"].value > 0:
-                self.setVisible(1)
-            elif not self.is_hiding and self.params["a"].value > 0:# self.params["o"].value == 0 == self.o_params["o"].value and
-                self.setVisible(1)
-                #elif self.o_params["o"].value == 0 and self.params["a"].value > 0:
-                #    self.setVisible(1)
-            else:
-                self.setVisible(0)
-                if self.debug:
-                    self.debug_param("A", "a")
-                    self.debug_param("O", "o")
-            '''
+
 # -#####################################################################################################################################-#
 
 
