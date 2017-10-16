@@ -11,6 +11,7 @@ class Driver:
         self.identifier = identifier
         self.rowHeight = Configuration.ui_row_height
         self.race = False
+        self.race_start_position = -1
         self.cur_theme = Value(-1)
         self.font = Value(0)
         self.theme = Value(-1)
@@ -250,15 +251,16 @@ class Driver:
                                       animated=True, init=True)
                     self.lbl_time.set(color=Colors.tower_time_even_txt(),
                                       animated=True, init=True)
-
-        if self.row_height.hasChanged() or self.font.hasChanged() or self.border_direction.hasChanged():
+        font_changed = self.font.hasChanged()
+        if self.row_height.hasChanged() or font_changed or self.border_direction.hasChanged():
             # Fonts
-            self.lbl_name.update_font()
-            self.lbl_time.update_font()
-            if not self.isLapLabel:
-                self.lbl_position.update_font()
-                self.lbl_pit.update_font()
-                self.lbl_p2p.update_font()
+            if font_changed:
+                self.lbl_name.update_font()
+                self.lbl_time.update_font()
+                if not self.isLapLabel:
+                    self.lbl_position.update_font()
+                    self.lbl_pit.update_font()
+                    self.lbl_p2p.update_font()
             # UI
             #self.position.setValue(-1)
             if self.isLapLabel:
@@ -495,10 +497,14 @@ class Driver:
             self.lbl_time.change_font_if_needed().setText("PIT").setColor(Colors.tower_time_pit_txt(), animated=True, init=True)
         elif time == "DNF":
             self.lbl_time.change_font_if_needed().setText("DNF").setColor(Colors.tower_time_retired_txt(), animated=True, init=True)
-        elif time == "UP":
-            self.lbl_time.change_font_if_needed(1).setText(u"\u25B2").setColor(Colors.tower_time_place_gain_txt(), animated=True, init=True)
-        elif time == "DOWN":
-            self.lbl_time.change_font_if_needed(1).setText(u"\u25BC").setColor(Colors.tower_time_place_lost_txt(), animated=True, init=True)
+        elif isinstance(time, str) and time.find("UP") >= 0:
+            self.lbl_time.change_font_if_needed(1).setText(time.replace("UP", u"\u25B2")).setColor(Colors.tower_time_place_gain_txt(), animated=True, init=True)
+            #self.lbl_time.change_font_if_needed(1).setText(u"\u25B2").setColor(Colors.tower_time_place_gain_txt(), animated=True, init=True)
+        elif isinstance(time, str) and time.find("DOWN") >= 0:
+            self.lbl_time.change_font_if_needed(1).setText(time.replace("DOWN", u"\u25BC")).setColor(Colors.tower_time_place_lost_txt(), animated=True, init=True)
+            #self.lbl_time.change_font_if_needed(1).setText(u"\u25BC").setColor(Colors.tower_time_place_lost_txt(), animated=True, init=True)
+        elif isinstance(time, str) and time.find("NEUTRAL") >= 0:
+            self.lbl_time.change_font_if_needed(1).setText(time.replace("NEUTRAL", u"\u25C0")).setColor(normal_color, animated=True, init=True)
         elif self.identifier == identifier or time == 600000:
             self.lbl_time.change_font_if_needed().setText("").setColor(normal_color, animated=True, init=True)
         elif lap:

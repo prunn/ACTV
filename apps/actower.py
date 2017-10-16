@@ -20,6 +20,7 @@ class ACTower:
         self.drivers = []
         self.stintLabels = []
         self.standings = []
+        self.standings_start_race = []
         self.standings_replay = []
         self.numCars = Value()
         self.session = Value(-1)
@@ -53,6 +54,7 @@ class ACTower:
         self.curLapCount = Value()
         self.stint_visible_end = 0
         self.title_mode_visible_end = 0
+        self.title_mode_visible_end_replay = 0
         self.curDriverLaps = []
         self.lastLapInvalidated = -1
         self.minlap_stint = 5
@@ -333,6 +335,25 @@ class ACTower:
             return driver.race_gaps[-1].sector
         return 0
 
+    def generate_standings_pos_before_race(self):
+        # Generate standings from -0.5 to 0.5 for the start of race
+        standings = []
+        for i in range(self.numCars.value):
+            bl = ac.getCarState(i, acsys.CS.LapCount) + ac.getCarState(i, acsys.CS.NormalizedSplinePosition)
+            if bl < 0.5:
+                bl += 0.5  # 0.1 = 0.6
+            elif 0.5 <= bl < 1:
+                bl -= 0.5  # 0.9 = 0.4
+            standings.append((i, bl))
+        self.standings_start_race = sorted(standings, key=lambda student: student[1], reverse=True)
+
+    def get_standings_pos_before_race(self, driver):
+        # Get position
+        p = [i for i, v in enumerate(self.standings_start_race) if v[0] == driver.identifier]
+        if len(p) > 0:
+            return p[0]
+        return ac.getCarRealTimeLeaderboardPosition(driver.identifier)
+
     def sector_is_valid(self, new_sector, driver):
         if len(driver.race_gaps) == 0 and self.sessionTimeLeft < 1760000 and not bool(ac.isCarInPitline(driver.identifier)) and not bool(ac.isCarInPit(driver.identifier)):
             return True
@@ -356,28 +377,38 @@ class ACTower:
         self.driver_shown = 0
         nb_drivers_alive = 0
         cur_driver = 0
+        standings_before_race_generated = False
         cur_driver_pos = 0
         first_driver = 0
         first_driver_sector = 0
         cur_sector = 0
         best_pos = 0
-        if not replay:  # Would need real timing
-            if self.race_mode.hasChanged():
-                if self.race_mode.value == 0:
-                    self.lbl_title_mode.setText("Auto")
-                elif self.race_mode.value == 1:
-                    self.lbl_title_mode.setText("Gaps")
-                elif self.race_mode.value == 2:
-                    self.lbl_title_mode.setText("Intervals")
-                elif self.race_mode.value == 3:
-                    self.lbl_title_mode.setText("Compact")
-                else:
-                    self.lbl_title_mode.setText("Off")
-                self.title_mode_visible_end = self.sessionTimeLeft - 6000
-            if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
-                self.lbl_title_mode.show()
+        # if not replay:  Would need real timing
+        if self.race_mode.hasChanged():
+            if self.race_mode.value == 0:
+                self.lbl_title_mode.setText("Auto")
+            elif self.race_mode.value == 1:
+                self.lbl_title_mode.setText("Gaps")
+            elif self.race_mode.value == 2:
+                self.lbl_title_mode.setText("Intervals")
+            elif self.race_mode.value == 3:
+                self.lbl_title_mode.setText("Compact")
+            elif self.race_mode.value == 4:
+                self.lbl_title_mode.setText("Progress")
             else:
-                self.lbl_title_mode.hide()
+                self.lbl_title_mode.setText("Off")
+            if replay:
+                self.title_mode_visible_end_replay = time.time() + 6
+            else:
+                self.title_mode_visible_end = self.sessionTimeLeft - 6000
+        if not replay and self.title_mode_visible_end != 0 \
+                and self.title_mode_visible_end < self.sessionTimeLeft:
+            self.lbl_title_mode.show()
+        elif replay and self.title_mode_visible_end_replay != 0 \
+                and self.title_mode_visible_end_replay > time.time():
+            self.lbl_title_mode.show()
+        else:
+            self.lbl_title_mode.hide()
         for driver in self.drivers:
             driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
             if driver.isAlive.value:
@@ -400,6 +431,11 @@ class ACTower:
                 self.numCarsToFinish = 0
                 driver.race_standings_sector.setValue(0)
                 driver.race_current_sector.setValue(0)
+                #Starting positions
+                if not standings_before_race_generated:
+                    self.generate_standings_pos_before_race()
+                    standings_before_race_generated = True
+                driver.race_start_position = self.get_standings_pos_before_race(driver)
             else:
                 bl = driver.raceProgress
                 if bl >= 0.06 and not driver.finished.value and self.sector_is_valid(bl, driver):
@@ -506,7 +542,15 @@ class ACTower:
                             else:
                                 driver.set_time_race_battle(gap, first_driver.identifier, False, self.race_mode.value == 2)
                                 driver.show(needs_tlc)
-                        elif Configuration.race_mode == 4:  # Timing off
+                        elif Configuration.race_mode == 4:  # Progress
+                            if driver.race_start_position > p[0]:
+                                driver.set_time_race_battle("{0} UP".format(driver.race_start_position - p[0]), -1)
+                            elif driver.race_start_position < p[0]:
+                                driver.set_time_race_battle("{0} DOWN".format(p[0] - driver.race_start_position), -1)
+                            else:
+                                driver.set_time_race_battle("0 NEUTRAL", -1)
+                            driver.show(needs_tlc)
+                        elif Configuration.race_mode == 5:  # Timing off
                             driver.show(needs_tlc, compact=True)
                         else:
                             driver.show(needs_tlc=needs_tlc, compact=True)
@@ -593,20 +637,25 @@ class ACTower:
         first_driver_sector = 0
         cur_sector = 0
         best_pos = 0
-        '''
         if self.race_mode.hasChanged():
             if self.race_mode.value == 0:
                 self.lbl_title_mode.setText("Auto")
             elif self.race_mode.value == 1:
-                self.lbl_title_mode.setText("Full-Gaps")
+                self.lbl_title_mode.setText("Gaps")
+            elif self.race_mode.value == 2:
+                self.lbl_title_mode.setText("Intervals")
+            elif self.race_mode.value == 3:
+                self.lbl_title_mode.setText("Compact")
+            elif self.race_mode.value == 4:
+                self.lbl_title_mode.setText("Progress")
             else:
-                self.lbl_title_mode.setText("Full")
-            self.title_mode_visible_end = self.sessionTimeLeft - 6000
-        if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
+                self.lbl_title_mode.setText("Off")
+            self.title_mode_visible_end_replay = time.time() + 6
+        if self.title_mode_visible_end_replay != 0 and self.title_mode_visible_end_replay > time.time():
             self.lbl_title_mode.show()
         else:
             self.lbl_title_mode.hide()
-        '''
+
         for driver in self.drivers:
             p = [i for i, v in enumerate(self.standings_replay) if v[0] == driver.identifier]
             if len(p) > 0 and p[0] == 0:
@@ -876,9 +925,11 @@ class ACTower:
                 self.window.showTitle(False)
 
     def on_update(self, sim_info):
+        '''
         t_info = time.time()
         t_update_drivers = 0
         t_update_drivers_end = 0
+        '''
         self.session.setValue(sim_info.graphics.session)
         sim_info_status = sim_info.graphics.status
         if (sim_info_status != 1 and sim_info_status != 3 and self.sessionTimeLeft != 0 and self.sessionTimeLeft != -1 and self.sessionTimeLeft + 100 < sim_info.graphics.sessionTimeLeft) or sim_info_status == 0:
@@ -1063,9 +1114,14 @@ class ACTower:
                 for l in self.stintLabels:
                     l.hide()
                 '''
+        else:
+            # Paused-OFF
+            self.lbl_title_mode.hide()
+        '''
         t_tower = time.time()
         if t_tower - t_info > 0.006:
             t_total = t_tower - t_info
             t_total_d = t_update_drivers_end - t_update_drivers
             # ac.console(str(t_total) + " u_diver:" + str(t_total_d))
             # ac.log(str(t_total) + " u_diver:" + str(t_total_d))
+        '''

@@ -1,5 +1,4 @@
 import ac
-#import acsys
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
 from .util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
@@ -42,7 +41,7 @@ class Configuration:
 
         y = 50
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
-        ac.setRange(self.spin_race_mode, 0, 4)
+        ac.setRange(self.spin_race_mode, 0, 5)
         ac.setPosition(self.spin_race_mode, 20, y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.on_spin_race_mode_changed)
@@ -330,6 +329,8 @@ class Configuration:
             self.lbl_race_mode.setText("Intervals")
         elif self.__class__.race_mode == 3:
             self.lbl_race_mode.setText("Compact")
+        elif self.__class__.race_mode == 4:
+            self.lbl_race_mode.setText("Progress")
         else:
             self.lbl_race_mode.setText("Off")
         # Tower color
@@ -464,7 +465,7 @@ class Configuration:
 
     def hotkey_pressed(self):
         if self.session.value == 2:
-            if self.__class__.race_mode >= 4:
+            if self.__class__.race_mode >= 5:
                 self.__class__.race_mode = 0
             else:
                 self.__class__.race_mode += 1
