@@ -4,7 +4,7 @@ import os.path
 import json
 import ctypes
 from .util.func import rgb
-from .util.classes import Window, Label, Value, Colors, Font
+from .util.classes import Window, Label, Value, POINT, Colors, Font
 from .configuration import Configuration
 
 
@@ -200,6 +200,22 @@ class ACTimer:
                 label.animate()
 
     def manage_window(self):
+        pt = POINT()
+        result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+        win_x = self.window.getPos().x
+        win_y = self.window.getPos().y
+        if win_x > 0:
+            self.window.last_x = win_x
+            self.window.last_y = win_y
+        else:
+            self.window.setLastPos()
+            win_x = self.window.getPos().x
+            win_y = self.window.getPos().y
+        if result and win_x < pt.x < win_x + self.window.width and win_y < pt.y < win_y + self.window.height:
+            self.cursor.setValue(True)
+        else:
+            self.cursor.setValue(False)
+
         if self.session.hasChanged():
             self.numberOfLapsTimedRace = -1
             self.hasExtraLap = -1
@@ -213,6 +229,7 @@ class ACTimer:
                 self.lbl_session_title.setText("Q")
             else:
                 self.lbl_session_title.setText("P")
+        if self.cursor.hasChanged():
             self.window.setBgOpacity(0).border(0)
 
     def on_update(self, sim_info):

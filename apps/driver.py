@@ -564,7 +564,7 @@ class Driver:
                 else:
                     self.lbl_name.setY(self.final_y)
                     self.lbl_position.setY(self.final_y)
-                    self.lbl_pit.setY(self.final_y + 2)
+                    self.lbl_pit.setY(self.final_y + 3)
                     self.lbl_p2p.setY(self.final_y + 5)
                 self.lbl_time.setY(self.final_y)
                 if Colors.border_direction == 1:
@@ -579,7 +579,7 @@ class Driver:
                 self.lbl_position.setText(str(self.position.value))
                 self.lbl_name.setY(self.final_y, True)
                 self.lbl_position.setY(self.final_y, True)
-                self.lbl_pit.setY(self.final_y + 2, True)
+                self.lbl_pit.setY(self.final_y + 3, True)
                 self.lbl_p2p.setY(self.final_y + 5, True)
 
             self.lbl_time.setY(self.final_y, True)

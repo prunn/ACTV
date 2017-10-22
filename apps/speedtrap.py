@@ -14,8 +14,10 @@ class ACSpeedTrap:
         self.SpeedKMH = Value(0)
         self.SpeedMPH = Value(0)
         self.topSpeed = Value(0)
+        self.topSpeedMPH = Value(0)
         self.theme = Value(-1)
         self.userTopSpeed = Value(0)
+        self.userTopSpeedMPH = Value(0)
         self.curTopSpeed = Value(0)
         self.curTopSpeedMPH = Value(0)
         self.current_vehicle = Value(0)
@@ -75,22 +77,22 @@ class ACSpeedTrap:
             # Size
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
             self.lbl_title.set(w=self.row_height.value*4.7, h=self.row_height.value,
-                               x=self.row_height.value*2.3,
+                               x=self.row_height.value*3,
                                font_size=font_size)
-            self.lbl_time.set(w=self.row_height.value * 7, h=self.row_height.value,
+            self.lbl_time.set(w=self.row_height.value * 7.7, h=self.row_height.value,
                               x=0, y=self.row_height.value,
                               font_size=font_size)
-            self.lbl_border.set(w=self.row_height.value * 7, y=self.row_height.value*2 + 1)
-            #v1.4
-            #self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
+            self.lbl_border.set(w=self.row_height.value * 7.7, y=self.row_height.value*2 + 1)
+            # v1.4
+            # self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
             #                   font_size=font_size)
-            #self.lbl_time.set(w=self.row_height.value * 6.6, h=self.row_height.value,
+            # self.lbl_time.set(w=self.row_height.value * 6.6, h=self.row_height.value,
             #                  x=self.row_height.value, font_size=font_size)
-            #v1
-            #self.lbl_time.set(w=self.row_height.value * 4.8, h=self.row_height.value,
+            # v1
+            # self.lbl_time.set(w=self.row_height.value * 4.8, h=self.row_height.value,
             #                  x=self.row_height.value, font_size=font_size)
-            #self.lbl_border.set(w=self.row_height.value * 5.8, y=self.row_height.value + 1)
-            #self.lbl_border.set(w=self.row_height.value * 7.6, y=self.row_height.value + 1)
+            # self.lbl_border.set(w=self.row_height.value * 5.8, y=self.row_height.value + 1)
+            # self.lbl_border.set(w=self.row_height.value * 7.6, y=self.row_height.value + 1)
 
     def check_mph(self):
         cfg_path = None
@@ -159,21 +161,34 @@ class ACSpeedTrap:
             self.carsCount = ac.getCarsCount()
         for x in range(self.carsCount):
             c = ac.getCarState(x, acsys.CS.SpeedKMH)
+            if self.useMPH:
+                mph = ac.getCarState(x, acsys.CS.SpeedMPH)
             if x == 0 and self.topSpeed.value < c:
                 self.userTopSpeed.setValue(c)
+                if self.useMPH:
+                    self.userTopSpeedMPH.setValue(mph)
                 self.userTrap = ac.getCarState(x, acsys.CS.NormalizedSplinePosition)
 
-            if self.relyOnEveryOne and self.topSpeed.value < c and ac.getCarState(x, acsys.CS.DriveTrainSpeed) > c / 10 and ac.getCarState(x, acsys.CS.Gas) > 0.9 and ac.getCarState(x, acsys.CS.RPM) > 2000:
+            if self.relyOnEveryOne and self.topSpeed.value < c \
+                    and ac.getCarState(x, acsys.CS.DriveTrainSpeed) > c / 10 \
+                    and ac.getCarState(x, acsys.CS.Gas) > 0.9 \
+                    and ac.getCarState(x, acsys.CS.RPM) > 2000:
                 if c > 500:
                     self.relyOnEveryOne = False
                     self.topSpeed.setValue(self.userTopSpeed.value)
+                    if self.useMPH:
+                        self.topSpeedMPH.setValue(self.userTopSpeedMPH.value)
                     self.trap = self.userTrap
                     # ac.console("stop rely")
                 else:
                     self.topSpeed.setValue(c)
+                    if self.useMPH:
+                        self.topSpeedMPH.setValue(mph)
                     self.trap = ac.getCarState(x, acsys.CS.NormalizedSplinePosition)
             elif not self.relyOnEveryOne and x == 0 and self.topSpeed.value < c:
                 self.topSpeed.setValue(c)
+                if self.useMPH:
+                    self.topSpeedMPH.setValue(mph)
                 self.trap = ac.getCarState(x, acsys.CS.NormalizedSplinePosition)
 
         self.current_vehicle.setValue(ac.getFocusedCar())
@@ -195,16 +210,19 @@ class ACSpeedTrap:
                          bool(ac.isCarInPit(self.current_vehicle.value)))
             if is_in_pit:
                 self.lastLapInvalidated = lap_count
-            if self.curTopSpeed.value < 500 and self.lastLapShown < lap_count and self.lastLapInvalidated < lap_count and self.widget_visible.value == 0 and self.trap < ac.getCarState(self.current_vehicle.value, acsys.CS.NormalizedSplinePosition) + 0.06 and self.trap > ac.getCarState(self.current_vehicle.value, acsys.CS.NormalizedSplinePosition) - 0.08 and self.SpeedKMH.value < self.SpeedKMH.old - 0.6:
+            if self.curTopSpeed.value < 500 and self.lastLapShown < lap_count \
+                    and self.lastLapInvalidated < lap_count and self.widget_visible.value == 0 \
+                    and ac.getCarState(self.current_vehicle.value,
+                                       acsys.CS.NormalizedSplinePosition) + 0.06 > self.trap > ac.getCarState(
+                        self.current_vehicle.value, acsys.CS.NormalizedSplinePosition) - 0.08 \
+                    and self.SpeedKMH.value < self.SpeedKMH.old - 0.6:
                 # show and set timer 0.3
                 self.lastLapShown = lap_count
                 self.widget_visible.setValue(1)
                 if self.useMPH:
-                    self.speedText = "%.1f mph" % self.curTopSpeedMPH.value
+                    self.speedText = "%.1f mph | %.1f kph" % (self.curTopSpeedMPH.value, self.topSpeedMPH.value)
                 else:
-                    self.speedText = "%.1f | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
-                    #self.speedText = "%.1f | %.1f kph" % (self.curTopSpeed.value, self.userTopSpeed.value)
-                    # ac.console(str(self.userTopSpeed.value))  # Want to show
+                    self.speedText = "%.1f kph | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
                 self.time_end = session_time_left - 14000
                 self.lbl_title.setText("Speedtrap", hidden=True)
                 self.lbl_time.setText(self.speedText, hidden=True)
@@ -218,7 +236,7 @@ class ACSpeedTrap:
                 if self.widget_visible.hasChanged():
                     self.curTopSpeed.setValue(0)
                     self.curTopSpeedMPH.setValue(0)
-            #else:
+            # else:
             #   self.reset_visibility()
         elif sim_info_status == 1:
             self.reset_visibility()

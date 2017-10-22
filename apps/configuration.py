@@ -114,9 +114,9 @@ class Configuration:
 
         # --------- Theme RGB ----------
         y = 50
-        # General theme : 0-Dark 1-white 2-electric
+        # General theme : 0-Dark 1-white
         self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
-        ac.setRange(self.spin_general_theme, 0, 3 + len(Colors.theme_files))
+        ac.setRange(self.spin_general_theme, 0, 1 + len(Colors.theme_files))
         ac.setPosition(self.spin_general_theme, 20, y)
         ac.setValue(self.spin_general_theme, 0)
         ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
@@ -255,12 +255,9 @@ class Configuration:
 
         if Colors.theme_ini != '' and len(Colors.theme_files):
             #  Get_theme number from ini
-            #for k, t in Colors.theme_files:
             for i in range(0, len(Colors.theme_files)):
-                #ac.log("theme_files " + str(k) + ":"+str(t))
-                #ac.console("theme_files " + str(k) + ":"+str(t))
                 if Colors.theme_files[i]['file'] == Colors.theme_ini:
-                    Colors.general_theme = i + 4
+                    Colors.general_theme = i + 2
                     break
         else:
             general_theme = self.cfg.get("SETTINGS", "general_theme", "int")
@@ -350,12 +347,8 @@ class Configuration:
             self.lbl_general_theme.setText("Dark")
         elif Colors.general_theme == 1:
             self.lbl_general_theme.setText("Light")
-        elif Colors.general_theme == 2:
-            self.lbl_general_theme.setText("Electric")
-        elif Colors.general_theme == 3:
-            self.lbl_general_theme.setText("Digital")
         else:
-            self.lbl_general_theme.setText(str(Colors.theme_files[Colors.general_theme-4]['name']))
+            self.lbl_general_theme.setText(str(Colors.theme_files[Colors.general_theme-2]['name']))
         # Border direction
         if Colors.border_direction == 0:
             self.lbl_border_direction.setText("Horizontal")
@@ -501,8 +494,8 @@ class Configuration:
     @staticmethod
     def on_spin_general_theme_changed(value):
         Colors.general_theme = value
-        if Colors.general_theme > 3:
-            Colors.theme_ini = Colors.theme_files[Colors.general_theme-4]['file']
+        if Colors.general_theme > 2:
+            Colors.theme_ini = Colors.theme_files[Colors.general_theme-2]['file']
         else:
             Colors.theme_ini = ''
         Configuration.configChanged = True
