@@ -298,6 +298,22 @@ class Driver:
             else:
                 self.lbl_border.set(w=self.rowHeight * 2.8, h=2,
                                     x=0, y=self.final_y + self.rowHeight - 2)
+            if self.isDisplayed:
+                self.final_y = self.num_pos * self.rowHeight
+                if self.isLapLabel:
+                    self.lbl_name.setPos(0, self.final_y, True)
+                else:
+                    self.lbl_position.setText(str(self.position.value))
+                    self.lbl_name.setY(self.final_y, True)
+                    self.lbl_position.setY(self.final_y, True)
+                    self.lbl_pit.setY(self.final_y + 3, True)
+                    self.lbl_p2p.setY(self.final_y + 5, True)
+
+                self.lbl_time.setY(self.final_y, True)
+                if Colors.border_direction == 1:
+                    self.lbl_border.setY(self.final_y, True)
+                else:
+                    self.lbl_border.setY(self.final_y + self.rowHeight - 2, True)
 
     def show(self, needs_tlc=True, race=True, compact=False):
         self.race = race

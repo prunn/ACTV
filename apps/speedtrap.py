@@ -23,9 +23,9 @@ class ACSpeedTrap:
         self.current_vehicle = Value(0)
         self.session = Value(-1)
         self.font = Value(0)
-        self.speedText = ""
         self.trap = 0
         self.userTrap = 0
+        self.time_start = 0
         self.time_end = 0
         self.carsCount = 0
         self.relyOnEveryOne = True
@@ -33,7 +33,7 @@ class ACSpeedTrap:
         self.cursor = Value(False)
         self.row_height = Value(-1)
         self.window = Window(name="ACTV Speed Trap", width=250, height=60)
-        self.lbl_title = Label(self.window.app, "")\
+        self.lbl_title = Label(self.window.app, "Speedtrap")\
             .set(w=36, h=36,
                  x=0, y=0,
                  font_size=26,
@@ -77,12 +77,12 @@ class ACSpeedTrap:
             # Size
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
             self.lbl_title.set(w=self.row_height.value*4.7, h=self.row_height.value,
-                               x=self.row_height.value*3,
+                               x=self.row_height.value*3.1,
                                font_size=font_size)
-            self.lbl_time.set(w=self.row_height.value * 7.7, h=self.row_height.value,
+            self.lbl_time.set(w=self.row_height.value * 7.8, h=self.row_height.value,
                               x=0, y=self.row_height.value,
                               font_size=font_size)
-            self.lbl_border.set(w=self.row_height.value * 7.7, y=self.row_height.value*2 + 1)
+            self.lbl_border.set(w=self.row_height.value * 7.8, y=self.row_height.value*2 + 1)
             # v1.4
             # self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
             #                   font_size=font_size)
@@ -141,6 +141,7 @@ class ACSpeedTrap:
         if session_changed:
             self.reset_visibility()
             self.time_end = 0
+            self.time_start = 0
         if self.cursor.hasChanged() or session_changed:
             if self.cursor.value:
                 self.window.setBgOpacity(0.4).border(0)
@@ -210,28 +211,30 @@ class ACSpeedTrap:
                          bool(ac.isCarInPit(self.current_vehicle.value)))
             if is_in_pit:
                 self.lastLapInvalidated = lap_count
+            position = ac.getCarState(self.current_vehicle.value, acsys.CS.NormalizedSplinePosition)
             if self.curTopSpeed.value < 500 and self.lastLapShown < lap_count \
                     and self.lastLapInvalidated < lap_count and self.widget_visible.value == 0 \
-                    and ac.getCarState(self.current_vehicle.value,
-                                       acsys.CS.NormalizedSplinePosition) + 0.06 > self.trap > ac.getCarState(
-                        self.current_vehicle.value, acsys.CS.NormalizedSplinePosition) - 0.08 \
+                    and position + 0.06 > self.trap > position - 0.08 \
                     and self.SpeedKMH.value < self.SpeedKMH.old - 0.6:
                 # show and set timer 0.3
                 self.lastLapShown = lap_count
                 self.widget_visible.setValue(1)
                 if self.useMPH:
-                    self.speedText = "%.1f mph | %.1f kph" % (self.curTopSpeedMPH.value, self.topSpeedMPH.value)
+                    speed_text = "%.1f mph | %.1f mph" % (self.curTopSpeedMPH.value, self.topSpeedMPH.value)
                 else:
-                    self.speedText = "%.1f kph | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
-                self.time_end = session_time_left - 14000
-                self.lbl_title.setText("Speedtrap", hidden=True)
-                self.lbl_time.setText(self.speedText, hidden=True)
+                    speed_text = "%.1f kph | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
+                self.time_start = session_time_left - 600
+                self.time_end = session_time_left - 14600
+                self.lbl_time.setText(speed_text, hidden=True)
+                self.lbl_title.set(y=self.row_height.value).show()
+            elif self.time_start != 0 and self.time_start > session_time_left > self.time_end:
+                self.lbl_title.set(y=0, animated=True).show()
                 self.lbl_time.show()
                 self.lbl_border.show()
-                self.lbl_title.show()
             elif self.time_end == 0 or session_time_left < self.time_end:
                 self.reset_visibility()
                 self.widget_visible.setValue(0)
+                self.time_start = 0
                 self.time_end = 0
                 if self.widget_visible.hasChanged():
                     self.curTopSpeed.setValue(0)

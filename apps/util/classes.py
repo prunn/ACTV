@@ -114,7 +114,7 @@ class POINT(ctypes.Structure):
 
 
 class Colors:
-    general_theme = 1  # 0 : Dark, 1 : Light, 2 : Electric, 3 : Digital
+    general_theme = 1  # 0 : Dark
     border_direction = 1  # 0 : Horizontal, 1 : Vertical
     theme_red = -1
     theme_green = -1
@@ -208,11 +208,11 @@ class Colors:
 
     @staticmethod
     def theme(bg=False, reload=False, a=1):
-        #if reload and Colors.general_theme == 1:
+        #if reload and Colors.general_theme == 0:
         #    Colors.export_theme_values()
         # get theme color
         if reload or Colors.theme_red < 0 or Colors.theme_green < 0 or Colors.theme_blue < 0:
-            if reload and Colors.general_theme > 1:
+            if reload and Colors.general_theme > 0:
                 Colors.load_theme_values()
 
             cfg = Config("apps/python/prunn/", "config.ini")
@@ -243,22 +243,22 @@ class Colors:
     @staticmethod
     def loadCarClasses():
         Colors.dataCarsClasses = []
-        loadedCars = []
+        loaded_cars = []
         for i in range(ac.getCarsCount()):
-            carName = ac.getCarName(i)
-            if not carName in loadedCars:
-                loadedCars.append(carName)
-                filePath = "content/cars/" + carName + "/ui/ui_car.json"
+            car_name = ac.getCarName(i)
+            if car_name not in loaded_cars:
+                loaded_cars.append(car_name)
+                file_path = "content/cars/" + car_name + "/ui/ui_car.json"
                 try:
-                    if os.path.exists(filePath):
-                        with open(filePath) as data_file:
+                    if os.path.exists(file_path):
+                        with open(file_path) as data_file:
                             d = data_file.read().replace('\r', '').replace('\n', '').replace('\t', '')
                             data = json.loads(d)
                             for t in data["tags"]:
                                 if t[0] == "#":
-                                    Colors.dataCarsClasses.append({"c": carName, "t": t[1:].lower()})
+                                    Colors.dataCarsClasses.append({"c": car_name, "t": t[1:].lower()})
                 except:
-                    Log.w("Error color:" + filePath)
+                    Log.w("Error color:" + file_path)
         Colors.carsClassesLoaded = True
 
     @staticmethod
@@ -286,8 +286,8 @@ class Colors:
 
     @staticmethod
     def load_theme_values():
-        if Colors.general_theme > 1 and len(Colors.theme_files):
-            cfg = Config(Colors.theme_files[Colors.general_theme - 2]['file'], "")
+        if Colors.general_theme > 0 and len(Colors.theme_files):
+            cfg = Config(Colors.theme_files[Colors.general_theme - 1]['file'], "")
             for key in Colors.current_theme:
                 value = cfg.get('THEME', key, 'string')
                 if value != -1:
@@ -309,11 +309,15 @@ class Colors:
     @staticmethod
     def get_color_for_key(key):
         if key in Colors.current_theme:
+            if Colors.current_theme[key] == "theme":
+                return Colors.theme()
             return Colors.current_theme[key]
         return rgb([0, 0, 0])
 
     @staticmethod
     def txt_to_rgba(value):
+        if value == "theme":
+            return "theme"
         value_type = value.find(",")
         if value_type > 0:
             array_values = value.split(',')
@@ -333,7 +337,6 @@ class Colors:
             ac.log('Error loading color :' + str(value))
         value = value.lstrip('#')
         if len(value) == 6:
-            test = 1
             # HEX RGB
             lv = len(value)
             array_values = tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
@@ -365,31 +368,25 @@ class Colors:
 
     @staticmethod
     def tower_time_odd_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_odd_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_time_even_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_even_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_time_highlight_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_highlight_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_time_qualification_highlight_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_qualification_highlight_txt')
         if Colors.theme_highlight == 1:
             return Colors.green()
@@ -397,572 +394,475 @@ class Colors:
 
     @staticmethod
     def tower_time_retired_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_retired_txt')
         return rgb([168, 48, 48])
 
     @staticmethod
     def tower_time_best_lap_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_best_lap_txt')
         return rgb([135, 31, 144])
 
     @staticmethod
     def tower_time_last_lap_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_last_lap_txt')
         return rgb([191, 0, 0])
 
     @staticmethod
     def tower_time_place_gain_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_place_gain_txt')
-        if Colors.general_theme == 1:
-            return rgb([12, 152, 11])
         return rgb([32, 192, 31])
 
     @staticmethod
     def tower_time_place_lost_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_place_lost_txt')
         return rgb([191, 0, 0])
 
     @staticmethod
     def tower_time_pit_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_pit_txt')
-        if Colors.general_theme == 1:
-            return Colors.red()
         return Colors.yellow()
 
     @staticmethod
     def tower_driver_odd_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_odd_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.opacity_tower_odd())
-        return rgb([32, 32, 32], a=Colors.opacity_tower_odd())
+        return rgb([32, 32, 32], a=0.72)
 
     @staticmethod
     def tower_driver_odd_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_odd_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_driver_even_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_even_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.opacity_tower_even())
-        return rgb([32, 32, 32], a=Colors.opacity_tower_even())
+        return rgb([32, 32, 32], a=0.58)
 
     @staticmethod
     def tower_driver_even_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_even_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_driver_highlight_odd_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_highlight_odd_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.opacity_tower_odd())
-        return rgb([32, 32, 32], a=Colors.opacity_tower_odd())
+        return rgb([32, 32, 32], a=0.72)
 
     @staticmethod
     def tower_driver_highlight_even_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_highlight_even_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.opacity_tower_even())
-        return rgb([32, 32, 32], a=Colors.opacity_tower_even())
+        return rgb([32, 32, 32], a=0.58)
 
     @staticmethod
     def tower_driver_highlight_odd_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_highlight_odd_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_driver_highlight_even_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_highlight_even_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_driver_stopped_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_stopped_txt')
-        if Colors.general_theme == 1:
-            return Colors.red()
         return Colors.yellow()
 
     @staticmethod
     def tower_driver_retired_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_retired_bg')
-        if Colors.general_theme == 1:
-            return Colors.black()
         return Colors.white()
 
     @staticmethod
     def tower_driver_retired_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_retired_txt')
         return rgb([112, 112, 112])
 
     @staticmethod
     def tower_position_first_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_first_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], a=0.62)
         return rgb([192, 0, 0], a=0.62)
 
     @staticmethod
     def tower_position_first_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_first_txt')
         return Colors.white()
 
     @staticmethod
     def tower_position_odd_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_odd_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], a=0.62)
         return rgb([12, 12, 12], a=0.62)
 
     @staticmethod
     def tower_position_odd_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_odd_txt')
         return Colors.white()
 
     @staticmethod
     def tower_position_even_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_even_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], a=0.58)
         return rgb([0, 0, 0], a=0.58)
 
     @staticmethod
     def tower_position_even_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_even_txt')
         return Colors.white()
 
     @staticmethod
     def tower_position_highlight_odd_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_highlight_odd_bg')
         return rgb([255, 255, 255], a=0.96)
 
     @staticmethod
     def tower_position_highlight_even_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_highlight_even_bg')
         return rgb([255, 255, 255], a=0.96)
 
     @staticmethod
     def tower_position_highlight_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_highlight_txt')
         return Colors.red()
 
     @staticmethod
     def tower_position_highlight_odd_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_highlight_odd_txt')
         return Colors.red()
 
     @staticmethod
     def tower_position_highlight_even_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_highlight_even_txt')
         return Colors.red()
 
     @staticmethod
     def tower_position_retired_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_retired_txt')
         return rgb([112, 112, 112])
 
     @staticmethod
     def tower_pit_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_pit_txt')
-        if Colors.general_theme == 1:
-            return rgb([12, 12, 12])
         return rgb([225, 225, 225])
 
     @staticmethod
     def tower_pit_highlight_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_pit_highlight_txt')
         return rgb([191, 0, 0])
 
     @staticmethod
     def tower_stint_lap_invalid_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_stint_lap_invalid_txt')
         return rgb([191, 0, 0])
 
     @staticmethod
     def tower_p2p_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_p2p_txt')
-        if Colors.general_theme == 1:
-            return rgb([12, 12, 12])
         return rgb([225, 225, 225])
 
     @staticmethod
     def tower_p2p_cooling():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_p2p_cooling')
-        if Colors.general_theme == 1:
-            return Colors.orange()
         return Colors.yellow()
 
     @staticmethod
     def tower_p2p_active():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_p2p_active')
         return Colors.red()
 
     @staticmethod
     def tower_border_default_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_border_default_bg')
         return Colors.theme(a=Colors.border_opacity())
 
     # --------------- Tower --------------
     @staticmethod
     def tower_mode_title_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_mode_title_bg')
         return Colors.theme()
 
     @staticmethod
     def tower_mode_title_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_mode_title_txt')
         return Colors.white()
 
     @staticmethod
     def tower_stint_title_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_stint_title_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=0.8)
         return rgb([20, 20, 20], a=0.8)
 
     @staticmethod
     def tower_stint_title_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_stint_title_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def tower_stint_tire_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_stint_tire_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=0.58)
         return rgb([32, 32, 32], a=0.58)
 
     @staticmethod
     def tower_stint_tire_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_stint_tire_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     # --------------- Info ---------------
     @staticmethod
     def info_driver_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_driver_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=0.8)
+        #return Colors.theme()
         return rgb([20, 20, 20], a=0.8)
 
     @staticmethod
     def info_driver_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_driver_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def info_driver_single_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_driver_single_bg')
-        return Colors.theme()
+        return rgb([20, 20, 20], a=0.8)
 
     @staticmethod
     def info_driver_single_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_driver_single_txt')
         return Colors.white()
 
     @staticmethod
     def info_split_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_split_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def info_split_positive_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_split_positive_txt')
-        if Colors.general_theme == 1:
-            return Colors.red()
         return Colors.yellow()
 
     @staticmethod
     def info_split_negative_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_split_negative_txt')
         return Colors.green()
 
     @staticmethod
     def info_timing_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_timing_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.background_opacity())
-        return rgb([55, 55, 55], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=0.64)
 
     @staticmethod
     def info_timing_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_timing_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def info_position_first_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_position_first_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110])
         return rgb([192, 0, 0])
 
     @staticmethod
     def info_position_first_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_position_first_txt')
         return Colors.white()
 
     @staticmethod
     def info_position_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_position_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110])
         return rgb([112, 112, 112])
 
     @staticmethod
     def info_position_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_position_txt')
         return Colors.white()
 
     @staticmethod
     def info_fastest_time_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_fastest_time_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def info_border_default_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('info_border_default_bg')
-        return Colors.theme(a=Colors.border_opacity())
+        return Colors.theme(a=0.64)
 
     # --------------- Timer ---------------
     @staticmethod
     def timer_title_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_title_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], a=Colors.background_opacity())
-        return Colors.theme(a=Colors.background_opacity())
+        return Colors.theme(a=0.64)
 
     @staticmethod
     def timer_title_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_title_txt')
         return Colors.white()
 
     @staticmethod
     def timer_title_yellow_flag_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_title_yellow_flag_bg')
         return Colors.black()
 
     @staticmethod
     def timer_title_yellow_flag_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_title_yellow_flag_txt')
         return Colors.white()
 
     @staticmethod
     def timer_time_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_time_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.background_opacity())
-        return rgb([55, 55, 55], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=0.64)
 
     @staticmethod
     def timer_time_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_time_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def timer_time_yellow_flag_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_time_yellow_flag_bg')
         return Colors.yellow(True)
 
     @staticmethod
     def timer_time_yellow_flag_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_time_yellow_flag_txt')
         return Colors.black_txt()
 
     @staticmethod
     def timer_pit_window_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_pit_window_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.background_opacity())
-        return rgb([55, 55, 55], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=0.64)
 
     @staticmethod
     def timer_pit_window_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_pit_window_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def timer_pit_window_open_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_pit_window_open_txt')
         return Colors.green()
 
     @staticmethod
     def timer_pit_window_done_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_pit_window_done_txt')
         return rgb([172, 172, 172])
 
     @staticmethod
     def timer_pit_window_close_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_pit_window_close_txt')
         return Colors.red()
 
     @staticmethod
     def timer_border_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_border_bg')
         return Colors.theme(a=Colors.border_opacity())
 
     @staticmethod
     def timer_border_yellow_flag_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('timer_border_yellow_flag_bg')
         return Colors.black()
 
     # --------------- Speedtrap ---------------
     @staticmethod
     def speedtrap_title_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('speedtrap_title_bg')
-        if Colors.general_theme == 1:
-            return rgb([5, 48, 110], a=Colors.background_opacity())
-        return Colors.theme(a=Colors.background_opacity())
+        return Colors.theme(a=0.64)
 
     @staticmethod
     def speedtrap_title_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('speedtrap_title_txt')
         return Colors.white()
 
     @staticmethod
     def speedtrap_speed_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('speedtrap_speed_bg')
-        if Colors.general_theme == 1:
-            return rgb([255, 255, 255], a=Colors.background_opacity())
-        return rgb([55, 55, 55], a=Colors.background_opacity())
+        return rgb([55, 55, 55], a=0.64)
 
     @staticmethod
     def speedtrap_speed_txt():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('speedtrap_speed_txt')
-        if Colors.general_theme == 1:
-            return Colors.black_txt()
         return Colors.white()
 
     @staticmethod
     def speedtrap_border_bg():
-        if Colors.general_theme > 1:
+        if Colors.general_theme > 0:
             return Colors.get_color_for_key('speedtrap_border_bg')
-        return Colors.theme(a=Colors.border_opacity())
+        return Colors.theme(a=0.64)
 
     # ----------------------------------------
 
     @staticmethod
-    def opacity_tower_odd():
-        if Colors.general_theme == 1:
-            return 0.9
-        return 0.72
-
-    @staticmethod
-    def opacity_tower_even():
-        if Colors.general_theme == 1:
-            return 0.84
-        return 0.58
-
-    @staticmethod
-    def background_opacity():
-        if Colors.general_theme == 1:
-            return 0.9
-        return 0.64
-
-    @staticmethod
     def border_opacity():
-        if Colors.general_theme == 1:
-            return 0.85
         return 0.7
 
     @staticmethod
@@ -1019,14 +919,10 @@ class Colors:
 
     @staticmethod
     def green(bg=False):
-        if Colors.general_theme == 1:
-            return rgb([12, 152, 11], bg=bg)
         return rgb([32, 192, 31], bg=bg)
 
     @staticmethod
     def yellow_time(bg=False):
-        if Colors.general_theme == 1:
-            return Colors.red(bg)
         return Colors.yellow(bg)
 
     @staticmethod
@@ -1687,14 +1583,14 @@ class Config:
 
 
 class Font:
-    # Name, offset, support
-    fonts = [["Segoe UI", 0, None],
-             ["Noto Sans", 0, None],
-             ["Open Sans", 0, 0],
-             ["Yantramanav", 5, 0],
-             ["Signika Negative", 3, 0],
-             ["Strait", 7, 0],
-             ["Overlock", 4, 1]]
+    # Name, offset, support, width
+    fonts = [["Segoe UI", 0, None, 1.2],
+             ["Noto Sans", 0, None, 1.26],
+             ["Open Sans", 0, 0, 1.26],
+             ["Yantramanav", 5, 0, 1.1],
+             ["Signika Negative", 3, 0, 1.2],
+             ["Strait", 7, 0, 1.1],
+             ["Overlock", 4, 1, 1.1]]
     init = []
     current = 0
 
@@ -1715,6 +1611,10 @@ class Font:
         return Font.fonts[Font.current][0]
 
     @staticmethod
+    def get_font_width_adjust():
+        return Font.fonts[Font.current][3]
+
+    @staticmethod
     def get_support_font():
         if Font.fonts[Font.current][2] is not None:
             return Font.fonts[Font.fonts[Font.current][2]][0]
@@ -1723,6 +1623,24 @@ class Font:
     @staticmethod
     def get_font_offset():
         return Font.fonts[Font.current][1]
+
+    @staticmethod
+    def get_text_dimensions(text, height):
+        class SIZE(ctypes.Structure):
+            _fields_ = [("cx", ctypes.c_long), ("cy", ctypes.c_long)]
+        points = Font.get_font_size(height+Font.get_font_offset())
+
+        hdc = ctypes.windll.user32.GetDC(0)
+        hfont = ctypes.windll.gdi32.CreateFontA(32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Font.get_font())
+        hfont_old = ctypes.windll.gdi32.SelectObject(hdc, hfont)
+        size = SIZE(0, 0)
+        ctypes.windll.gdi32.GetTextExtentPoint32A(hdc, text, len(text), ctypes.byref(size))
+        ctypes.windll.gdi32.SelectObject(hdc, hfont_old)
+        ctypes.windll.gdi32.DeleteObject(hfont)
+        #ac.console("Name :" + str(points) + " : " + str(Font.get_font()) + " : " + str(size.cx) + " = " + str(size.cx / 32 * points * Font.get_font_width_adjust()))
+        #ac.log("Name :" + str(points) + " : " + str(Font.get_font()) + " : " + str(size.cx) + " = " + str(size.cx / 32 * points * Font.get_font_width_adjust()))
+        #return size.cx
+        return size.cx / 32 * points * Font.get_font_width_adjust()
 
     @staticmethod
     def get_font_size(row_height):

@@ -15,6 +15,7 @@ class ACInfo:
         self.raceStarted = False
         self.carsCount = 0
         self.pos = 0
+        self.driver_name_width = 0
         self.lbl_position_text = Value("")
         self.currentVehicle = Value(-1)
         self.row_height = Value(-1)
@@ -32,7 +33,6 @@ class ACInfo:
         self.visible_end = 0
         self.lastLapTime = 0
         self.nameOffset = 0
-        self.nameOffsetValue = Value(0)
         self.lapCanBeInvalidated = True
         self.fastestLapBorderActive = False
         self.firstLapStarted = False
@@ -56,6 +56,10 @@ class ACInfo:
         self.window = Window(name="ACTV Info", width=332, height=self.rowHeight * 2)
 
         self.lbl_driver_name = Label(self.window.app, "")\
+            .set(w=284, h=self.rowHeight,
+                 x=0, y=0,
+                 opacity=0.8)
+        self.lbl_fl_driver_name = Label(self.window.app, "")\
             .set(w=284, h=self.rowHeight,
                  x=0, y=0,
                  opacity=0.8)
@@ -149,6 +153,7 @@ class ACInfo:
                 self.lbl_driver_name_text.set(color=Colors.info_driver_txt(), animated=True, init=True)
             self.lbl_fastest_split.set(color=Colors.info_fastest_time_txt(), animated=True, init=True)
             self.lbl_timing_text.set(color=Colors.info_timing_txt(), animated=True, init=True)
+            self.lbl_fl_driver_name.set(background=Colors.info_driver_bg(), animated=True, init=True)
 
             if Colors.border_direction == 1:
                 self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()),
@@ -178,11 +183,12 @@ class ACInfo:
             font_size = Font.get_font_size(self.rowHeight+font_offset)
             font_size2 = Font.get_font_size(self.row_height.value+font_offset)
             width = self.rowHeight * 7
-            self.lbl_driver_name.set(w=width, h=self.rowHeight)
+            self.lbl_driver_name.set(h=self.rowHeight)  # w=width,
+            self.lbl_fl_driver_name.set(h=self.rowHeight)  # w=width,
             self.lbl_driver_name_text.set(w=width, h=self.rowHeight,
                                           font_size=font_size)
-            self.lbl_timing.set(w=width, h=self.row_height.value,
-                                y=self.rowHeight)
+            self.lbl_timing.set(h=self.row_height.value,
+                                y=self.rowHeight)#w=width,
             self.lbl_timing_text.set(w=width * 0.6, h=self.row_height.value,
                                      x=self.rowHeight * 14 / 36, y=self.rowHeight,
                                      font_size=font_size2)
@@ -295,6 +301,7 @@ class ACInfo:
 
     def animate(self):
         self.lbl_driver_name.animate()
+        self.lbl_fl_driver_name.animate()
         self.lbl_driver_name_text.animate()
         self.lbl_timing.animate()
         self.lbl_timing_text.animate()
@@ -307,6 +314,7 @@ class ACInfo:
     def reset_visibility(self):
         self.driver_name_visible.setValue(0)
         self.lbl_driver_name.hide()
+        self.lbl_fl_driver_name.hide()
         self.lbl_driver_name_text.hide()
         self.lbl_border.hide()
         self.driver_name_visible_fin.setValue(0)
@@ -321,6 +329,19 @@ class ACInfo:
         self.driver_name_text.setValue("")
 
     def set_width_and_name(self):
+        name = self.format_name(self.driver_name_text.value, 17)
+        width = (self.rowHeight * 49 / 36) + Font.get_text_dimensions(name, self.rowHeight)
+        if width < self.rowHeight * 7.2:
+            width = self.rowHeight * 7.2
+
+        '''
+        width = Font.get_text_dimensions("WWWWWWWWW", self.rowHeight)
+        ac.console("Name length:" + str(width))
+        ac.log("Name length:" + str(width))
+        width1 = self.get_text_dimensions(name,
+                                          Font.get_font_size(self.rowHeight+Font.get_font_offset()),
+                                          Font.get_font())
+
         width = self.rowHeight * 8.6
         name = self.format_name(self.driver_name_text.value, 17)
         if len(name) <= 13:
@@ -331,9 +352,12 @@ class ACInfo:
             width = self.rowHeight * 7.8
         elif len(name) <= 16:
             width = self.rowHeight * 8.2
-
-        self.lbl_driver_name.set(w=width, animated=True)
-        self.lbl_driver_name_text.set(w=width, animated=True)
+        
+        '''
+        self.driver_name_width = width
+        #self.lbl_driver_name.set(w=width, animated=True)
+        self.lbl_fl_driver_name.set(w=width, animated=True)
+        #self.lbl_driver_name_text.set(w=width, animated=True)
         if Colors.border_direction != 1:
             self.lbl_border.set(w=width, animated=True)
         self.lbl_timing.set(w=width, animated=True)
@@ -341,13 +365,21 @@ class ACInfo:
         self.info_position_lead.set(x=width - self.row_height.value, animated=True)
         self.lbl_driver_name_text.setText(name)
 
+    def set_driver_name_width(self):
+        if Colors.border_direction == 1 and self.info_position.isVisible.value == 1:
+            self.lbl_driver_name.set(x=self.rowHeight + 8, w=self.driver_name_width-(self.rowHeight + 8), animated=True)
+        elif self.info_position.isVisible.value == 1:
+            self.lbl_driver_name.set(x=self.rowHeight + 4, w=self.driver_name_width-(self.rowHeight + 4), animated=True)
+        else:
+            self.lbl_driver_name.set(x=0, w=self.driver_name_width, animated=True)
+
     def visibility_qualif(self):
         self.lbl_fastest_split.hide()
+        self.lbl_fl_driver_name.hide()
         #if self.driver_name_visible.value == 1 and self.lbl_driver_name.isVisible.value == 0:
         #    self.driver_name_visible.changed = True
 
         self.driver_name_visible_fin.setValue(self.driver_name_visible.value)
-        self.nameOffsetValue.setValue(self.nameOffset)
         if self.timing_visible.value == 0:
             self.lbl_timing.hide()
             self.lbl_timing_text.hide()
@@ -365,21 +397,22 @@ class ACInfo:
                 self.lbl_driver_name_text.hide()
                 self.lbl_border.hide()
             else:
-                if self.timing_visible.value == 1:
-                    self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg()).show()
-                    self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt()).show()
-                else:
-                    self.lbl_driver_name.set(background=Colors.info_driver_bg()).show()
-                    self.lbl_driver_name_text.set(color=Colors.info_driver_txt()).show()
+                #if self.timing_visible.value == 1:
+                self.lbl_driver_name.set(background=Colors.info_driver_bg()).show()
+                self.lbl_driver_name_text.set(color=Colors.info_driver_txt()).show()
+                #else: never happening
+                #    self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg()).show()
+                #    self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt()).show()
                 if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                     self.lbl_border.hide()
                 else:
                     self.lbl_border.show()
-
+        if Colors.border_direction == 1 and self.info_position.isVisible.value == 1:
+            self.nameOffset += 4
+        self.lbl_driver_name_text.set(x=self.nameOffset, animated=True)
         if self.driver_name_text.hasChanged():
             self.set_width_and_name()
-        if self.nameOffsetValue.hasChanged():
-            self.lbl_driver_name_text.setX(self.nameOffsetValue.value, True)
+        self.set_driver_name_width()
         if self.timing_text.hasChanged():
             self.lbl_timing_text.setText(self.timing_text.value)
 
@@ -391,14 +424,13 @@ class ACInfo:
             self.lbl_timing.show()
             self.lbl_timing_text.show()
 
-        self.nameOffsetValue.setValue(self.nameOffset)
         if self.driver_name_visible.value == 1:
             if self.timing_visible.value == 1:
+                #self.lbl_driver_name.set(background=Colors.info_driver_bg())
+                self.lbl_driver_name_text.set(color=Colors.info_driver_txt())
+            else:
                 self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg())
                 self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt())
-            else:
-                self.lbl_driver_name.set(background=Colors.info_driver_bg())
-                self.lbl_driver_name_text.set(color=Colors.info_driver_txt())
             if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
@@ -406,20 +438,27 @@ class ACInfo:
 
         if self.driver_name_visible.value == 0:
             self.lbl_driver_name.hide()
+            self.lbl_fl_driver_name.hide()
             self.lbl_driver_name_text.hide()
             self.lbl_border.hide()
         else:
-            self.lbl_driver_name.show()
+            if self.fastestLapBorderActive:
+                self.lbl_fl_driver_name.show()
+                self.lbl_driver_name.hide()
+            else:
+                self.lbl_driver_name.show()
+                self.lbl_fl_driver_name.hide()
             self.lbl_driver_name_text.show()
             if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
                 self.lbl_border.show()
 
+        self.lbl_driver_name_text.set(x=self.nameOffset, animated=True)
         if self.driver_name_text.hasChanged():
             self.set_width_and_name()
-        if self.nameOffsetValue.hasChanged():
-            self.lbl_driver_name_text.setX(self.nameOffsetValue.value, True)
+        if not self.fastestLapBorderActive:
+            self.set_driver_name_width()
         if self.timing_text.hasChanged():
             self.lbl_timing_text.setText(self.timing_text.value, hidden=bool(self.timing_visible.value == 0))
 
@@ -780,6 +819,8 @@ class ACInfo:
                     # if current_vehicle_changed:
                     self.driver_name_text.setValue(ac.getDriverName(self.currentVehicle.value))
                     self.nameOffset = self.rowHeight * 49 / 36
+                    if Colors.border_direction == 1:
+                        self.nameOffset += 4
                     if not self.raceStarted:
                         if sim_info.graphics.completedLaps > 0 or sim_info.graphics.iCurrentTime > 20000:
                             self.raceStarted = True

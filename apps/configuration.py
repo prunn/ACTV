@@ -30,7 +30,7 @@ class Configuration:
         self.listen_active = True
         Colors.load_themes()
 
-        self.window = Window(name="ACTV Config", icon=True, width=251, height=580, texture="").setBgOpacity(0.6)
+        self.window = Window(name="ACTV Config", icon=True, width=251, height=550, texture="").setBgOpacity(0.6)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -116,7 +116,7 @@ class Configuration:
         y = 50
         # General theme : 0-Dark 1-white
         self.spin_general_theme = ac.addSpinner(self.window.app, "Theme :")
-        ac.setRange(self.spin_general_theme, 0, 1 + len(Colors.theme_files))
+        ac.setRange(self.spin_general_theme, 0, len(Colors.theme_files))
         ac.setPosition(self.spin_general_theme, 20, y)
         ac.setValue(self.spin_general_theme, 0)
         ac.addOnValueChangeListener(self.spin_general_theme, self.on_spin_general_theme_changed)
@@ -257,7 +257,7 @@ class Configuration:
             #  Get_theme number from ini
             for i in range(0, len(Colors.theme_files)):
                 if Colors.theme_files[i]['file'] == Colors.theme_ini:
-                    Colors.general_theme = i + 2
+                    Colors.general_theme = i + 1
                     break
         else:
             general_theme = self.cfg.get("SETTINGS", "general_theme", "int")
@@ -345,10 +345,8 @@ class Configuration:
         # Theme
         if Colors.general_theme == 0:
             self.lbl_general_theme.setText("Dark")
-        elif Colors.general_theme == 1:
-            self.lbl_general_theme.setText("Light")
         else:
-            self.lbl_general_theme.setText(str(Colors.theme_files[Colors.general_theme-2]['name']))
+            self.lbl_general_theme.setText(str(Colors.theme_files[Colors.general_theme-1]['name']))
         # Border direction
         if Colors.border_direction == 0:
             self.lbl_border_direction.setText("Horizontal")
@@ -494,8 +492,8 @@ class Configuration:
     @staticmethod
     def on_spin_general_theme_changed(value):
         Colors.general_theme = value
-        if Colors.general_theme > 2:
-            Colors.theme_ini = Colors.theme_files[Colors.general_theme-2]['file']
+        if Colors.general_theme > 0:
+            Colors.theme_ini = Colors.theme_files[Colors.general_theme-1]['file']
         else:
             Colors.theme_ini = ''
         Configuration.configChanged = True
