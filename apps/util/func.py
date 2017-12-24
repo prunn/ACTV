@@ -11,6 +11,22 @@ def rgb(color, a=1, bg=False):
     r = color[0] / 255
     g = color[1] / 255
     b = color[2] / 255
+    if r > 1:
+        r = 1
+    elif r < 0:
+        r = 0
+    if g > 1:
+        g = 1
+    elif g < 0:
+        g = 0
+    if b > 1:
+        b = 1
+    elif b < 0:
+        b = 0
+    if a > 1:
+        a = 1
+    elif a < 0:
+        a = 0
     if not bg:
         return r, g, b, a
     else:

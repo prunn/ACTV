@@ -1586,8 +1586,8 @@ class Font:
     # Name, offset, support, width
     fonts = [["Segoe UI", 0, None, 1.2],
              ["Noto Sans", 0, None, 1.26],
-             ["Open Sans", 0, 0, 1.26],
-             ["Yantramanav", 5, 0, 1.1],
+             ["Open Sans", 0, 0, 1.5],
+             ["Yantramanav", 5, 0, 1.18],
              ["Signika Negative", 3, 0, 1.2],
              ["Strait", 7, 0, 1.1],
              ["Overlock", 4, 1, 1.1]]
@@ -1631,15 +1631,18 @@ class Font:
         points = Font.get_font_size(height+Font.get_font_offset())
 
         hdc = ctypes.windll.user32.GetDC(0)
-        hfont = ctypes.windll.gdi32.CreateFontA(32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Font.get_font())
+        hfont = ctypes.windll.gdi32.CreateFontA(-32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")
+        #hfont = ctypes.windll.gdi32.CreateFontA(-points, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Font.get_font())
         hfont_old = ctypes.windll.gdi32.SelectObject(hdc, hfont)
         size = SIZE(0, 0)
         ctypes.windll.gdi32.GetTextExtentPoint32A(hdc, text, len(text), ctypes.byref(size))
         ctypes.windll.gdi32.SelectObject(hdc, hfont_old)
         ctypes.windll.gdi32.DeleteObject(hfont)
         #ac.console("Name :" + str(points) + " : " + str(Font.get_font()) + " : " + str(size.cx) + " = " + str(size.cx / 32 * points * Font.get_font_width_adjust()))
+        #ac.console("Name :" + str(points) + " : " + str(Font.get_font()) + " : " + str(size.cx) + " = " + str(size.cx / 32 * points * Font.get_font_width_adjust()))
         #ac.log("Name :" + str(points) + " : " + str(Font.get_font()) + " : " + str(size.cx) + " = " + str(size.cx / 32 * points * Font.get_font_width_adjust()))
         #return size.cx
+        #return size.cx * Font.get_font_width_adjust()
         return size.cx / 32 * points * Font.get_font_width_adjust()
 
     @staticmethod

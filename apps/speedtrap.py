@@ -223,8 +223,8 @@ class ACSpeedTrap:
                     speed_text = "%.1f mph | %.1f mph" % (self.curTopSpeedMPH.value, self.topSpeedMPH.value)
                 else:
                     speed_text = "%.1f kph | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
-                self.time_start = session_time_left - 600
-                self.time_end = session_time_left - 14600
+                self.time_start = session_time_left - 800
+                self.time_end = session_time_left - 14800
                 self.lbl_time.setText(speed_text, hidden=True)
                 self.lbl_title.set(y=self.row_height.value).show()
             elif self.time_start != 0 and self.time_start > session_time_left > self.time_end:

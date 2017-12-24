@@ -1,7 +1,8 @@
 import ac
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
-from .util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
+import time
+from .util.classes import Window, Button, Label, Value, POINT, Config, Log, Font, Colors
 from .util.func import rgb
 
 
@@ -26,11 +27,12 @@ class Configuration:
 
     # INITIALIZATION
     def __init__(self):
+        self.visual_timeout = -1
         self.session = Value(-1)
         self.listen_active = True
         Colors.load_themes()
 
-        self.window = Window(name="ACTV Config", icon=True, width=251, height=550, texture="").setBgOpacity(0.6)
+        self.window = Window(name="ACTV Config", icon=False, width=251, height=550, texture="").setBgOpacity(0)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -368,68 +370,115 @@ class Configuration:
         if self.__class__.currentTab == 1:
             self.btn_tab1.setBgColor(rgb([255, 12, 12], bg=True)).setBgOpacity(0.6)
             self.btn_tab2.setBgColor(rgb([12, 12, 12], bg=True)).setBgOpacity(0.6)
-            ac.setVisible(self.spin_theme_red, 0)
-            ac.setVisible(self.spin_theme_green, 0)
-            ac.setVisible(self.spin_theme_blue, 0)
-            ac.setVisible(self.spin_tower_lap, 0)
-            ac.setVisible(self.spin_colors_by, 0)
-            ac.setVisible(self.spin_font, 0)
-            self.lbl_tower_lap.setVisible(0)
-            self.lbl_colors_by.setVisible(0)
-            self.lbl_font.setVisible(0)
-            ac.setVisible(self.spin_general_theme, 0)
-            self.lbl_general_theme.setVisible(0)
-            ac.setVisible(self.spin_border_direction, 0)
-            self.lbl_border_direction.setVisible(0)
-            ac.setVisible(self.spin_race_mode, 1)
-            ac.setVisible(self.spin_qual_mode, 1)
-            ac.setVisible(self.spin_names, 1)
-            ac.setVisible(self.spin_num_cars, 1)
-            ac.setVisible(self.spin_num_laps, 1)
-            ac.setVisible(self.spin_row_height, 1)
-            ac.setVisible(self.chk_invalidated, 1)
-            ac.setVisible(self.chk_force_info, 1)
-            self.lbl_title_invalidated.setVisible(1)
-            self.lbl_title_force_info.setVisible(1)
-            self.lbl_race_mode.setVisible(1)
-            self.lbl_qual_mode.setVisible(1)
-            self.lbl_names.setVisible(1)
-
+            self.hide_tab2()
+            self.show_tab1()
         else:
             self.btn_tab1.setBgColor(rgb([12, 12, 12], bg=True)).setBgOpacity(0.6)
             self.btn_tab2.setBgColor(rgb([255, 12, 12], bg=True)).setBgOpacity(0.6)
-            ac.setVisible(self.spin_theme_red, 1)
-            ac.setVisible(self.spin_theme_green, 1)
-            ac.setVisible(self.spin_theme_blue, 1)
-            ac.setVisible(self.spin_tower_lap, 0)
-            ac.setVisible(self.spin_colors_by, 1)
-            ac.setVisible(self.spin_font, 1)
-            self.lbl_tower_lap.setVisible(0)
-            self.lbl_colors_by.setVisible(1)
-            self.lbl_font.setVisible(1)
-            ac.setVisible(self.spin_general_theme, 1)
-            self.lbl_general_theme.setVisible(1)
-            ac.setVisible(self.spin_border_direction, 1)
-            self.lbl_border_direction.setVisible(1)
-            ac.setVisible(self.spin_race_mode, 0)
-            ac.setVisible(self.spin_qual_mode, 0)
-            ac.setVisible(self.spin_names, 0)
-            ac.setVisible(self.spin_num_cars, 0)
-            ac.setVisible(self.spin_num_laps, 0)
-            ac.setVisible(self.spin_row_height, 0)
-            ac.setVisible(self.chk_invalidated, 0)
-            ac.setVisible(self.chk_force_info, 0)
-            self.lbl_title_invalidated.setVisible(0)
-            self.lbl_title_force_info.setVisible(0)
-            self.lbl_race_mode.setVisible(0)
-            self.lbl_qual_mode.setVisible(0)
-            self.lbl_names.setVisible(0)
+            self.hide_tab1()
+            self.show_tab2()
+
+    def hide_tab1(self):
+        ac.setVisible(self.spin_race_mode, 0)
+        ac.setVisible(self.spin_qual_mode, 0)
+        ac.setVisible(self.spin_names, 0)
+        ac.setVisible(self.spin_num_cars, 0)
+        ac.setVisible(self.spin_num_laps, 0)
+        ac.setVisible(self.spin_row_height, 0)
+        ac.setVisible(self.chk_invalidated, 0)
+        ac.setVisible(self.chk_force_info, 0)
+        self.lbl_title_invalidated.setVisible(0)
+        self.lbl_title_force_info.setVisible(0)
+        self.lbl_race_mode.setVisible(0)
+        self.lbl_qual_mode.setVisible(0)
+        self.lbl_names.setVisible(0)
+
+    def hide_tab2(self):
+        ac.setVisible(self.spin_theme_red, 0)
+        ac.setVisible(self.spin_theme_green, 0)
+        ac.setVisible(self.spin_theme_blue, 0)
+        ac.setVisible(self.spin_tower_lap, 0)
+        ac.setVisible(self.spin_colors_by, 0)
+        ac.setVisible(self.spin_font, 0)
+        self.lbl_tower_lap.setVisible(0)
+        self.lbl_colors_by.setVisible(0)
+        self.lbl_font.setVisible(0)
+        ac.setVisible(self.spin_general_theme, 0)
+        self.lbl_general_theme.setVisible(0)
+        ac.setVisible(self.spin_border_direction, 0)
+        self.lbl_border_direction.setVisible(0)
+
+    def show_tab1(self):
+        ac.setVisible(self.spin_race_mode, 1)
+        ac.setVisible(self.spin_qual_mode, 1)
+        ac.setVisible(self.spin_names, 1)
+        ac.setVisible(self.spin_num_cars, 1)
+        ac.setVisible(self.spin_num_laps, 1)
+        ac.setVisible(self.spin_row_height, 1)
+        ac.setVisible(self.chk_invalidated, 1)
+        ac.setVisible(self.chk_force_info, 1)
+        self.lbl_title_invalidated.setVisible(1)
+        self.lbl_title_force_info.setVisible(1)
+        self.lbl_race_mode.setVisible(1)
+        self.lbl_qual_mode.setVisible(1)
+        self.lbl_names.setVisible(1)
+
+    def show_tab2(self):
+        ac.setVisible(self.spin_theme_red, 1)
+        ac.setVisible(self.spin_theme_green, 1)
+        ac.setVisible(self.spin_theme_blue, 1)
+        ac.setVisible(self.spin_tower_lap, 0)
+        ac.setVisible(self.spin_colors_by, 1)
+        ac.setVisible(self.spin_font, 1)
+        self.lbl_tower_lap.setVisible(0)
+        self.lbl_colors_by.setVisible(1)
+        self.lbl_font.setVisible(1)
+        ac.setVisible(self.spin_general_theme, 1)
+        self.lbl_general_theme.setVisible(1)
+        ac.setVisible(self.spin_border_direction, 1)
+        self.lbl_border_direction.setVisible(1)
+
+    def manage_window(self):
+        if self.session.hasChanged():
+            self.visual_timeout = -1
+        pt = POINT()
+        result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+        win_x = self.window.getPos().x
+        win_y = self.window.getPos().y
+        if win_x > 0:
+            self.window.last_x = win_x
+            self.window.last_y = win_y
+        else:
+            self.window.setLastPos()
+            win_x = self.window.getPos().x
+            win_y = self.window.getPos().y
+        if result and win_x < pt.x < win_x + self.window.width and win_y < pt.y < win_y + self.window.height:
+            self.visual_timeout = time.time() + 6
+        #ac.console("visual_timeout:" + str(self.visual_timeout)+" time:" + str(time.time()))
+        if self.visual_timeout != 0 and self.visual_timeout > time.time():
+            self.window.setBgOpacity(0.6).border(0)
+            if self.__class__.currentTab == 1:
+                self.show_tab1()
+            else:
+                self.show_tab2()
+        else:
+            self.window.setBgOpacity(0).border(0)
+            if self.visual_timeout != 0:
+                ac.console("hiding tabs")
+                if self.__class__.currentTab == 1:
+                    self.hide_tab1()
+                    ac.console("hiding hide_tab1")
+                else:
+                    self.hide_tab2()
+                    ac.console("hiding hide_tab2")
+            self.visual_timeout = 0
 
     def on_update(self, sim_info):
-        self.window.setBgOpacity(0.6).border(0)
         self.session.setValue(sim_info.graphics.session)
+        self.manage_window()
         if self.__class__.tabChanged:
             self.change_tab()
+            Configuration.tabChanged = False
         if self.__class__.configChanged and self.cfg_loaded:
             self.save_cfg()
             self.__class__.configChanged = False
