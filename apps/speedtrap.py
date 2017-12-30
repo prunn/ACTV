@@ -33,7 +33,7 @@ class ACSpeedTrap:
         self.cursor = Value(False)
         self.row_height = Value(-1)
         self.window = Window(name="ACTV Speed Trap", width=250, height=60)
-        self.lbl_title = Label(self.window.app, "Speedtrap")\
+        self.lbl_title = Label(self.window.app, "Speed Trap")\
             .set(w=36, h=36,
                  x=0, y=0,
                  font_size=26,

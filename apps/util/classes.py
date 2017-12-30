@@ -309,25 +309,29 @@ class Colors:
     @staticmethod
     def get_color_for_key(key):
         if key in Colors.current_theme:
-            if Colors.current_theme[key] == "theme":
+            if Colors.current_theme[key][0] == "t":
                 return Colors.theme()
             return Colors.current_theme[key]
         return rgb([0, 0, 0])
 
     @staticmethod
     def txt_to_rgba(value):
-        if value == "theme":
-            return "theme"
         value_type = value.find(",")
         if value_type > 0:
             array_values = value.split(',')
             # RGB or RGBA split
             if len(array_values) == 3:
+                #Theme
+                if array_values[0] == "t" and array_values[1] == "t" and array_values[2] == "t":
+                    return "t", "t", "t"
                 #RGB
                 return rgb([int(array_values[0]),
                             int(array_values[1]),
                             int(array_values[2])])
             if len(array_values) == 4:
+                #Theme
+                if array_values[0] == "t" and array_values[1] == "t" and array_values[2] == "t":
+                    return "t", "t", "t", array_values[3]
                 #RGBA
                 return rgb([int(array_values[0]),
                             int(array_values[1]),

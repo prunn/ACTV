@@ -8,6 +8,8 @@ def millisToString(millis):
 
 # COLOR CONVERSION
 def rgb(color, a=1, bg=False):
+    if type(color[0]) is str or type(color[1]) is str or type(color[2]) is str:
+        return 0, 0, 0, a
     r = color[0] / 255
     g = color[1] / 255
     b = color[2] / 255
