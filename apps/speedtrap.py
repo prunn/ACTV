@@ -77,12 +77,12 @@ class ACSpeedTrap:
             # Size
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
             self.lbl_title.set(w=self.row_height.value*4.7, h=self.row_height.value,
-                               x=self.row_height.value*3.1,
+                               x=self.row_height.value*3.3,
                                font_size=font_size)
-            self.lbl_time.set(w=self.row_height.value * 7.8, h=self.row_height.value,
+            self.lbl_time.set(w=self.row_height.value * 8, h=self.row_height.value,
                               x=0, y=self.row_height.value,
                               font_size=font_size)
-            self.lbl_border.set(w=self.row_height.value * 7.8, y=self.row_height.value*2 + 1)
+            self.lbl_border.set(w=self.row_height.value * 8, y=self.row_height.value*2 + 1)
             # v1.4
             # self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
             #                   font_size=font_size)

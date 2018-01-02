@@ -458,19 +458,20 @@ class Configuration:
         if self.visual_timeout != 0 and self.visual_timeout > time.time():
             self.window.setBgOpacity(0.6).border(0)
             if self.__class__.currentTab == 1:
+                self.btn_tab1.setBgColor(rgb([255, 12, 12], bg=True)).setBgOpacity(0.6)
                 self.show_tab1()
             else:
+                self.btn_tab2.setBgColor(rgb([255, 12, 12], bg=True)).setBgOpacity(0.6)
                 self.show_tab2()
         else:
             self.window.setBgOpacity(0).border(0)
             if self.visual_timeout != 0:
-                ac.console("hiding tabs")
                 if self.__class__.currentTab == 1:
+                    self.btn_tab1.setBgColor(rgb([12, 12, 12], bg=True)).setBgOpacity(0.6)
                     self.hide_tab1()
-                    ac.console("hiding hide_tab1")
                 else:
+                    self.btn_tab2.setBgColor(rgb([12, 12, 12], bg=True)).setBgOpacity(0.6)
                     self.hide_tab2()
-                    ac.console("hiding hide_tab2")
             self.visual_timeout = 0
 
     def on_update(self, sim_info):

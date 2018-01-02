@@ -8,6 +8,14 @@
 
 -
 ###Changelog
+2.0.0
+Pit window timer
+Fixed live theme change
+Theme engine : theme ini
+Config window display timeout
+Speed trap new layout
+Tower race position progress mode
+
 1.3.0
 tower : TLC-Names modes split from timing modes
 delta : Added session delta - last lap
