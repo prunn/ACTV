@@ -357,6 +357,10 @@ class Colors:
                         int(array_values[2]),
                         int(array_values[3])],
                        a=float(array_values[0]/255))
+        # Background image
+        if value.find(".jpg") > 0 or value.find(".png") > 0 or value.find(".tga") > 0:
+            # todo bg opacity?
+            return value, -1, -1, 1
         ac.console('Error loading color :' + str(value))
         ac.log('Error loading color :' + str(value))
         return rgb([0, 0, 0])
@@ -1216,10 +1220,13 @@ class Label:
         return self
 
     def setBgColor(self, color, animated=False, init=False):
-        if self.debug:
-            #self.debug_param("A", "a")
-            #self.debug_param("O", "o")
-            self.debug_param("setBgColor" + str(color[0]), "br")
+        # background image [0]
+        if color[1] < 0:
+            self.setBgTexture(color[0])
+            if len(color) > 3:
+                self.setBgOpacity(color[3], animated, init)
+            return self
+        self.setBgTexture('')
         self.f_params["br"].setValue(color[0])
         self.f_params["bg"].setValue(color[1])
         self.f_params["bb"].setValue(color[2])
@@ -1587,7 +1594,7 @@ class Config:
 
 
 class Font:
-    # Name, offset, support, width
+    # Name, size offset, support, width
     fonts = [["Segoe UI", 0, None, 1.2],
              ["Noto Sans", 0, None, 1.26],
              ["Open Sans", 0, 0, 1.5],
