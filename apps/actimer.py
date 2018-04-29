@@ -33,27 +33,43 @@ class ACTimer:
         self.numberOfLapsCompleted = Value(0)
         self.trackName = ""
         self.window = Window(name="ACTV Timer", width=228, height=42)
-        self.lbl_session_info = Label(self.window.app, "Loading")\
+        self.lbl_session_info = Label(self.window.app)\
+            .set(w=154, h=36,
+                 x=self.row_height.value, y=0,)
+        self.lbl_session_info_txt = Label(self.window.app, "Loading")\
             .set(w=154, h=36,
                  x=self.row_height.value, y=0,
+                 opacity=0,
                  font_size=26,
                  align="center")
-        self.lbl_session_title = Label(self.window.app, "P")\
+        self.lbl_session_title = Label(self.window.app)\
+            .set(w=36, h=36,
+                 x=0, y=0)
+        self.lbl_session_title_txt = Label(self.window.app, "P")\
             .set(w=36, h=36,
                  x=0, y=0,
+                 opacity=0,
                  font_size=26,
                  align="center")
-        self.lbl_session_single = Label(self.window.app, "Loading")\
+        self.lbl_session_single = Label(self.window.app)\
+            .set(w=190, h=36,
+                 x=0, y=0)
+        self.lbl_session_single_txt = Label(self.window.app, "Loading")\
             .set(w=190, h=36,
                  x=0, y=0,
+                 opacity=0,
                  font_size=26,
                  align="center")
-        self.lbl_session_border = Label(self.window.app, "")\
+        self.lbl_session_border = Label(self.window.app)\
             .set(w=154 + 36, h=2,
                  x=0, y=36 + 1)
-        self.lbl_pit_window = Label(self.window.app, "")\
+        self.lbl_pit_window = Label(self.window.app)\
+            .set(w=160, h=36,
+                 x=0, y=-36)
+        self.lbl_pit_window_txt = Label(self.window.app)\
             .set(w=160, h=36,
                  x=0, y=-36,
+                 opacity=0,
                  align="center",
                  font_size=26)
 
@@ -100,36 +116,40 @@ class ACTimer:
         if self.theme.hasChanged():
             self.lbl_session_border.set(background=Colors.timer_border_bg(),
                                         animated=True, init=True)
-            self.lbl_session_single.set(background=Colors.timer_time_bg(),
-                                        color=Colors.timer_time_txt(),
-                                        animated=True, init=True)
-            self.lbl_session_info.set(background=Colors.timer_time_bg(),
-                                      color=Colors.timer_time_txt(),
-                                      animated=True, init=True)
-            self.lbl_session_title.set(background=Colors.timer_title_bg(),
-                                       color=Colors.timer_title_txt(),
-                                       animated=True, init=True)
-            self.lbl_pit_window.set(background=Colors.timer_pit_window_bg(),
-                                    color=Colors.timer_pit_window_txt(),
-                                    animated=True, init=True)
+            self.lbl_session_single.set(background=Colors.timer_time_bg(), animated=True, init=True)
+            self.lbl_session_single_txt.set(color=Colors.timer_time_txt(), animated=True, init=True)
+            self.lbl_session_info.set(background=Colors.timer_time_bg(), animated=True, init=True)
+            self.lbl_session_info_txt.set(color=Colors.timer_time_txt(), animated=True, init=True)
+            self.lbl_session_title.set(background=Colors.timer_title_bg(), animated=True, init=True)
+            self.lbl_session_title_txt.set(color=Colors.timer_title_txt(), animated=True, init=True)
+            self.lbl_pit_window.set(background=Colors.timer_pit_window_bg(), animated=True, init=True)
+            self.lbl_pit_window_txt.set(color=Colors.timer_pit_window_txt(), animated=True, init=True)
         if self.row_height.hasChanged() or self.font.hasChanged():
             # Fonts
-            self.lbl_session_info.update_font()
-            self.lbl_session_title.update_font()
-            self.lbl_session_single.update_font()
-            self.lbl_pit_window.update_font()
+            self.lbl_session_info_txt.update_font()
+            self.lbl_session_title_txt.update_font()
+            self.lbl_session_single_txt.update_font()
+            self.lbl_pit_window_txt.update_font()
             # Size
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
             font_size2 = Font.get_font_size(self.row_height.value-7+Font.get_font_offset())
             width = self.row_height.value * 5
-            self.lbl_session_info.set(w=self.row_height.value * 4, h=self.row_height.value, x=self.row_height.value,
-                                      font_size=font_size)
-            self.lbl_session_title.set(w=self.row_height.value, h=self.row_height.value, font_size=font_size)
-            self.lbl_session_single.set(w=width, h=self.row_height.value, font_size=font_size)
+            self.lbl_session_info.set(w=self.row_height.value * 4, h=self.row_height.value, x=self.row_height.value)
+            self.lbl_session_info_txt.set(w=self.row_height.value * 4, h=self.row_height.value, x=self.row_height.value,
+                                          font_size=font_size, y=Font.get_font_x_offset())
+            self.lbl_session_title.set(w=self.row_height.value, h=self.row_height.value)
+            self.lbl_session_title_txt.set(w=self.row_height.value, h=self.row_height.value,
+                                           font_size=font_size, y=Font.get_font_x_offset())
+            self.lbl_session_single.set(w=width, h=self.row_height.value)
+            self.lbl_session_single_txt.set(w=width, h=self.row_height.value, font_size=font_size,
+                                            y=Font.get_font_x_offset())
             self.lbl_session_border.set(w=width, y=self.row_height.value + 1)
             self.lbl_pit_window.set(x=0, y=-self.row_height.value + 3,
-                                    w=width, h=self.row_height.value-5,
-                                    font_size=font_size2)
+                                    w=width, h=self.row_height.value-5)
+            self.lbl_pit_window_txt.set(x=0, y=-self.row_height.value + 3 + Font.get_font_x_offset(),
+                                        w=width,
+                                        h=self.row_height.value-5,
+                                        font_size=font_size2)
             if len(self.finish_labels) > 0:
                 i = 0
                 j = 0
@@ -157,9 +177,12 @@ class ACTimer:
 
     def init_finish(self):
         self.lbl_session_info.hide()
+        self.lbl_session_info_txt.hide()
         self.lbl_session_title.hide()
+        self.lbl_session_title_txt.hide()
         self.lbl_session_border.hide()
-        self.lbl_session_single.setText("").setBgColor(rgb([255, 255, 255], bg=True)).setBgOpacity(0.76).show()
+        self.lbl_session_single.setBgColor(rgb([255, 255, 255], bg=True)).setBgOpacity(0.76).show()
+        self.lbl_session_single_txt.setText("").show()
         if len(self.finish_labels) > 0:
             for label in self.finish_labels:
                 label.show()
@@ -185,16 +208,21 @@ class ACTimer:
     def destroy_finish(self):
         # Destroy
         self.lbl_session_single.setBgColor(Colors.timer_time_bg()).hide()
+        self.lbl_session_single_txt.hide()
         for label in self.finish_labels:
             label.hide()
         self.finish_initialised = False
 
     def animate(self):
         self.lbl_session_info.animate()
+        self.lbl_session_info_txt.animate()
         self.lbl_session_title.animate()
+        self.lbl_session_title_txt.animate()
         self.lbl_session_border.animate()
         self.lbl_session_single.animate()
+        self.lbl_session_single_txt.animate()
         self.lbl_pit_window.animate()
+        self.lbl_pit_window_txt.animate()
         if len(self.finish_labels) > 0:
             for label in self.finish_labels:
                 label.animate()
@@ -226,9 +254,9 @@ class ACTimer:
             self.pitWindowVisibleEnd = 0
             self.pitWindowActive = False
             if self.session.value == 1:
-                self.lbl_session_title.setText("Q")
+                self.lbl_session_title_txt.setText("Q")
             else:
-                self.lbl_session_title.setText("P")
+                self.lbl_session_title_txt.setText("P")
         if self.cursor.hasChanged():
             self.window.setBgOpacity(0).border(0)
 
@@ -239,10 +267,11 @@ class ACTimer:
         self.animate()
         if sim_info_status == 2:  # LIVE
             if self.replay_initialised:
-                self.lbl_session_single.setColor(Colors.timer_time_txt())
+                self.lbl_session_single_txt.setColor(Colors.timer_time_txt())
             session_time_left = sim_info.graphics.sessionTimeLeft
             if self.session.value < 2:
                 self.lbl_pit_window.hide()
+                self.lbl_pit_window_txt.hide()
                 # 0 to -5000 show finish
                 if 0 > session_time_left > -5000:
                     if not self.finish_initialised:
@@ -253,27 +282,26 @@ class ACTimer:
                     if self.finish_initialised:
                         self.destroy_finish()
                     self.lbl_session_title.show()
+                    self.lbl_session_title_txt.show()
                     self.lbl_session_single.hide()
+                    self.lbl_session_single_txt.hide()
                     self.lbl_session_border.show()
-                    self.lbl_session_info.setText(self.time_splitting(session_time_left)).show()
+                    self.lbl_session_info.show()
+                    self.lbl_session_info_txt.setText(self.time_splitting(session_time_left)).show()
                     if not self.finish_initialised:
                         if sim_info.graphics.flag == 2:
                             # Yellow Flag
-                            self.lbl_session_info.set(background=Colors.timer_time_yellow_flag_bg(),
-                                                      color=Colors.timer_time_yellow_flag_txt(),
-                                                      animated=True)
-                            self.lbl_session_title.set(background=Colors.timer_title_yellow_flag_bg(),
-                                                       color=Colors.timer_title_yellow_flag_txt(),
-                                                       animated=True)
+                            self.lbl_session_info.set(background=Colors.timer_time_yellow_flag_bg(), animated=True)
+                            self.lbl_session_info_txt.set(color=Colors.timer_time_yellow_flag_txt(), animated=True)
+                            self.lbl_session_title.set(background=Colors.timer_title_yellow_flag_bg(), animated=True)
+                            self.lbl_session_title_txt.set(color=Colors.timer_title_yellow_flag_txt(), animated=True)
                             self.lbl_session_border.set(background=Colors.timer_border_yellow_flag_bg(),
                                                         animated=True)
                         else:
-                            self.lbl_session_info.set(background=Colors.timer_time_bg(),
-                                                      color=Colors.timer_time_txt(),
-                                                      animated=True)
-                            self.lbl_session_title.set(background=Colors.timer_title_bg(),
-                                                       color=Colors.timer_title_txt(),
-                                                       animated=True)
+                            self.lbl_session_info.set(background=Colors.timer_time_bg(), animated=True)
+                            self.lbl_session_info_txt.set(color=Colors.timer_time_txt(), animated=True)
+                            self.lbl_session_title.set(background=Colors.timer_title_bg(), animated=True)
+                            self.lbl_session_title_txt.set(color=Colors.timer_title_txt(), animated=True)
                             self.lbl_session_border.set(background=Colors.timer_border_bg(),
                                                         animated=True)
             elif self.session.value == 2:
@@ -326,18 +354,21 @@ class ACTimer:
                         pit_window_remain = " " + self.time_splitting(session_time_left - (self.sessionMaxTime - self.pitWindowEnd * 60 * 1000))
                 if self.pitWindowActive:
                     self.lbl_pit_window.show()
+                    self.lbl_pit_window_txt.show()
                     if self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
-                        self.lbl_pit_window.setColor(Colors.timer_pit_window_open_txt())
+                        self.lbl_pit_window_txt.setColor(Colors.timer_pit_window_open_txt())
                     elif sim_info.graphics.MandatoryPitDone:
-                        self.lbl_pit_window.setColor(Colors.timer_pit_window_done_txt(), True)
+                        self.lbl_pit_window_txt.setColor(Colors.timer_pit_window_done_txt(), True)
                     else:
-                        self.lbl_pit_window.setColor(Colors.timer_pit_window_txt(), True)
-                    self.lbl_pit_window.setText("Pits open" + pit_window_remain)
+                        self.lbl_pit_window_txt.setColor(Colors.timer_pit_window_txt(), True)
+                    self.lbl_pit_window_txt.setText("Pits open" + pit_window_remain)
                 elif self.pitWindowVisibleEnd != 0 and self.pitWindowVisibleEnd < session_time_left:
                     self.lbl_pit_window.show()
-                    self.lbl_pit_window.setText("Pits closed").setColor(Colors.timer_pit_window_close_txt(), True)
+                    self.lbl_pit_window_txt.setText("Pits closed").setColor(Colors.timer_pit_window_close_txt(), True)
+                    self.lbl_pit_window_txt.show()
                 else:
                     self.lbl_pit_window.hide()
+                    self.lbl_pit_window_txt.hide()
 
                 if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
                     self.pitWindowVisibleEnd = 0
@@ -346,10 +377,12 @@ class ACTimer:
                     if self.finish_initialised:
                         self.destroy_finish()
                     self.lbl_session_info.hide()
+                    self.lbl_session_info_txt.hide()
                     self.lbl_session_title.hide()
+                    self.lbl_session_title_txt.hide()
                     self.lbl_session_single.show()
                     self.lbl_session_border.show()
-                    self.lbl_session_single.setText(self.trackName)
+                    self.lbl_session_single_txt.setText(self.trackName).show()
                 elif race_finished > 0:
                     if not self.finish_initialised:
                         self.init_finish()
@@ -357,58 +390,69 @@ class ACTimer:
                     if self.finish_initialised:
                         self.destroy_finish()
                     self.lbl_session_info.hide()
+                    self.lbl_session_info_txt.hide()
                     self.lbl_session_title.hide()
+                    self.lbl_session_title_txt.hide()
                     self.lbl_session_single.show()
                     self.lbl_session_border.show()
-                    self.lbl_session_single.setText("Final lap")
+                    self.lbl_session_single_txt.setText("Final lap").show()
                 else:
                     if self.finish_initialised:
                         self.destroy_finish()
                     self.lbl_session_info.hide()
+                    self.lbl_session_info_txt.hide()
                     self.lbl_session_title.hide()
+                    self.lbl_session_title_txt.hide()
                     self.lbl_session_single.show()
+                    self.lbl_session_single_txt.show()
                     self.lbl_session_border.show()
                     if self.hasExtraLap > 0:
                         txt_extra_lap = " +1 Lap"
                     else:
                         txt_extra_lap = ""
                     if self.numberOfLaps > 0:
-                        self.lbl_session_single.setText("{0} / {1}".format(completed, self.numberOfLaps))
+                        self.lbl_session_single_txt.setText("{0} / {1}".format(completed, self.numberOfLaps))
                     elif session_time_left > 0:
-                        self.lbl_session_single.setText(self.time_splitting(session_time_left) + txt_extra_lap)
+                        self.lbl_session_single_txt.setText(self.time_splitting(session_time_left) + txt_extra_lap)
                     else:
-                        self.lbl_session_single.setText("0:00" + txt_extra_lap)
+                        self.lbl_session_single_txt.setText("0:00" + txt_extra_lap)
                 if not self.finish_initialised:
                     if sim_info.graphics.flag == 2:  # Yellow flag
-                        self.lbl_session_single.set(background=Colors.timer_time_yellow_flag_bg(),
-                                                    color=Colors.timer_time_yellow_flag_txt(),
-                                                    animated=True)
+                        self.lbl_session_single.set(background=Colors.timer_time_yellow_flag_bg(), animated=True)
+                        self.lbl_session_single_txt.set(color=Colors.timer_time_yellow_flag_txt(), animated=True)
                         self.lbl_session_border.set(background=Colors.timer_border_yellow_flag_bg(),
                                                     animated=True)
                     else:
-                        self.lbl_session_single.set(background=Colors.timer_time_bg(),
-                                                    color=Colors.timer_time_txt(),
-                                                    animated=True)
+                        self.lbl_session_single.set(background=Colors.timer_time_bg(), animated=True)
+                        self.lbl_session_single_txt.set(color=Colors.timer_time_txt(), animated=True)
                         self.lbl_session_border.set(background=Colors.timer_border_bg(),
                                                     animated=True)
             else:
                 self.lbl_session_info.hide()
+                self.lbl_session_info_txt.hide()
                 self.lbl_session_title.hide()
+                self.lbl_session_title_txt.hide()
                 self.lbl_session_single.hide()
+                self.lbl_session_single_txt.hide()
                 self.lbl_session_border.hide()
                 self.lbl_pit_window.hide()
+                self.lbl_pit_window_txt.hide()
 
         elif sim_info_status == 1:
             replay_time_multiplier = sim_info.graphics.replayTimeMultiplier
             if self.finish_initialised:
                 self.destroy_finish()
             self.lbl_session_info.hide()
+            self.lbl_session_info_txt.hide()
             self.lbl_session_title.hide()
+            self.lbl_session_title_txt.hide()
             self.lbl_session_border.show()
             self.lbl_session_single.show()
+            self.lbl_session_single_txt.show()
             self.lbl_pit_window.hide()
+            self.lbl_pit_window_txt.hide()
             self.replay_initialised = True
-            self.lbl_session_single.setColor(rgb([self.replay_rgb, self.replay_rgb, self.replay_rgb]))
+            self.lbl_session_single_txt.setColor(rgb([self.replay_rgb, self.replay_rgb, self.replay_rgb]))
             if self.replay_asc and replay_time_multiplier > 0:
                 self.replay_rgb += 2
             elif replay_time_multiplier > 0:
@@ -425,4 +469,4 @@ class ACTimer:
                 elif self.replay_rgb >= 246:
                     self.replay_rgb = 246
                     self.replay_asc = False
-            self.lbl_session_single.setText("REPLAY")
+            self.lbl_session_single_txt.setText("REPLAY")

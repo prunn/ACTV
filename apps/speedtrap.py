@@ -33,17 +33,29 @@ class ACSpeedTrap:
         self.cursor = Value(False)
         self.row_height = Value(-1)
         self.window = Window(name="ACTV Speed Trap", width=250, height=60)
-        self.lbl_title = Label(self.window.app, "Speed Trap")\
+        self.lbl_title = Label(self.window.app)\
             .set(w=36, h=36,
                  x=0, y=0,
                  font_size=26,
                  align="center")
-        self.lbl_time = Label(self.window.app, "")\
+        self.lbl_title_txt = Label(self.window.app, "Speed Trap")\
+            .set(w=36, h=36,
+                 x=0, y=0,
+                 font_size=26,
+                 opacity=0,
+                 align="center")
+        self.lbl_time = Label(self.window.app)\
             .set(w=172, h=36,
                  x=38, y=0,
                  font_size=26,
                  align="center")
-        self.lbl_border = Label(self.window.app, "")\
+        self.lbl_time_txt = Label(self.window.app)\
+            .set(w=172, h=36,
+                 x=38, y=0,
+                 opacity=0,
+                 font_size=26,
+                 align="center")
+        self.lbl_border = Label(self.window.app)\
             .set(w=210, h=2,
                  x=0, y=39)
         self.useMPH = False
@@ -61,27 +73,28 @@ class ACSpeedTrap:
     def redraw_size(self):
         # Colors
         if self.theme.hasChanged():
-            self.lbl_title.set(background=Colors.speedtrap_title_bg(),
-                               color=Colors.speedtrap_title_txt(),
-                               animated=True, init=True)
-            self.lbl_time.set(background=Colors.speedtrap_speed_bg(),
-                              color=Colors.speedtrap_speed_txt(),
-                              animated=True, init=True)
-            self.lbl_border.set(background=Colors.speedtrap_border_bg(),
-                                animated=True, init=True)
+            self.lbl_title.set(background=Colors.speedtrap_title_bg(), animated=True, init=True)
+            self.lbl_title_txt.set(color=Colors.speedtrap_title_txt(), animated=True, init=True)
+            self.lbl_time.set(background=Colors.speedtrap_speed_bg(), animated=True, init=True)
+            self.lbl_time_txt.set(color=Colors.speedtrap_speed_txt(), animated=True, init=True)
+            self.lbl_border.set(background=Colors.speedtrap_border_bg(), animated=True, init=True)
 
         if self.row_height.hasChanged() or self.font.hasChanged():
             # Fonts
-            self.lbl_title.update_font()
-            self.lbl_time.update_font()
+            self.lbl_title_txt.update_font()
+            self.lbl_time_txt.update_font()
             # Size
             font_size = Font.get_font_size(self.row_height.value+Font.get_font_offset())
             self.lbl_title.set(w=self.row_height.value*4.7, h=self.row_height.value,
-                               x=self.row_height.value*3.3,
-                               font_size=font_size)
+                               x=self.row_height.value*3.3)
+            self.lbl_title_txt.set(w=self.row_height.value*4.7, h=self.row_height.value,
+                                   x=self.row_height.value*3.3, y=Font.get_font_x_offset(),
+                                   font_size=font_size)
             self.lbl_time.set(w=self.row_height.value * 8, h=self.row_height.value,
-                              x=0, y=self.row_height.value,
-                              font_size=font_size)
+                              x=0, y=self.row_height.value)
+            self.lbl_time_txt.set(w=self.row_height.value * 8, h=self.row_height.value,
+                                  x=0, y=self.row_height.value + Font.get_font_x_offset(),
+                                  font_size=font_size)
             self.lbl_border.set(w=self.row_height.value * 8, y=self.row_height.value*2 + 1)
             # v1.4
             # self.lbl_title.set(w=self.row_height.value, h=self.row_height.value,
@@ -111,13 +124,17 @@ class ACSpeedTrap:
 
     def animate(self):
         self.lbl_title.animate()
+        self.lbl_title_txt.animate()
         self.lbl_time.animate()
+        self.lbl_time_txt.animate()
         self.lbl_border.animate()
 
     def reset_visibility(self):
         self.lbl_time.hide()
+        self.lbl_time_txt.hide()
         self.lbl_border.hide()
         self.lbl_title.hide()
+        self.lbl_title_txt.hide()
 
     def manage_window(self):
         pt = POINT()
@@ -225,11 +242,14 @@ class ACSpeedTrap:
                     speed_text = "%.1f kph | %.1f kph" % (self.curTopSpeed.value, self.topSpeed.value)
                 self.time_start = session_time_left - 800
                 self.time_end = session_time_left - 14800
-                self.lbl_time.setText(speed_text, hidden=True)
+                self.lbl_time_txt.setText(speed_text) #  , hidden=True)
                 self.lbl_title.set(y=self.row_height.value).show()
+                self.lbl_title_txt.set(y=self.row_height.value + Font.get_font_x_offset()).show()
             elif self.time_start != 0 and self.time_start > session_time_left > self.time_end:
                 self.lbl_title.set(y=0, animated=True).show()
+                self.lbl_title_txt.set(y=0 + Font.get_font_x_offset(), animated=True).show()
                 self.lbl_time.show()
+                self.lbl_time_txt.show()
                 self.lbl_border.show()
             elif self.time_end == 0 or session_time_left < self.time_end:
                 self.reset_visibility()

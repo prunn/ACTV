@@ -123,6 +123,7 @@ class Colors:
     dataCarsClasses = []
     carsClassesLoaded = False
     theme_files = []
+    # (0, 0, 0, 1, None)
     current_theme = {
         'tower_time_odd_txt': rgb([0, 0, 0]),
         'tower_time_even_txt': rgb([0, 0, 0]),
@@ -134,6 +135,10 @@ class Colors:
         'tower_time_place_gain_txt': rgb([0, 0, 0]),
         'tower_time_place_lost_txt': rgb([0, 0, 0]),
         'tower_time_pit_txt': rgb([0, 0, 0]),
+        'tower_time_highlight_odd_bg': rgb([0, 0, 0]),
+        'tower_time_highlight_even_bg': rgb([0, 0, 0]),
+        'tower_time_odd_bg': rgb([0, 0, 0]),
+        'tower_time_even_bg': rgb([0, 0, 0]),
         'tower_driver_odd_bg': rgb([0, 0, 0]),
         'tower_driver_odd_txt': rgb([0, 0, 0]),
         'tower_driver_even_bg': rgb([0, 0, 0]),
@@ -163,6 +168,7 @@ class Colors:
         'tower_p2p_cooling': rgb([0, 0, 0]),
         'tower_p2p_active': rgb([0, 0, 0]),
         'tower_border_default_bg': rgb([0, 0, 0]),
+        'tower_border_retired_bg': rgb([0, 0, 0]),
         'tower_mode_title_bg': rgb([0, 0, 0]),
         'tower_mode_title_txt': rgb([0, 0, 0]),
         'tower_stint_title_bg': rgb([0, 0, 0]),
@@ -337,6 +343,15 @@ class Colors:
                             int(array_values[1]),
                             int(array_values[2])],
                            a=float(array_values[3]))
+            if len(array_values) == 5:
+                # Background image
+                if array_values[4].find(".jpg") > 0 or array_values[4].find(".png") > 0 or array_values[4].find(".tga") > 0:
+                    val = rgb([int(array_values[0]),
+                               int(array_values[1]),
+                               int(array_values[2])],
+                              a=float(array_values[3]))
+                    return val[0], val[1], val[2], val[3], array_values[4]
+
             ac.console('Error loading color :' + str(value))
             ac.log('Error loading color :' + str(value))
         value = value.lstrip('#')
@@ -357,10 +372,7 @@ class Colors:
                         int(array_values[2]),
                         int(array_values[3])],
                        a=float(array_values[0]/255))
-        # Background image
-        if value.find(".jpg") > 0 or value.find(".png") > 0 or value.find(".tga") > 0:
-            # todo bg opacity?
-            return value, -1, -1, 1
+
         ac.console('Error loading color :' + str(value))
         ac.log('Error loading color :' + str(value))
         return rgb([0, 0, 0])
@@ -375,10 +387,24 @@ class Colors:
         return False
 
     @staticmethod
+    def tower_time_odd_bg():
+        #return rgb([192, 0, 0], a=0.2)
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_time_odd_bg')
+        return rgb([32, 32, 32], a=0.72)
+
+    @staticmethod
     def tower_time_odd_txt():
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_odd_txt')
         return Colors.white()
+
+    @staticmethod
+    def tower_time_even_bg():
+        #return rgb([0, 0, 0], a=0.2)
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_time_even_bg')
+        return rgb([32, 32, 32], a=0.72)
 
     @staticmethod
     def tower_time_even_txt():
@@ -391,6 +417,20 @@ class Colors:
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_highlight_txt')
         return Colors.white()
+
+    @staticmethod
+    def tower_time_highlight_odd_bg():
+        #return rgb([0, 0, 0], a=1)
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_time_highlight_odd_bg')
+        return rgb([32, 32, 32], a=0.72)
+
+    @staticmethod
+    def tower_time_highlight_even_bg():
+        #return rgb([192, 0, 0], a=1)
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_time_highlight_even_bg')
+        return rgb([32, 32, 32], a=0.58)
 
     @staticmethod
     def tower_time_qualification_highlight_txt():
@@ -615,6 +655,18 @@ class Colors:
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_border_default_bg')
         return Colors.theme(a=Colors.border_opacity())
+
+    @staticmethod
+    def tower_border_default_bg_opacity():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_border_default_bg')[3]
+        return Colors.border_opacity()
+
+    @staticmethod
+    def tower_border_default_bg_opacity_retired():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_border_retired_bg')[3]
+        return Colors.border_opacity()
 
     # --------------- Tower --------------
     @staticmethod
@@ -1221,12 +1273,10 @@ class Label:
 
     def setBgColor(self, color, animated=False, init=False):
         # background image [0]
-        if color[1] < 0:
-            self.setBgTexture(color[0])
-            if len(color) > 3:
-                self.setBgOpacity(color[3], animated, init)
-            return self
-        self.setBgTexture('')
+        if len(color) > 4 and color[4] is not None:
+            self.setBgTexture(color[4])
+        else:
+            self.setBgTexture('')
         self.f_params["br"].setValue(color[0])
         self.f_params["bg"].setValue(color[1])
         self.f_params["bb"].setValue(color[2])
@@ -1594,14 +1644,14 @@ class Config:
 
 
 class Font:
-    # Name, size offset, support, width
-    fonts = [["Segoe UI", 0, None, 1.2],
-             ["Noto Sans", 0, None, 1.26],
-             ["Open Sans", 0, 0, 1.5],
-             ["Yantramanav", 5, 0, 1.18],
-             ["Signika Negative", 3, 0, 1.2],
-             ["Strait", 7, 0, 1.1],
-             ["Overlock", 4, 1, 1.1]]
+    # Name, size offset, support, width, font x offset
+    fonts = [["Segoe UI", 0, None, 1.2, 0],
+             ["Noto Sans", 0, None, 1.26, 0],
+             ["Open Sans", 0, 0, 1.5, 0],
+             ["Yantramanav", 5, 0, 1.18, 0],
+             ["Signika Negative", 3, 0, 1.2, 0],
+             ["Strait", 7, 0, 1.1, 0],
+             ["Overlock", 4, 1, 1.1, 0]]
     init = []
     current = 0
 
@@ -1634,6 +1684,10 @@ class Font:
     @staticmethod
     def get_font_offset():
         return Font.fonts[Font.current][1]
+
+    @staticmethod
+    def get_font_x_offset():
+        return Font.fonts[Font.current][4]
 
     @staticmethod
     def get_text_dimensions(text, height):
