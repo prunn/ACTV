@@ -59,19 +59,31 @@ class ACTower:
         self.lastLapInvalidated = -1
         self.minlap_stint = 5
         self.iLastTime = Value()
-        self.lbl_title_stint = Label(self.window.app, "Current Stint")\
+        self.lbl_title_stint = Label(self.window.app)\
+            .set(w=rowHeight * 6, h=rowHeight - 4,
+                 x=0, y=rowHeight * 4 - rowHeight - 6,
+                 opacity=0)
+        self.lbl_title_stint_txt = Label(self.window.app, "Current Stint")\
             .set(w=rowHeight * 6, h=rowHeight - 4,
                  x=0, y=rowHeight * 4 - rowHeight - 6,
                  font_size=23,
                  opacity=0,
                  align="center")
-        self.lbl_tire_stint = Label(self.window.app, "")\
+        self.lbl_tire_stint = Label(self.window.app)\
+            .set(w=rowHeight * 6, h=rowHeight,
+                 x=0, y=rowHeight * 4 - (rowHeight - 4),
+                 opacity=0.58)
+        self.lbl_tire_stint_txt = Label(self.window.app)\
             .set(w=rowHeight * 6, h=rowHeight,
                  x=0, y=rowHeight * 4 - (rowHeight - 4),
                  font_size=24,
-                 opacity=0.58,
+                 opacity=0,
                  align="center")
-        self.lbl_title_mode = Label(self.window.app, "Mode") \
+        self.lbl_title_mode = Label(self.window.app) \
+            .set(w=rowHeight * 6, h=rowHeight - 4,
+                 x=0, y=-(rowHeight - 4),
+                 opacity=0)
+        self.lbl_title_mode_txt = Label(self.window.app, "Mode") \
             .set(w=rowHeight * 6, h=rowHeight - 4,
                  x=0, y=-(rowHeight - 4),
                  opacity=0,
@@ -102,20 +114,17 @@ class ACTower:
     def redraw_size(self):
         # Colors
         if self.theme.hasChanged():
-            self.lbl_title_stint.set(background=Colors.tower_stint_title_bg(),
-                                     color=Colors.tower_stint_title_txt(),
-                                     animated=True, init=True)
-            self.lbl_tire_stint.set(background=Colors.tower_stint_tire_bg(),
-                                    color=Colors.tower_stint_tire_txt(),
-                                    animated=True, init=True)
-            self.lbl_title_mode.set(background=Colors.tower_mode_title_bg(),
-                                    color=Colors.tower_mode_title_txt(),
-                                    animated=True, init=True)
+            self.lbl_title_stint.set(background=Colors.tower_stint_title_bg(), animated=True, init=True)
+            self.lbl_title_stint_txt.set(color=Colors.tower_stint_title_txt(), animated=True, init=True)
+            self.lbl_tire_stint.set(background=Colors.tower_stint_tire_bg(), animated=True, init=True)
+            self.lbl_tire_stint_txt.set(color=Colors.tower_stint_tire_txt(), animated=True, init=True)
+            self.lbl_title_mode.set(background=Colors.tower_mode_title_bg(), animated=True, init=True)
+            self.lbl_title_mode_txt.set(color=Colors.tower_mode_title_txt(), animated=True, init=True)
         if self.ui_row_height.hasChanged() or self.font.hasChanged():
             # Fonts
-            self.lbl_title_stint.update_font()
-            self.lbl_tire_stint.update_font()
-            self.lbl_title_mode.update_font()
+            self.lbl_title_stint_txt.update_font()
+            self.lbl_tire_stint_txt.update_font()
+            self.lbl_title_mode_txt.update_font()
             # UI
             font_offset = Font.get_font_offset()
             height = self.ui_row_height.value - 2
@@ -127,12 +136,18 @@ class ACTower:
             else:
                 border_offset = 4
             width = self.ui_row_height.value * 6.2 + border_offset
-            self.lbl_title_stint.set(w=width, h=height - 2, y=self.ui_row_height.value * 4 - (height - 2),
-                                     font_size=font_size2)
-            self.lbl_tire_stint.set(w=width, h=height, y=self.ui_row_height.value,
-                                    font_size=font_size)
-            self.lbl_title_mode.set(w=width, h=height - 2, y=-(height - 2),
-                                    font_size=font_size2)
+            self.lbl_title_stint.set(w=width, h=height - 2, y=self.ui_row_height.value * 4 - (height - 2))
+            self.lbl_title_stint_txt.set(w=width, h=height - 2,
+                                         y=self.ui_row_height.value * 4 - (height - 2) + Font.get_font_x_offset(),
+                                         font_size=font_size2)
+            self.lbl_tire_stint.set(w=width, h=height, y=self.ui_row_height.value)
+            self.lbl_tire_stint_txt.set(w=width, h=height,
+                                        y=self.ui_row_height.value + Font.get_font_x_offset(),
+                                        font_size=font_size)
+            self.lbl_title_mode.set(w=width, h=height - 2, y=-(height - 2))
+            self.lbl_title_mode_txt.set(w=width, h=height - 2,
+                                        y=-(height - 2) + Font.get_font_x_offset(),
+                                        font_size=font_size2)
         for driver in self.drivers:
             driver.redraw_size()
             driver.set_border()
@@ -141,8 +156,11 @@ class ACTower:
 
     def animate(self):
         self.lbl_title_stint.animate()
+        self.lbl_title_stint_txt.animate()
         self.lbl_tire_stint.animate()
+        self.lbl_tire_stint_txt.animate()
         self.lbl_title_mode.animate()
+        self.lbl_title_mode_txt.animate()
         for driver in self.drivers:
             driver.animate(self.sessionTimeLeft)
         for lbl in self.stintLabels:
@@ -185,16 +203,18 @@ class ACTower:
         # mode_changed = self.qual_mode.hasChanged()
         if self.qual_mode.hasChanged():
             if self.qual_mode.value == 0:
-                self.lbl_title_mode.setText("Gaps")
+                self.lbl_title_mode_txt.setText("Gaps")
             elif self.qual_mode.value == 1:
-                self.lbl_title_mode.setText("Times")
+                self.lbl_title_mode_txt.setText("Times")
             else:
-                self.lbl_title_mode.setText("Compact")
+                self.lbl_title_mode_txt.setText("Compact")
             self.title_mode_visible_end = self.sessionTimeLeft - 6000
         if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
             self.lbl_title_mode.show()
+            self.lbl_title_mode_txt.show()
         else:
             self.lbl_title_mode.hide()
+            self.lbl_title_mode_txt.hide()
 
         needs_tlc = True
         if Configuration.names >= 2:
@@ -210,8 +230,10 @@ class ACTower:
                     driver.show(needs_tlc=False, race=False, compact=True)
                     driver.update_pit(self.sessionTimeLeft)
                     self.lbl_title_stint.show()
-                    self.lbl_tire_stint.setText(self.format_tire(sim_info.graphics.tyreCompound))
+                    self.lbl_title_stint_txt.show()
+                    self.lbl_tire_stint_txt.setText(self.format_tire(sim_info.graphics.tyreCompound))
                     self.lbl_tire_stint.show()
+                    self.lbl_tire_stint_txt.show()
                     # self.stintLabels
                     if len(self.curDriverLaps) > len(self.stintLabels):
                         for i in range(len(self.stintLabels), len(self.curDriverLaps)):
@@ -239,7 +261,9 @@ class ACTower:
         else:
             if self.lbl_title_stint.isVisible.value:
                 self.lbl_title_stint.hide()
+                self.lbl_title_stint_txt.hide()
                 self.lbl_tire_stint.hide()
+                self.lbl_tire_stint_txt.hide()
                 for l in self.stintLabels:
                     l.hide()
             for driver in self.drivers:
@@ -263,20 +287,24 @@ class ACTower:
     def update_drivers_replay(self):
         if self.qual_mode.hasChanged():
             if self.qual_mode.value == 0:
-                self.lbl_title_mode.setText("Gaps")
+                self.lbl_title_mode_txt.setText("Gaps")
             elif self.qual_mode.value == 1:
-                self.lbl_title_mode.setText("Times")
+                self.lbl_title_mode_txt.setText("Times")
             else:
-                self.lbl_title_mode.setText("Compact")
+                self.lbl_title_mode_txt.setText("Compact")
             self.title_mode_visible_end = self.sessionTimeLeft - 6000
         if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
             self.lbl_title_mode.show()
+            self.lbl_title_mode_txt.show()
         else:
             self.lbl_title_mode.hide()
+            self.lbl_title_mode_txt.hide()
 
         if self.lbl_title_stint.isVisible.value:
             self.lbl_title_stint.hide()
+            self.lbl_title_stint_txt.hide()
             self.lbl_tire_stint.hide()
+            self.lbl_tire_stint_txt.hide()
             for l in self.stintLabels:
                 l.hide()
 
@@ -371,7 +399,9 @@ class ACTower:
     def update_drivers_race(self, sim_info, replay=False):
         if self.lbl_title_stint.isVisible.value:
             self.lbl_title_stint.hide()
+            self.lbl_title_stint_txt.hide()
             self.lbl_tire_stint.hide()
+            self.lbl_tire_stint_txt.hide()
             for l in self.stintLabels:
                 l.hide()
         self.driver_shown = 0
@@ -386,17 +416,17 @@ class ACTower:
         # if not replay:  Would need real timing
         if self.race_mode.hasChanged():
             if self.race_mode.value == 0:
-                self.lbl_title_mode.setText("Auto")
+                self.lbl_title_mode_txt.setText("Auto")
             elif self.race_mode.value == 1:
-                self.lbl_title_mode.setText("Gaps")
+                self.lbl_title_mode_txt.setText("Gaps")
             elif self.race_mode.value == 2:
-                self.lbl_title_mode.setText("Intervals")
+                self.lbl_title_mode_txt.setText("Intervals")
             elif self.race_mode.value == 3:
-                self.lbl_title_mode.setText("Compact")
+                self.lbl_title_mode_txt.setText("Compact")
             elif self.race_mode.value == 4:
-                self.lbl_title_mode.setText("Progress")
+                self.lbl_title_mode_txt.setText("Progress")
             else:
-                self.lbl_title_mode.setText("Off")
+                self.lbl_title_mode_txt.setText("Off")
             if replay:
                 self.title_mode_visible_end_replay = time.time() + 6
             else:
@@ -404,11 +434,14 @@ class ACTower:
         if not replay and self.title_mode_visible_end != 0 \
                 and self.title_mode_visible_end < self.sessionTimeLeft:
             self.lbl_title_mode.show()
+            self.lbl_title_mode_txt.show()
         elif replay and self.title_mode_visible_end_replay != 0 \
                 and self.title_mode_visible_end_replay > time.time():
             self.lbl_title_mode.show()
+            self.lbl_title_mode_txt.show()
         else:
             self.lbl_title_mode.hide()
+            self.lbl_title_mode_txt.hide()
 
         for driver in self.drivers:
             if replay:
@@ -897,8 +930,11 @@ class ACTower:
                 for driver in self.drivers:
                     driver.hide()
                 self.lbl_title_stint.hide()
+                self.lbl_title_stint_txt.hide()
                 self.lbl_tire_stint.hide()
+                self.lbl_tire_stint_txt.hide()
                 self.lbl_title_mode.hide()
+                self.lbl_title_mode_txt.hide()
                 for l in self.stintLabels:
                     l.hide()
         elif sim_info_status == 1:  # Replay
@@ -961,6 +997,7 @@ class ACTower:
         else:
             # Paused-OFF
             self.lbl_title_mode.hide()
+            self.lbl_title_mode_txt.hide()
         '''
         t_tower = time.time()
         if t_tower - t_info > 0.006:

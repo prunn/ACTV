@@ -31,6 +31,7 @@ class Configuration:
         self.session = Value(-1)
         self.listen_active = True
         Colors.load_themes()
+        Font.load_fonts()
 
         self.window = Window(name="ACTV Config", icon=False, width=251, height=550, texture="").setBgOpacity(0)
 
@@ -129,7 +130,7 @@ class Configuration:
         # Font
         y += 70
         self.spin_font = ac.addSpinner(self.window.app, "Font :")
-        ac.setRange(self.spin_font, 0, len(Font.fonts) - 1)
+        ac.setRange(self.spin_font, 0, len(Font.font_files))
         ac.setPosition(self.spin_font, 20, y)
         ac.setValue(self.spin_font, Font.current)
         ac.addOnValueChangeListener(self.spin_font, self.on_spin_font_changed)
@@ -244,10 +245,23 @@ class Configuration:
         self.__class__.carColorsBy = self.cfg.get("SETTINGS", "car_colors_by", "int")
         if self.__class__.carColorsBy == -1:
             self.__class__.carColorsBy = 0
-        font = self.cfg.get("SETTINGS", "font", "int")
-        if font == -1 or font > len(Font.fonts) - 1:
-            font = 2  # Open Sans
-        Font.set_font(font)
+        font_ini = self.cfg.get("SETTINGS", "font_ini", "string")
+        if font_ini != -1:
+            Font.font_ini = font_ini
+        else:
+            Font.font_ini = ''
+
+        if Font.font_ini != '' and len(Font.font_files):
+            #  font number from ini
+            for i in range(0, len(Font.font_files)):
+                if Font.font_files[i]['file'] == Font.font_ini:
+                    Font.set_font(i + 1)
+                    break
+        else:
+            font = self.cfg.get("SETTINGS", "font", "int")
+            if font == -1 or font > len(Font.font_files) - 1:
+                font = 2  # Open Sans
+            Font.set_font(font)
 
         theme_ini = self.cfg.get("SETTINGS", "theme_ini", "string")
         if theme_ini != -1:
@@ -283,7 +297,7 @@ class Configuration:
         ac.setValue(self.spin_theme_blue, self.__class__.theme_blue)
         ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
         ac.setValue(self.spin_colors_by, self.__class__.carColorsBy)
-        ac.setValue(self.spin_font, font)
+        ac.setValue(self.spin_font, Font.current)
         ac.setValue(self.spin_general_theme, Colors.general_theme)
         ac.setValue(self.spin_border_direction, Colors.border_direction)
         self.set_labels()
@@ -304,7 +318,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "blue", self.__class__.theme_blue)
         self.cfg.set("SETTINGS", "tower_highlight", self.__class__.tower_highlight)
         self.cfg.set("SETTINGS", "car_colors_by", self.__class__.carColorsBy)
-        self.cfg.set("SETTINGS", "font", Font.current)
+        self.cfg.set("SETTINGS", "font_ini", Font.font_ini)
         self.cfg.set("SETTINGS", "general_theme", Colors.general_theme)
         self.cfg.set("SETTINGS", "border_direction", Colors.border_direction)
         self.cfg.set("SETTINGS", "theme_ini", Colors.theme_ini)
@@ -343,7 +357,7 @@ class Configuration:
         else:
             self.lbl_colors_by.setText("Class")
         # Font
-        self.lbl_font.setText(str(Font.get_font()))
+        self.lbl_font.setText(Font.get_font_file_name())
         # Theme
         if Colors.general_theme == 0:
             self.lbl_general_theme.setText("Dark")

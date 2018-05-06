@@ -1645,6 +1645,7 @@ class Config:
 
 class Font:
     # Name, size offset, support, width, font x offset
+    '''
     fonts = [["Segoe UI", 0, None, 1.2, 0],
              ["Noto Sans", 0, None, 1.26, 0],
              ["Open Sans", 0, 0, 1.5, 0],
@@ -1652,42 +1653,94 @@ class Font:
              ["Signika Negative", 3, 0, 1.2, 0],
              ["Strait", 7, 0, 1.1, 0],
              ["Overlock", 4, 1, 1.1, 0]]
+     '''
     init = []
+    font_ini = ''
+    font_files = []
     current = 0
+    current_font = {
+        'font_name': "Segoe UI",
+        'size_offset': 0,
+        'support_utf8': 1,
+        'width': 1.2,
+        'x_offset': 0
+    }
+
+    # ------------Theme engine -----------
+    @staticmethod
+    def load_fonts():
+        Font.font_files = []
+        theme_files = [os.path.join(root, name)
+                       for root, dirs, files in os.walk("apps/python/prunn/fonts/")
+                       for name in files
+                       if name.endswith(".ini")]
+        if len(theme_files):
+            for t in theme_files:
+                cfg = Config(t, "")
+                name = cfg.get('MAIN', 'title', 'string')
+                if name == -1:
+                    name = ""
+                Font.font_files.append({"file": t, "name": name})
 
     @staticmethod
     def set_font(font):
         Font.current = font
+        if Font.current > 0:
+            Font.font_ini = Font.font_files[Font.current - 1]['file']
+        else:
+            Font.font_ini = ''
+        if Font.current > 0 and len(Font.font_files):
+            cfg = Config(Font.font_files[Font.current - 1]['file'], "")
+            for key in Font.current_font:
+                value = cfg.get('CONFIG', key, 'string')
+                if value != -1:
+                    Font.current_font[key] = value
+        else:
+            Font.current_font = {
+                'font_name': "Segoe UI",
+                'size_offset': 0,
+                'support_utf8': 1,
+                'width': 1.2,
+                'x_offset': 0
+            }
+
         if not len(Font.init):
             i = 0
-            for _ in Font.fonts:
+            Font.init.append(False)
+            for _ in Font.font_files:
                 Font.init.append(False)
                 i += 1
         if not Font.init[Font.current]:
-            if ac.initFont(0, Font.fonts[Font.current][0], 0, 0) > 0:
+            if ac.initFont(0, Font.current_font['font_name'], 0, 0) > 0:
                 Font.init[Font.current] = True
 
     @staticmethod
     def get_font():
-        return Font.fonts[Font.current][0]
+        return Font.current_font['font_name']
+
+    @staticmethod
+    def get_font_file_name():
+        if Font.current > 0:
+            return Font.font_files[Font.current - 1]['name']
+        return 'Segoe UI'
 
     @staticmethod
     def get_font_width_adjust():
-        return Font.fonts[Font.current][3]
+        return float(Font.current_font['width'])
 
     @staticmethod
     def get_support_font():
-        if Font.fonts[Font.current][2] is not None:
-            return Font.fonts[Font.fonts[Font.current][2]][0]
-        return Font.fonts[Font.current][0]
+        if bool(Font.current_font['support_utf8']):
+            return Font.current_font['font_name']
+        return "Segoe UI"
 
     @staticmethod
     def get_font_offset():
-        return Font.fonts[Font.current][1]
+        return int(Font.current_font['size_offset'])
 
     @staticmethod
     def get_font_x_offset():
-        return Font.fonts[Font.current][4]
+        return int(Font.current_font['x_offset'])
 
     @staticmethod
     def get_text_dimensions(text, height):
