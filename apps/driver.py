@@ -223,19 +223,21 @@ class Driver:
                         self.lbl_position_txt.set(color=Colors.tower_position_highlight_odd_txt(), animated=True, init=True)
                         self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                     else:
-                        self.lbl_time.set(background=Colors.tower_time_odd_bg(), animated=True, init=True)
-                        self.lbl_time_txt.set(color=Colors.tower_time_odd_txt(), animated=True, init=True)
                         if self.isAlive.value:
                             self.lbl_name.set(background=Colors.tower_driver_odd_bg(), animated=True, init=True)
                             self.lbl_name_txt.set(color=Colors.tower_driver_odd_txt(), animated=True, init=True)
                             self.lbl_position.set(background=Colors.tower_position_odd_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_odd_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_odd_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_odd_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                         else:
                             self.lbl_name.set(background=Colors.tower_driver_retired_bg(), animated=True, init=True)
                             self.lbl_name_txt.set(color=Colors.tower_driver_retired_txt(), animated=True, init=True)
-                            self.lbl_position.set(background=Colors.tower_position_odd_bg(), animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_retired_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_retired_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_retired_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_retired_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity_retired(), animated=True, init=True)
                 else:
                     self.lbl_name.set(background=Colors.tower_driver_odd_bg(), animated=True, init=True)
@@ -253,19 +255,21 @@ class Driver:
                         self.lbl_position.set(background=Colors.tower_position_highlight_even_bg(), animated=True, init=True)
                         self.lbl_position_txt.set(color=Colors.tower_position_highlight_even_txt(), animated=True, init=True)
                     else:
-                        self.lbl_time.set(background=Colors.tower_time_even_bg(), animated=True, init=True)
-                        self.lbl_time_txt.set(color=Colors.tower_time_even_txt(), animated=True, init=True)
                         if self.isAlive.value:
                             self.lbl_name.set(background=Colors.tower_driver_even_bg(), animated=True, init=True)
                             self.lbl_name_txt.set(color=Colors.tower_driver_even_txt(), animated=True, init=True)
                             self.lbl_position.set(background=Colors.tower_position_even_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_even_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_even_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_even_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                         else:
                             self.lbl_name.set(background=Colors.tower_driver_retired_bg(), animated=True, init=True)
                             self.lbl_name_txt.set(color=Colors.tower_driver_retired_txt(), animated=True, init=True)
-                            self.lbl_position.set(background=Colors.tower_position_even_bg(), animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_retired_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_retired_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_retired_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_retired_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity_retired(), animated=True, init=True)
                 else:
                     self.lbl_name.set(background=Colors.tower_driver_even_bg(), animated=True, init=True)
@@ -579,6 +583,12 @@ class Driver:
             self.lbl_time_txt.change_font_if_needed().setText("PIT").setColor(Colors.tower_time_pit_txt(), animated=True, init=True)
         elif time == "DNF":
             self.lbl_time_txt.change_font_if_needed().setText("DNF").setColor(Colors.tower_time_retired_txt(), animated=True, init=True)
+            self.lbl_name.set(background=Colors.tower_driver_retired_bg(), animated=True, init=True)
+            self.lbl_name_txt.set(color=Colors.tower_driver_retired_txt(), animated=True, init=True)
+            self.lbl_position.set(background=Colors.tower_position_retired_bg(), animated=True, init=True)
+            self.lbl_position_txt.set(color=Colors.tower_position_retired_txt(), animated=True, init=True)
+            self.lbl_time.set(background=Colors.tower_time_retired_bg(), animated=True, init=True)
+            self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity_retired(), animated=True, init=True)
         elif isinstance(time, str) and time.find("UP") >= 0:
             self.lbl_time_txt.change_font_if_needed(1).setText(time.replace("UP", u"\u25B2")).setColor(Colors.tower_time_place_gain_txt(), animated=True, init=True)
             #self.lbl_time_txt.change_font_if_needed(1).setText(u"\u25B2").setColor(Colors.tower_time_place_gain_txt(), animated=True, init=True)
@@ -686,12 +696,16 @@ class Driver:
                         self.lbl_name_txt.set(color=Colors.tower_driver_odd_txt(), animated=True, init=True)
                         self.lbl_position.set(background=Colors.tower_position_first_bg(), animated=True, init=True)
                         self.lbl_position_txt.set(color=Colors.tower_position_first_txt(), animated=True, init=True)
+                        self.lbl_time.set(background=Colors.tower_time_odd_bg(), animated=True, init=True)
+                        self.lbl_time_txt.set(color=Colors.tower_time_odd_txt(), animated=True, init=True)
                         self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                     elif battles and self.isCurrentVehicule.value:
                         self.lbl_name.set(background=Colors.tower_driver_highlight_odd_bg(), animated=True, init=True)
                         self.lbl_name_txt.set(color=Colors.tower_driver_highlight_odd_txt(), animated=True, init=True)
                         self.lbl_position.set(background=Colors.tower_position_highlight_odd_bg(), animated=True, init=True)
                         self.lbl_position_txt.set(color=Colors.tower_position_highlight_odd_txt(), animated=True, init=True)
+                        self.lbl_time.set(background=Colors.tower_time_highlight_odd_bg(), animated=True, init=True)
+                        self.lbl_time_txt.set(color=Colors.tower_time_highlight_txt(), animated=True, init=True)
                         self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                     else:
                         if self.isAlive.value:
@@ -699,12 +713,16 @@ class Driver:
                             self.lbl_name_txt.set(color=Colors.tower_driver_odd_txt(), animated=True, init=True)
                             self.lbl_position.set(background=Colors.tower_position_odd_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_odd_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_odd_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_odd_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                         else:
                             self.lbl_name.set(background=Colors.tower_driver_retired_bg(), animated=True, init=True)
                             self.lbl_name_txt.set(color=Colors.tower_driver_retired_txt(), animated=True, init=True)
-                            self.lbl_position.set(background=Colors.tower_position_odd_bg(), animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_retired_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_retired_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_retired_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_retired_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity_retired(), animated=True, init=True)
                 else:
                     self.lbl_name.set(background=Colors.tower_driver_odd_bg(), animated=True, init=True)
@@ -718,6 +736,8 @@ class Driver:
                         self.lbl_name_txt.set(color=Colors.tower_driver_highlight_even_txt(), animated=True, init=True)
                         self.lbl_position.set(background=Colors.tower_position_highlight_even_bg(), animated=True, init=True)
                         self.lbl_position_txt.set(color=Colors.tower_position_highlight_even_txt(), animated=True, init=True)
+                        self.lbl_time.set(background=Colors.tower_time_highlight_even_bg(), animated=True, init=True)
+                        self.lbl_time_txt.set(color=Colors.tower_time_highlight_txt(), animated=True, init=True)
                         self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                     else:
                         if self.isAlive.value:
@@ -725,12 +745,16 @@ class Driver:
                             self.lbl_name_txt.set(color=Colors.tower_driver_even_txt(), animated=True, init=True)
                             self.lbl_position.set(background=Colors.tower_position_even_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_even_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_even_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_even_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
                         else:
                             self.lbl_name.set(background=Colors.tower_driver_retired_bg(), animated=True, init=True)
                             self.lbl_name_txt.set(color=Colors.tower_driver_retired_txt(), animated=True, init=True)
-                            self.lbl_position.set(background=Colors.tower_position_even_bg(), animated=True, init=True)
+                            self.lbl_position.set(background=Colors.tower_position_retired_bg(), animated=True, init=True)
                             self.lbl_position_txt.set(color=Colors.tower_position_retired_txt(), animated=True, init=True)
+                            self.lbl_time.set(background=Colors.tower_time_retired_bg(), animated=True, init=True)
+                            self.lbl_time_txt.set(color=Colors.tower_time_retired_txt(), animated=True, init=True)
                             self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity_retired(), animated=True, init=True)
                 else:
                     self.lbl_name.set(background=Colors.tower_driver_even_bg(), animated=True, init=True)

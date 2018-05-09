@@ -139,6 +139,7 @@ class Colors:
         'tower_time_highlight_even_bg': rgb([0, 0, 0]),
         'tower_time_odd_bg': rgb([0, 0, 0]),
         'tower_time_even_bg': rgb([0, 0, 0]),
+        'tower_time_retired_bg': rgb([0, 0, 0]),
         'tower_driver_odd_bg': rgb([0, 0, 0]),
         'tower_driver_odd_txt': rgb([0, 0, 0]),
         'tower_driver_even_bg': rgb([0, 0, 0]),
@@ -161,6 +162,7 @@ class Colors:
         'tower_position_highlight_odd_txt': rgb([0, 0, 0]),
         'tower_position_highlight_even_txt': rgb([0, 0, 0]),
         'tower_position_retired_txt': rgb([0, 0, 0]),
+        'tower_position_retired_bg': rgb([0, 0, 0]),
         'tower_pit_txt': rgb([0, 0, 0]),
         'tower_pit_highlight_txt': rgb([0, 0, 0]),
         'tower_stint_lap_invalid_txt': rgb([0, 0, 0]),
@@ -394,6 +396,13 @@ class Colors:
         return rgb([32, 32, 32], a=0.72)
 
     @staticmethod
+    def tower_time_retired_bg():
+        #return rgb([192, 0, 0], a=0.2)
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_time_retired_bg')
+        return rgb([32, 32, 32], a=0.72)
+
+    @staticmethod
     def tower_time_odd_txt():
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_odd_txt')
@@ -404,7 +413,7 @@ class Colors:
         #return rgb([0, 0, 0], a=0.2)
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_even_bg')
-        return rgb([32, 32, 32], a=0.72)
+        return rgb([32, 32, 32], a=0.58)
 
     @staticmethod
     def tower_time_even_txt():
@@ -534,7 +543,7 @@ class Colors:
     def tower_driver_retired_bg():
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_retired_bg')
-        return Colors.white()
+        return rgb([32, 32, 32], a=0.72)
 
     @staticmethod
     def tower_driver_retired_txt():
@@ -613,6 +622,12 @@ class Colors:
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_position_retired_txt')
         return rgb([112, 112, 112])
+
+    @staticmethod
+    def tower_position_retired_bg():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_position_retired_bg')
+        return rgb([0, 0, 0], a=0.58)
 
     @staticmethod
     def tower_pit_txt():
@@ -1096,6 +1111,7 @@ class Label:
 
     def __init__(self, window, text=""):
         self.text = text
+        #self.window = window
         self.debug = False
         self.is_hiding = True
         self.label = ac.addLabel(window, self.text)
@@ -1113,7 +1129,7 @@ class Label:
         self.fontSize = 12
         self.spring_multiplier = 36
         self.align = "left"
-        self.bgTexture = ""
+        self.bgTexture = Value('')
         self.fontName = ""
         self.cur_fontName = ""
         self.visible = 0
@@ -1267,8 +1283,13 @@ class Label:
         return self
 
     def setBgTexture(self, texture):
-        self.bgTexture = texture
-        ac.setBackgroundTexture(self.label, self.bgTexture)
+        self.bgTexture.setValue(texture)
+        if self.bgTexture.hasChanged():
+            if self.bgTexture.value == '':
+                #ac.setBackgroundTexture(self.label, 'apps/python/prunn/content/gui/actv/actv_reset_bg.png')
+                ac.setBackgroundTexture(self.label, 'content/gui/actv/reset_bg.png')
+            else:
+                ac.setBackgroundTexture(self.label, self.bgTexture.value)
         return self
 
     def setBgColor(self, color, animated=False, init=False):
