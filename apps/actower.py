@@ -48,6 +48,7 @@ class ACTower:
         self.race_mode = Value(0)
         self.qual_mode = Value(0)
         self.ui_row_height = Value(-1)
+        self.border_direction = Value(-1)
         self.numCarsToFinish = 0
         self.window = Window(name="ACTV Tower", width=268, height=60)
         self.minLapCount = 1
@@ -104,6 +105,7 @@ class ACTower:
         self.race_mode.setValue(Configuration.race_mode)
         self.qual_mode.setValue(Configuration.qual_mode)
         self.ui_row_height.setValue(Configuration.ui_row_height)
+        self.border_direction.setValue(Colors.border_direction)
         Colors.highlight(reload=True)
         self.theme.setValue(Colors.general_theme + Colors.theme_red + Colors.theme_green + Colors.theme_blue)
         self.font.setValue(Font.current)
@@ -120,7 +122,7 @@ class ACTower:
             self.lbl_tire_stint_txt.set(color=Colors.tower_stint_tire_txt(), animated=True, init=True)
             self.lbl_title_mode.set(background=Colors.tower_mode_title_bg(), animated=True, init=True)
             self.lbl_title_mode_txt.set(color=Colors.tower_mode_title_txt(), animated=True, init=True)
-        if self.ui_row_height.hasChanged() or self.font.hasChanged():
+        if self.ui_row_height.hasChanged() or self.font.hasChanged() or self.border_direction.hasChanged():
             # Fonts
             self.lbl_title_stint_txt.update_font()
             self.lbl_tire_stint_txt.update_font()

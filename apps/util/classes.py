@@ -301,7 +301,19 @@ class Colors:
                 if value != -1:
                     # Translate value to rgba
                     Colors.current_theme[key] = Colors.txt_to_rgba(value)
-                    #else default color
+
+            # Fallback for older themes - new, old
+            fallbacks = [["tower_time_highlight_odd_bg", "tower_driver_highlight_odd_bg"],
+                         ["tower_time_highlight_even_bg", "tower_driver_highlight_even_bg"],
+                         ["tower_time_odd_bg", "tower_driver_odd_bg"],
+                         ["tower_time_even_bg", "tower_driver_even_bg"],
+                         ["tower_border_retired_bg", "tower_border_default_bg"],
+                         ["tower_position_retired_bg", "tower_position_even_bg"],
+                         ["tower_time_retired_bg", "tower_driver_retired_bg"]]
+            for f in fallbacks:
+                value = cfg.get('THEME', f[0], 'string')
+                if value == -1:
+                    Colors.current_theme[f[0]] = Colors.current_theme[f[1]]
 
     @staticmethod
     def export_theme_values():
