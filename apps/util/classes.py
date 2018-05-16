@@ -1693,10 +1693,10 @@ class Font:
     current = 0
     current_font = {
         'font_name': "Segoe UI",
-        'size_offset': 0,
+        'size_offset': -7,
         'support_utf8': 1,
         'width': 1.2,
-        'x_offset': 0
+        'x_offset': 4
     }
 
     # ------------Theme engine -----------
@@ -1731,10 +1731,10 @@ class Font:
         else:
             Font.current_font = {
                 'font_name': "Segoe UI",
-                'size_offset': 0,
+                'size_offset': -7,
                 'support_utf8': 1,
                 'width': 1.2,
-                'x_offset': 0
+                'x_offset': 4
             }
 
         if not len(Font.init):
@@ -1763,7 +1763,7 @@ class Font:
 
     @staticmethod
     def get_support_font():
-        if bool(Font.current_font['support_utf8']):
+        if bool(int(Font.current_font['support_utf8'])):
             return Font.current_font['font_name']
         return "Segoe UI"
 

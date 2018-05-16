@@ -63,6 +63,10 @@ class Driver:
         self.num_pos = 0
         self.showingFullNames = False
         fontSize = 28
+        self.lbl_time = Label(app) \
+            .set(w=self.rowHeight * 4.7, h=self.rowHeight,
+                 x=self.rowHeight, y=0,
+                 opacity=0)
         if self.isLapLabel:
             self.lbl_name = Label(app) \
                 .set(w=self.rowHeight * 6, h=self.rowHeight,
@@ -146,10 +150,6 @@ class Driver:
             self.lbl_position_txt.setAnimationMode("y", "spring")
             self.lbl_p2p.setAnimationMode("y", "spring")
             self.lbl_pit.setAnimationMode("y", "spring")
-        self.lbl_time = Label(app) \
-            .set(w=self.rowHeight * 4.7, h=self.rowHeight,
-                 x=self.rowHeight, y=0,
-                 opacity=0)
         self.lbl_time_txt = Label(app, "+0.000") \
             .set(w=self.rowHeight * 4.7, h=self.rowHeight,
                  x=self.rowHeight, y=0,
