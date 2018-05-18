@@ -4,7 +4,7 @@ import os.path
 import json
 import ctypes
 from .util.func import rgb
-from .util.classes import Window, Label, Value, POINT, Colors, Font
+from .util.classes import Window, Label, Value, POINT, Colors, Font, Log
 from .configuration import Configuration
 
 
@@ -78,24 +78,28 @@ class ACTimer:
             track_file_path += ac.getTrackConfiguration(0) + "/ui_track.json"
         else:
             track_file_path += "ui_track.json"
-        if os.path.exists(track_file_path):
-            with open(track_file_path) as data_file:
-                data = json.load(data_file)
-                self.trackName = data["name"]
-                if len(self.trackName) > 12:
-                    if self.trackName[12] == " " or self.trackName[12] == "-":
-                        self.trackName = self.trackName[:12]
-                    else:
-                        self.trackName = self.trackName[:12]
-                        # cut multi-word
-                        space = self.trackName.rfind(" ")
-                        dash = self.trackName.rfind("-")
-                        if space > 0:
-                            self.trackName = self.trackName[:space]
-                        elif dash > 0:
-                            self.trackName = self.trackName[:dash]
+        try:
+            if os.path.exists(track_file_path):
+                with open(track_file_path) as data_file:
+                    data = json.load(data_file)
+                    self.trackName = data["name"]
+                    if len(self.trackName) > 12:
+                        if self.trackName[12] == " " or self.trackName[12] == "-":
+                            self.trackName = self.trackName[:12]
+                        else:
+                            self.trackName = self.trackName[:12]
+                            # cut multi-word
+                            space = self.trackName.rfind(" ")
+                            dash = self.trackName.rfind("-")
+                            if space > 0:
+                                self.trackName = self.trackName[:space]
+                            elif dash > 0:
+                                self.trackName = self.trackName[:dash]
 
-        else:
+            else:
+                self.trackName = ac.getTrackName(0)
+        except:
+            Log.w("Error init timer")
             self.trackName = ac.getTrackName(0)
         if len(self.trackName) > 12:
             self.trackName = self.trackName[:12]

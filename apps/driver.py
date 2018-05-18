@@ -681,8 +681,8 @@ class Driver:
                 self.lbl_name_txt.setY(self.final_y + Font.get_font_x_offset(), True)
                 self.lbl_position.setY(self.final_y, True)
                 self.lbl_position_txt.setY(self.final_y + Font.get_font_x_offset(), True)
-                self.lbl_pit.setY(self.final_y + 3 + Font.get_font_x_offset(), True)
-                self.lbl_p2p.setY(self.final_y + 5 + Font.get_font_x_offset(), True)
+                self.lbl_pit.setY(self.final_y + Font.get_font_x_offset() + self.rowHeight/10, True)  #  + self.rowHeight/10 +3
+                self.lbl_p2p.setY(self.final_y + Font.get_font_x_offset() + self.rowHeight/8, True)  # + 5
 
             self.lbl_time.setY(self.final_y, True)
             self.lbl_time_txt.setY(self.final_y + Font.get_font_x_offset(), True)
