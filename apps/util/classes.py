@@ -320,11 +320,15 @@ class Colors:
         ac.log('----------Start export theme------------')
         ac.log('[THEME]')
         for key in Colors.current_theme:
-            val = getattr(Colors, key)()
-            if len(val) == 4:
-                ac.log(str(key) + "=" + str(round(val[0]*255)) + "," + str(round(val[1]*255)) + "," + str(round(val[2]*255)) + "," + str(val[3]))
-            else:
-                ac.log(str(key) + "=" + str(round(val[0]*255)) + "," + str(round(val[1]*255)) + "," + str(round(val[2]*255)) + ",1")
+            try:
+                val = getattr(Colors, key)()
+                if len(val) == 4:
+                    ac.log(str(key) + "=" + str(round(val[0]*255)) + "," + str(round(val[1]*255)) + "," + str(round(val[2]*255)) + "," + str(val[3]))
+                else:
+                    ac.log(str(key) + "=" + str(round(val[0]*255)) + "," + str(round(val[1]*255)) + "," + str(round(val[2]*255)) + ",1")
+            except:
+                ac.log(str(key) + "=")
+
 
     @staticmethod
     def get_color_for_key(key):

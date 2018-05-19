@@ -7,7 +7,15 @@
 * Config (Configuration)
 
 -
-###Changelog
+###Changelog.
+2.1.0
+Added background texture support for themes (jpg,png,tga) ex: r,g,b,a,texture(full path from AC folder)
+Added 7 new color options to themes with fallback for older themes
+Smaller fonts
+Added Font config files
+Stint view bugs fixes
+Handling failed to read the ui_track.json for better track support
+
 2.0.0
 Pit window timer
 Fixed live theme change
