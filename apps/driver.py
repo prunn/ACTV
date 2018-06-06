@@ -941,6 +941,7 @@ class Driver:
                     if self.highlight.hasChanged():
                         if self.highlight.value:
                             self.lbl_time_txt.setColor(Colors.tower_time_qualification_highlight_txt(), animated=True, init=True)
+                            self.lbl_time.show()
                             self.lbl_time_txt.show()
                         else:
                             if self.position.value % 2 == 1:

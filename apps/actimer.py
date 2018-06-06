@@ -186,7 +186,7 @@ class ACTimer:
         self.lbl_session_title_txt.hide()
         self.lbl_session_border.hide()
         self.lbl_session_single.setBgColor(rgb([255, 255, 255], bg=True)).setBgOpacity(0.76).show()
-        self.lbl_session_single_txt.setText("").show()
+        self.lbl_session_single_txt.hide()
         if len(self.finish_labels) > 0:
             for label in self.finish_labels:
                 label.show()
@@ -271,11 +271,12 @@ class ACTimer:
         self.animate()
         if sim_info_status == 2:  # LIVE
             if self.replay_initialised:
-                self.lbl_session_single_txt.setColor(Colors.timer_time_txt())
+                self.lbl_session_single_txt.setColor(Colors.timer_time_txt(), animated=True)
             session_time_left = sim_info.graphics.sessionTimeLeft
             if self.session.value < 2:
                 self.lbl_pit_window.hide()
                 self.lbl_pit_window_txt.hide()
+                self.lbl_session_single_txt.hide()
                 # 0 to -5000 show finish
                 if 0 > session_time_left > -5000:
                     if not self.finish_initialised:
@@ -288,7 +289,6 @@ class ACTimer:
                     self.lbl_session_title.show()
                     self.lbl_session_title_txt.show()
                     self.lbl_session_single.hide()
-                    self.lbl_session_single_txt.hide()
                     self.lbl_session_border.show()
                     self.lbl_session_info.show()
                     self.lbl_session_info_txt.setText(self.time_splitting(session_time_left)).show()
@@ -452,11 +452,12 @@ class ACTimer:
             self.lbl_session_title_txt.hide()
             self.lbl_session_border.show()
             self.lbl_session_single.show()
-            self.lbl_session_single_txt.show()
             self.lbl_pit_window.hide()
             self.lbl_pit_window_txt.hide()
             self.replay_initialised = True
-            self.lbl_session_single_txt.setColor(rgb([self.replay_rgb, self.replay_rgb, self.replay_rgb]))
+            self.lbl_session_single_txt.setText("REPLAY")\
+                .setColor(rgb([self.replay_rgb, self.replay_rgb, self.replay_rgb]))\
+                .show()
             if self.replay_asc and replay_time_multiplier > 0:
                 self.replay_rgb += 2
             elif replay_time_multiplier > 0:
@@ -473,4 +474,3 @@ class ACTimer:
                 elif self.replay_rgb >= 246:
                     self.replay_rgb = 246
                     self.replay_asc = False
-            self.lbl_session_single_txt.setText("REPLAY")
