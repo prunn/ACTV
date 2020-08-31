@@ -38,7 +38,8 @@ class Window:
 
         # applying settings
         ac.setTitle(self.app, "")
-        ac.setBackgroundTexture(self.app, texture)
+        if texture != "":
+            ac.setBackgroundTexture(self.app, texture)
         ac.setSize(self.app, math.floor(self.width * scale), math.floor(self.height * scale))
 
     # PUBLIC METHODS
@@ -46,6 +47,11 @@ class Window:
     def onRenderCallback(self, func):
         ac.addRenderCallback(self.app, func)
         return self
+
+    def setSize(self, width, height):
+        self.width = width
+        self.height = height
+        ac.setSize(self.app, math.floor(self.width), math.floor(self.height))
 
     def setBgOpacity(self, alpha):
         ac.setBackgroundOpacity(self.app, alpha)
@@ -123,7 +129,75 @@ class Colors:
     dataCarsClasses = []
     carsClassesLoaded = False
     theme_files = []
-    # (0, 0, 0, 1, None)
+    car_classes = {
+        'default_bg': rgb([255, 255, 255]), # Red
+        'default_txt': rgb([0, 0, 0]),
+
+        'lmp1_title': 'LMP1',
+        'lmp1_bg': rgb([205, 0, 0]), # Red
+        'lmp1_txt': rgb([255, 255, 255]),
+
+        'lmp2_title': 'LMP2',
+        'lmp2_bg': rgb([0, 80, 150]), # Blue
+        'lmp2_txt': rgb([255, 255, 255]),
+
+        'lmp3_title': 'LMP3',
+        'lmp3_bg': rgb([102, 51, 102]), # Purple
+        'lmp3_txt': rgb([255, 255, 255]),
+
+        'proto c_title': 'PROTO C',
+        'proto c_bg': rgb([238, 234, 51]), # Yellow
+        'proto c_txt': rgb([0, 0, 0]),
+
+        'gte-gt3_title': 'GT3-GTE',
+        'gte-gt3_bg': rgb([0, 150, 54]), # Green
+        'gte-gt3_txt': rgb([0, 0, 0]),
+
+        'gt4_title': 'GT4',
+        'gt4_bg': rgb([252, 139, 1]), # Orange
+        'gt4_txt': rgb([255, 255, 255]),
+
+        'suv_title': 'SUV',
+        'suv_bg': rgb([242, 65, 225]), # Bad Pink
+        'suv_txt': rgb([0, 0, 0]),
+
+        'hypercars_title': 'HYP',
+        'hypercars_bg': rgb([227, 90, 90]), # Light red
+        'hypercars_txt': rgb([0, 0, 0]),
+
+        'hypercars r_title': 'HYP R',
+        'hypercars r_bg': rgb([127, 215, 127]), # Light green
+        'hypercars r_txt': rgb([0, 0, 0]),
+
+        'supercars_title': 'SUPER',
+        'supercars_bg': rgb([21, 141, 255]), # Dark blue
+        'supercars_txt': rgb([0, 0, 0]),
+
+        'sportscars_title': 'SPORTS',
+        'sportscars_bg': rgb([101, 101, 101]), # Grey
+        'sportscars_txt': rgb([255, 255, 255]),
+
+        'vintage supercars_title': 'V SUPER',
+        'vintage supercars_bg': rgb([65, 200, 220]), # Light blue
+        'vintage supercars_txt': rgb([0, 0, 0]),
+
+        'vintage gt_title': 'V GT',
+        'vintage gt_bg': rgb([212, 167, 206]), # Pink
+        'vintage gt_txt': rgb([0, 0, 0]),
+
+        'vintage touring_title': 'V TOURING',
+        'vintage touring_bg': rgb([236, 205, 96]), # Dark yellow
+        'vintage touring_txt': rgb([0, 0, 0]),
+
+        'small sports_title': 'SMALL',
+        'small sports_bg': rgb([0, 0, 0]), # Black
+        'small sports_txt': rgb([255, 255, 255]),
+
+        '90s touring_title': '90S T',
+        '90s touring_bg': rgb([96, 169, 184]), # Blue-Green
+        '90s touring_txt': rgb([0, 0, 0]),
+
+    }
     current_theme = {
         'tower_time_odd_txt': rgb([0, 0, 0]),
         'tower_time_even_txt': rgb([0, 0, 0]),
@@ -151,6 +225,8 @@ class Colors:
         'tower_driver_stopped_txt': rgb([0, 0, 0]),
         'tower_driver_retired_bg': rgb([0, 0, 0]),
         'tower_driver_retired_txt': rgb([0, 0, 0]),
+        'tower_driver_lap_down_txt': rgb([0, 188, 255]),
+        'tower_driver_lap_up_txt': rgb([252, 139, 7]),
         'tower_position_first_bg': rgb([0, 0, 0]),
         'tower_position_first_txt': rgb([0, 0, 0]),
         'tower_position_odd_bg': rgb([0, 0, 0]),
@@ -256,6 +332,15 @@ class Colors:
             car_name = ac.getCarName(i)
             if car_name not in loaded_cars:
                 loaded_cars.append(car_name)
+                # check car_classes first
+                for index, c in Colors.car_classes.items():
+                    if index.find("_cars") >= 0:
+                        if car_name in c:
+                            cur_class = index.replace("_cars", "")
+                            driver_index = index.replace("_cars", "_drivers")
+                            if not driver_index in Colors.car_classes.keys():
+                                Colors.dataCarsClasses.append({"c": car_name, "t": cur_class})
+                                break
                 file_path = "content/cars/" + car_name + "/ui/ui_car.json"
                 try:
                     if os.path.exists(file_path):
@@ -270,11 +355,22 @@ class Colors:
         Colors.carsClassesLoaded = True
 
     @staticmethod
-    def getClassForCar(car):
+    def getClassForCar(car,steam_id=None):
+        if not Colors.carsClassesLoaded:
+            Colors.loadCarClasses()
+        # Driver class
+        if steam_id is not None:
+            for index, c in Colors.car_classes.items():
+                if index.find("_drivers") >= 0 and steam_id in c:
+                    # drivers + cars
+                    car_index = index.replace("_drivers", "_cars")
+                    if (not car_index in Colors.car_classes.keys()) or (car_index in Colors.car_classes.keys() and car in Colors.car_classes[car_index]):
+                        return index.replace("_drivers", "")
+
         for c in Colors.dataCarsClasses:
             if c["c"] == car:
                 return c["t"]
-        return False
+        return ""
 
     # ------------Theme engine -----------
     @staticmethod
@@ -309,11 +405,41 @@ class Colors:
                          ["tower_time_even_bg", "tower_driver_even_bg"],
                          ["tower_border_retired_bg", "tower_border_default_bg"],
                          ["tower_position_retired_bg", "tower_position_even_bg"],
-                         ["tower_time_retired_bg", "tower_driver_retired_bg"]]
+                         ["tower_time_retired_bg", "tower_driver_retired_bg"],
+                         ["tower_driver_lap_down_txt", "tower_driver_lap_down_txt"],
+                         ["tower_driver_lap_up_txt", "tower_driver_lap_up_txt"]]
             for f in fallbacks:
                 value = cfg.get('THEME', f[0], 'string')
                 if value == -1:
                     Colors.current_theme[f[0]] = Colors.current_theme[f[1]]
+
+        # Car classes
+        cfg = Config('apps/python/prunn/', 'car_classes.ini')
+        cfg_sections = cfg.sections()
+        for s in cfg_sections:
+            value = cfg.get(s, 'bg', 'string')
+            if value != -1:
+                Colors.car_classes[s + '_bg'] = Colors.txt_to_rgba(value)  # Translate value to rgba
+            value = cfg.get(s, 'txt', 'string')
+            if value != -1:
+                Colors.car_classes[s + '_txt'] = Colors.txt_to_rgba(value)  # Translate value to rgba
+            value = cfg.get(s, 'title', 'string')
+            if value != -1:
+                Colors.car_classes[s + '_title'] = value
+            value = cfg.get(s, 'cars', 'string')
+            if value != -1:
+                if value.find(",") > 0:
+                    array_values = value.split(',')
+                else:
+                    array_values = [value]
+                Colors.car_classes[s + '_cars'] = array_values
+            value = cfg.get(s, 'drivers', 'string')
+            if value != -1:
+                if value.find(",") > 0:
+                    array_values = value.split(',')
+                else:
+                    array_values = [value]
+                Colors.car_classes[s + '_drivers'] = array_values
 
     @staticmethod
     def export_theme_values():
@@ -512,6 +638,19 @@ class Colors:
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_driver_odd_txt')
         return Colors.white()
+
+
+    @staticmethod
+    def tower_driver_lap_down_txt():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_driver_lap_down_txt')
+        return Colors.blue_flag()
+
+    @staticmethod
+    def tower_driver_lap_up_txt():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_driver_lap_up_txt')
+        return Colors.blue_flag()
 
     @staticmethod
     def tower_driver_even_bg():
@@ -1037,15 +1176,17 @@ class Colors:
         return rgb([0, 150, 54], a=a)
 
     @staticmethod
-    def colorFromCar(car, byclass=False, default=None):
+    def colorFromCar(car, byclass=False, default=None, car_class=None):
         if default is not None and len(default) > 3:
             #get alpha from default
             alpha = default[3]
         else:
             alpha = 1
         if byclass:
-            if not Colors.carsClassesLoaded:
-                Colors.loadCarClasses()
+            if car_class is not None:
+                if car_class != "" and car_class + '_bg' in Colors.car_classes:
+                    return Colors.car_classes[car_class + '_bg']
+                return Colors.car_classes['default_bg']
             cl = Colors.getClassForCar(car)
             if cl != False:
                 if cl == 'lmp1':
@@ -1609,13 +1750,16 @@ class Config:
     # LOCAL METHODS
 
     def _read(self):
-        self.parser.read(self.file)
+        self.parser.read(self.file, encoding='utf-8')
 
     def _write(self):
         with open(self.file, "w") as cfgFile:
             self.parser.write(cfgFile)
 
     # PUBLIC METHODS
+
+    def sections(self):
+        return self.parser.sections()
 
     def has(self, section=None, option=None):
         if section is not None:
@@ -1802,6 +1946,10 @@ class Font:
 
     @staticmethod
     def get_font_size(row_height):
+        if row_height >= 60:
+            return int(row_height * 2 / 3)
+        if row_height == 59 or row_height == 58:
+            return 39
         if row_height == 57 or row_height == 56:
             return 38
         if row_height == 55 or row_height == 54:

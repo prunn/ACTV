@@ -7,11 +7,16 @@ from .configuration import Configuration
 
 
 class Driver:
-    def __init__(self, app, identifier, name, pos, is_lap_label=False, is_results=False):
+    def __init__(self, app, identifier, name, pos, is_lap_label=False, is_results=False,is_touristenfahrten=False):
         self.identifier = identifier
+        self.steam_id=None
+        self.steam_id_changed=Value(None)
+        self.is_touristenfahrten=is_touristenfahrten
         self.rowHeight = Configuration.ui_row_height
         self.race = False
         self.race_start_position = -1
+        self.car_number = ""
+        self.team_name = ""
         self.cur_theme = Value(-1)
         self.font = Value(0)
         self.theme = Value(-1)
@@ -34,6 +39,9 @@ class Driver:
         self.isLapLabel = is_lap_label
         self.qual_mode = Value(0)
         self.race_gaps = []
+        self.realtime_gaps = [0] * 100
+        self.bestLap_sectors = []
+        self.bestLap_value = Value(0)
         self.finished = Value(False)
         self.bestLap = 0
         self.compact_mode = False
@@ -60,6 +68,7 @@ class Driver:
         self.position = Value()
         self.position_offset = Value()
         self.carName = ac.getCarName(self.identifier)
+        self.car_class_name = Colors.getClassForCar(self.carName)
         self.num_pos = 0
         self.showingFullNames = False
         fontSize = 28
@@ -359,7 +368,7 @@ class Driver:
                 else:
                     self.lbl_border.setY(self.final_y + self.rowHeight - 2, True)
 
-    def show(self, needs_tlc=True, race=True, compact=False):
+    def show(self, needs_tlc=True, race=True, compact=False, realtime_target_laps=-1):
         self.race = race
         self.compact_mode = compact
         # P2P
@@ -401,12 +410,16 @@ class Driver:
             self.lbl_position_txt.show()
             if not self.isAlive.value and not self.finished.value:
                 self.lbl_name_txt.setColor(Colors.tower_driver_retired_txt(), animated=True, init=True)
-            elif self.isInPit.value or ac.getCarState(self.identifier, acsys.CS.SpeedKMH) > 30 or self.finished.value:
+            elif self.isInPit.value or ac.getCarState(self.identifier, acsys.CS.SpeedKMH) > 30 or self.finished.value or (self.race and not self.hasStartedRace):
                 if self.race and self.isCurrentVehicule.value:
                     if self.position.value % 2 == 1:
                         self.lbl_name_txt.setColor(Colors.tower_driver_highlight_odd_txt(), animated=True, init=True)
                     else:
                         self.lbl_name_txt.setColor(Colors.tower_driver_highlight_even_txt(), animated=True, init=True)
+                elif not self.isCurrentVehicule.value and self.race and realtime_target_laps > -1 and self.race_current_sector.value + 50 < realtime_target_laps:
+                    self.lbl_name_txt.setColor(Colors.tower_driver_lap_down_txt(), animated=True, init=True)
+                elif not self.isCurrentVehicule.value and self.race and realtime_target_laps > -1 and self.race_current_sector.value - 50 > realtime_target_laps:
+                    self.lbl_name_txt.setColor(Colors.tower_driver_lap_up_txt(), animated=True, init=True)
                 elif self.position.value % 2 == 1:
                     self.lbl_name_txt.setColor(Colors.tower_driver_odd_txt(), animated=True, init=True)
                 else:
@@ -479,6 +492,7 @@ class Driver:
             self.race_current_sector.setValue(0)
             self.race_standings_sector.setValue(0)
             self.race_gaps = []
+            self.realtime_gaps = [0] * 100
             self.completedLaps.setValue(0)
             self.completedLapsChanged = False
             self.last_lap_visible_end = 0
@@ -520,7 +534,7 @@ class Driver:
 
     def set_border(self):
         colors_by_class = bool(Configuration.carColorsBy == 1)
-        self.lbl_border.set(background=Colors.colorFromCar(self.carName, colors_by_class, Colors.tower_border_default_bg()),
+        self.lbl_border.set(background=Colors.colorFromCar(self.carName, colors_by_class, Colors.tower_border_default_bg(),self.car_class_name),
                             init=True)
 
     def show_full_name(self):
@@ -574,7 +588,7 @@ class Driver:
         else:
             self.lbl_time_txt.change_font_if_needed().setText("+" + self.format_time(leader - session_time)).setColor(Colors.tower_time_even_txt(), animated=True, init=True)
 
-    def set_time_race_battle(self, time, identifier, lap=False, intervals=False):
+    def set_time_race_battle(self, time, identifier, lap=False, intervals=False, realtime=False):
         if self.isCurrentVehicule.value:
             normal_color = Colors.tower_time_highlight_txt()
         elif self.position.value % 2 == 1:
@@ -600,7 +614,17 @@ class Driver:
         elif isinstance(time, str) and time.find("NEUTRAL") >= 0:
             self.lbl_time_txt.change_font_if_needed(1).setText(time.replace("NEUTRAL", u"\u25C0")).setColor(normal_color, animated=True, init=True)
         elif self.identifier == identifier or time == 600000:
-            self.lbl_time_txt.change_font_if_needed().setText("").setColor(normal_color, animated=True, init=True)
+            if ((self.race and Configuration.race_mode == 6) or (not self.race and Configuration.qual_mode == 3)) or time == 600000:  # or self.completedLaps.value == 0
+                self.lbl_time_txt.change_font_if_needed().setText("--.-").setColor(normal_color, animated=True, init=True)
+            else:
+                laps = " Lap"
+                if self.completedLaps.value > 1:
+                    laps += "s"
+                laps = str(self.completedLaps.value) + laps
+                self.lbl_time_txt.change_font_if_needed().setText(laps).setColor(normal_color, animated=True, init=True)
+                #self.lbl_time_txt.change_font_if_needed().setText("").setColor(normal_color, animated=True, init=True)
+        elif realtime:
+            self.lbl_time_txt.change_font_if_needed().setText(self.format_time_realtime(time)).setColor(normal_color, animated=True, init=True)
         elif lap:
             str_time = "+" + str(math.floor(abs(time)))
             if abs(time) >= 2:
@@ -623,7 +647,27 @@ class Driver:
         if len(self.race_gaps) > 132:
             del self.race_gaps[0:len(self.race_gaps) - 132]
 
-    def set_position(self, position, offset, battles):
+    def update_mandatory_pitstop(self, pit_window_active):
+        self.steam_id_changed.setValue(self.steam_id)
+        if self.steam_id_changed.hasChanged():
+            self.car_class_name = Colors.getClassForCar(self.carName, self.steam_id)
+            self.set_border()
+        self.isInPitLane.setValue(bool(ac.isCarInPitline(self.identifier)))
+        self.isInPitBox.setValue(bool(ac.isCarInPit(self.identifier)))
+        pit_value = self.isInPitLane.value or self.isInPitBox.value or (self.is_touristenfahrten and 0.923 < self.raceProgress < 0.939)  # or Nord Tourist 0.923 < position > 0.939
+        self.isInPit.setValue(pit_value)
+        if self.race:
+            #self.pit_window_active = pit_window_active
+            if self.isInPitBox.hasChanged():
+                if self.isInPitBox.value:
+                    self.inPitFromPitLane = self.isInPitLaneOld
+                    #if self.pit_window_active and self.inPitFromPitLane:
+                    #    self.pit_stops = 1
+                else:
+                    self.inPitFromPitLane = False
+            self.isInPitLaneOld = self.isInPitLane.value
+
+    def set_position(self, position, offset, battles, realtime=False):
         if not self.isLapLabel:
             self.isInPitLane.setValue(bool(ac.isCarInPitline(self.identifier)))
             self.isInPitBox.setValue(bool(ac.isCarInPit(self.identifier)))
@@ -649,7 +693,10 @@ class Driver:
                 if self.position.old > 0:
                     self.position_highlight_end = True
             # move labels
-            self.num_pos = position - 1 - offset
+            if realtime:
+                self.num_pos = offset
+            else:
+                self.num_pos = position - 1 - offset
             self.final_y = self.num_pos * self.rowHeight
             # avoid long slide on first draw
             if not self.firstDraw:
@@ -811,7 +858,7 @@ class Driver:
         space = name.find(" ")
         if space > 0:
             name = name[space:]
-        name = name.strip().upper()
+        name = name.strip()
         if len(name) > 9:
             return name[:10]
         return name
@@ -822,7 +869,7 @@ class Driver:
             first = name[0].upper()
         space = name.find(" ")
         if space > 0:
-            name = first + "." + name[space:]
+            name = first.upper() + "." + name[space:]
         name = name.strip().upper()
         if len(name) > 9:
             return name[:10]
@@ -832,7 +879,7 @@ class Driver:
         space = name.find(" ")
         if space > 0:
             name = name[:space]
-        name = name.strip().upper()
+        name = name.strip()
         if len(name) > 9:
             return name[:10]
         return name
@@ -851,6 +898,26 @@ class Driver:
             return "{0}:{1}.{2}".format(int(m), str(int(s)).zfill(2), str(int(d)).zfill(3))
         else:
             return "{0}.{1}".format(int(s), str(int(d)).zfill(3))
+
+    def format_time_realtime(self, ms):
+        prefix = "+"
+        if ms < 0:
+            prefix = "-"
+        ms = abs(ms)
+        # time = "+"+str(time)
+        s = ms / 1000
+        m, s = divmod(s, 60)
+        h, m = divmod(m, 60)
+        # d,h=divmod(h,24)
+        d = ms % 1000 / 100
+        if math.isnan(s) or math.isnan(d) or math.isnan(m) or math.isnan(h):
+            return "--.-"
+        if h > 0:
+            return prefix + "{0}:{1}:{2}.{3}".format(int(h), str(int(m)).zfill(2), str(int(s)).zfill(2), str(int(d)))
+        elif m > 0:
+            return prefix + "{0}:{1}.{2}".format(int(m), str(int(s)).zfill(2), str(int(d)))
+        else:
+            return prefix + "{0}.{1}".format(int(s), str(int(d)))
 
     def is_compact_mode(self):
         if self.isLapLabel:

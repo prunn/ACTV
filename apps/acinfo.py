@@ -17,7 +17,7 @@ class ACInfo:
         self.pos = 0
         self.driver_name_width = 0
         self.lbl_position_text = Value("")
-        self.currentVehicle = Value(-1)
+        self.currentVehicle = Value(0)
         self.row_height = Value(-1)
         self.cursor = Value(False)
         self.border_direction = Value(-1)
@@ -150,7 +150,7 @@ class ACInfo:
     def redraw_size(self):
         # Colors
         if self.theme.hasChanged():
-            car = ac.getCarName(0)
+            car = ac.getCarName(self.currentVehicle.value)
             self.lbl_timing.set(background=Colors.info_timing_bg(),
                                 animated=True, init=True)
             self.info_position_lead.set(background=Colors.info_position_first_bg(), animated=True, init=True)
@@ -164,12 +164,12 @@ class ACInfo:
             self.lbl_fastest_split.set(color=Colors.info_fastest_time_txt(), animated=True, init=True)
             self.lbl_timing_text.set(color=Colors.info_timing_txt(), animated=True, init=True)
             self.lbl_fl_driver_name.set(background=Colors.info_driver_bg(), animated=True, init=True)
-
+            class_id = self.get_class_id(self.currentVehicle.value)
             if Colors.border_direction == 1:
-                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()),
+                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg(),class_id),
                                     opacity=1, animated=True, init=True)
             else:
-                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()),
+                self.lbl_border.set(background=Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg(),class_id),
                                     opacity=Colors.border_opacity(), animated=True, init=True)
             if self.pos > 1:
                 self.info_position.set(background=Colors.info_position_bg(), animated=True, init=True)
@@ -484,6 +484,13 @@ class ACInfo:
         # old bestLap
         return self.fastestLap2.old
 
+    def get_class_id(self, identifier):
+        if self.standings is not None and len(self.standings):
+            for s in self.standings:
+                if s[0] == identifier:
+                    return s[2]
+        return Colors.getClassForCar(ac.getCarName(identifier))
+
     def manage_window(self):
         pt = POINT()
         result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
@@ -551,12 +558,14 @@ class ACInfo:
         current_vehicle_changed = self.currentVehicle.hasChanged()
         if self.colorsByClass.hasChanged() and not self.fastestLapBorderActive:
             car = ac.getCarName(self.currentVehicle.value)
-            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()))
+            class_id = self.get_class_id(self.currentVehicle.value)
+            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg(),class_id))
 
         if current_vehicle_changed or (self.fastestLapBorderActive and session_time_left < self.visible_end - 2000):
             self.fastestLapBorderActive = False
             car = ac.getCarName(self.currentVehicle.value)
-            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()))
+            class_id = self.get_class_id(self.currentVehicle.value)
+            self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg(),class_id))
 
         if sim_info_status == 2:
             # LIVE
@@ -835,7 +844,8 @@ class ACInfo:
                 if self.race_fastest_lap.hasChanged() and self.race_fastest_lap.value > 0:
                     self.fastestLapBorderActive = True
                     car = ac.getCarName(self.race_fastest_lap_driver.value)
-                    self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg()))
+                    class_id = self.get_class_id(self.race_fastest_lap_driver.value)
+                    self.lbl_border.setBgColor(Colors.colorFromCar(car, self.colorsByClass.value, Colors.info_border_default_bg(),class_id))
                     self.visible_end = session_time_left - 10000
                     self.driver_name_visible.setValue(1)
                     self.driver_name_text.setValue(ac.getDriverName(self.race_fastest_lap_driver.value))

@@ -44,7 +44,7 @@ class Configuration:
 
         y = 50
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
-        ac.setRange(self.spin_race_mode, 0, 5)
+        ac.setRange(self.spin_race_mode, 0, 6)
         ac.setPosition(self.spin_race_mode, 20, y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.on_spin_race_mode_changed)
@@ -66,7 +66,7 @@ class Configuration:
 
         y += 70
         self.spin_num_cars = ac.addSpinner(self.window.app, "Number cars tower")
-        ac.setRange(self.spin_num_cars, 6, 28)
+        ac.setRange(self.spin_num_cars, 6, 80)
         ac.setPosition(self.spin_num_cars, 20, y)
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.addOnValueChangeListener(self.spin_num_cars, self.on_spin_num_cars_changed)
@@ -80,7 +80,7 @@ class Configuration:
 
         y += 70
         self.spin_row_height = ac.addSpinner(self.window.app, "Row height")
-        ac.setRange(self.spin_row_height, 20, 48)
+        ac.setRange(self.spin_row_height, 20, 80)
         ac.setPosition(self.spin_row_height, 20, y)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
         ac.addOnValueChangeListener(self.spin_row_height, self.on_spin_row_height_changed)
@@ -213,16 +213,23 @@ class Configuration:
             self.__class__.forceInfoVisible = 0
         self.__class__.max_num_cars = self.cfg.get("SETTINGS", "num_cars_tower", "int")
         if self.__class__.max_num_cars == -1:
-            self.__class__.max_num_cars = 18
+            self.__class__.max_num_cars = 10
         self.__class__.max_num_laps_stint = self.cfg.get("SETTINGS", "num_laps_stint", "int")
         if self.__class__.max_num_laps_stint == -1:
             self.__class__.max_num_laps_stint = 8
         self.__class__.ui_row_height = self.cfg.get("SETTINGS", "ui_row_height", "int")
         if self.__class__.ui_row_height == -1:
-            self.__class__.ui_row_height = 36
+            user32 = ctypes.windll.user32
+            window_height = user32.GetSystemMetrics(1)
+            if window_height >= 2000:  # 4k
+                self.__class__.ui_row_height = 72
+            elif window_height >= 1400:  # 2k
+                self.__class__.ui_row_height = 54
+            else:  # 1080p
+                self.__class__.ui_row_height = 36
         self.__class__.race_mode = self.cfg.get("SETTINGS", "race_mode", "int")
         if self.__class__.race_mode == -1:
-            self.__class__.race_mode = 0
+            self.__class__.race_mode = 1
         self.__class__.qual_mode = self.cfg.get("SETTINGS", "qual_mode", "int")
         if self.__class__.qual_mode == -1:
             self.__class__.qual_mode = 0
@@ -332,7 +339,7 @@ class Configuration:
         elif self.__class__.qual_mode == 2:
             self.lbl_qual_mode.setText("Compact")
         else:
-            self.lbl_qual_mode.setText("Off")
+            self.lbl_qual_mode.setText("Realtime")
         # Race mode
         if self.__class__.race_mode == 0:
             self.lbl_race_mode.setText("Auto")
@@ -344,8 +351,10 @@ class Configuration:
             self.lbl_race_mode.setText("Compact")
         elif self.__class__.race_mode == 4:
             self.lbl_race_mode.setText("Progress")
-        else:
+        elif self.__class__.race_mode == 5:
             self.lbl_race_mode.setText("Off")
+        else:
+            self.lbl_race_mode.setText("Realtime")
         # Tower color
         if self.__class__.tower_highlight == 0:
             self.lbl_tower_lap.setText("Red")
@@ -520,13 +529,13 @@ class Configuration:
 
     def hotkey_pressed(self):
         if self.session.value == 2:
-            if self.__class__.race_mode >= 5:
+            if self.__class__.race_mode >= 6:
                 self.__class__.race_mode = 0
             else:
                 self.__class__.race_mode += 1
             ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         else:
-            if self.__class__.qual_mode >= 2:
+            if self.__class__.qual_mode >= 3:
                 self.__class__.qual_mode = 0
             else:
                 self.__class__.qual_mode += 1
