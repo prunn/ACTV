@@ -287,7 +287,7 @@ class ACTower:
                         driver.update_pit(self.sessionTimeLeft)
                     else:
                         driver.hide()
-        elif (show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and self.sessionTimeLeft >= self.stint_visible_end):
+        elif Configuration.max_num_laps_stint > 0 and ((show_stint_always and len(self.curDriverLaps) >= self.minlap_stint) or (self.stint_visible_end != 0 and self.sessionTimeLeft >= self.stint_visible_end)):
             # Lap stint mode
             for driver in self.drivers:
                 if driver.identifier == 0:

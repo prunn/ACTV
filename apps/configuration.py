@@ -33,7 +33,7 @@ class Configuration:
         Colors.load_themes()
         Font.load_fonts()
 
-        self.window = Window(name="ACTV Config", icon=False, width=251, height=550, texture="").setBgOpacity(0)
+        self.window = Window(name="ACTV Config", icon=False, width=251, height=520, texture="").setBgOpacity(0)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -73,7 +73,7 @@ class Configuration:
 
         y += 70
         self.spin_num_laps = ac.addSpinner(self.window.app, "Number laps stint mode")
-        ac.setRange(self.spin_num_laps, 2, 28)
+        ac.setRange(self.spin_num_laps, 0, 28)
         ac.setPosition(self.spin_num_laps, 20, y)
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
         ac.addOnValueChangeListener(self.spin_num_laps, self.on_spin_num_laps_changed)
@@ -106,7 +106,7 @@ class Configuration:
             .setFontSize(16).setAlign("left")\
             .setVisible(1)
 
-        y += 36
+        y += 33
         self.chk_force_info = ac.addCheckBox(self.window.app, "")
         ac.setPosition(self.chk_force_info, 20, y)
         ac.addOnCheckBoxChanged(self.chk_force_info, self.on_check_force_info_changed)
