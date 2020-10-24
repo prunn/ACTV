@@ -5,6 +5,7 @@ import configparser
 import ctypes
 import os.path
 import json
+import functools
 from apps.util.func import rgb
 from html.parser import HTMLParser
 
@@ -125,9 +126,11 @@ class Colors:
     theme_red = -1
     theme_green = -1
     theme_blue = -1
-    theme_highlight = -1
+    cars_classes_current = -1
     dataCarsClasses = []
+    car_classes_list = []
     carsClassesLoaded = False
+    multiCarsClasses = False
     theme_files = []
     car_classes = {
         'default_bg': rgb([255, 255, 255]), # White
@@ -253,6 +256,8 @@ class Colors:
         'tower_stint_title_txt': rgb([0, 0, 0]),
         'tower_stint_tire_bg': rgb([0, 0, 0]),
         'tower_stint_tire_txt': rgb([0, 0, 0]),
+        'tower_class_bg': rgb([0, 0, 0]),
+        'tower_class_txt': rgb([0, 0, 0]),
         'info_driver_bg': rgb([0, 0, 0]),
         'info_driver_txt': rgb([0, 0, 0]),
         'info_driver_single_bg': rgb([0, 0, 0]),
@@ -315,19 +320,15 @@ class Colors:
     @staticmethod
     def highlight(bg=False, reload=False):
         # get theme color
-        if reload or Colors.theme_highlight < 0:
-            cfg = Config("apps/python/prunn/", "config.ini")
-            Colors.theme_highlight = cfg.get("SETTINGS", "tower_highlight", "int")
-            if Colors.theme_highlight != 1:
-                Colors.theme_highlight = 0
-        if Colors.theme_highlight == 1:
-            return Colors.green(bg=bg)
+        #return Colors.green(bg=bg)
         return Colors.red(bg=bg)
 
     @staticmethod
     def loadCarClasses():
         Colors.dataCarsClasses = []
+        Colors.car_classes_list = []
         loaded_cars = []
+        last_class=-1
         for i in range(ac.getCarsCount()):
             car_name = ac.getCarName(i)
             if car_name not in loaded_cars:
@@ -340,6 +341,11 @@ class Colors:
                             driver_index = index.replace("_cars", "_drivers")
                             if not driver_index in Colors.car_classes.keys():
                                 Colors.dataCarsClasses.append({"c": car_name, "t": cur_class})
+                                if last_class != -1 and last_class != cur_class.lower():
+                                    Colors.multiCarsClasses = True
+                                last_class = cur_class.lower()
+                                if not last_class in Colors.car_classes_list:
+                                    Colors.car_classes_list.append(last_class)
                                 break
                 file_path = "content/cars/" + car_name + "/ui/ui_car.json"
                 try:
@@ -350,6 +356,11 @@ class Colors:
                             for t in data["tags"]:
                                 if t[0] == "#":
                                     Colors.dataCarsClasses.append({"c": car_name, "t": t[1:].lower()})
+                                    if last_class != -1 and last_class != t[1:].lower():
+                                        Colors.multiCarsClasses = True
+                                    last_class = t[1:].lower()
+                                    if not last_class in Colors.car_classes_list:
+                                        Colors.car_classes_list.append(last_class)
                 except:
                     Log.w("Error color:" + file_path)
         Colors.carsClassesLoaded = True
@@ -365,6 +376,7 @@ class Colors:
                     # drivers + cars
                     car_index = index.replace("_drivers", "_cars")
                     if (not car_index in Colors.car_classes.keys()) or (car_index in Colors.car_classes.keys() and car in Colors.car_classes[car_index]):
+                        Colors.multiCarsClasses=True #?? how to know for sure?
                         return index.replace("_drivers", "")
 
         for c in Colors.dataCarsClasses:
@@ -406,8 +418,10 @@ class Colors:
                          ["tower_border_retired_bg", "tower_border_default_bg"],
                          ["tower_position_retired_bg", "tower_position_even_bg"],
                          ["tower_time_retired_bg", "tower_driver_retired_bg"],
-                         ["tower_driver_lap_down_txt", "tower_driver_lap_down_txt"],
-                         ["tower_driver_lap_up_txt", "tower_driver_lap_up_txt"]]
+                         ["tower_driver_lap_down_txt", "tower_driver_odd_txt"],
+                         ["tower_driver_lap_up_txt", "tower_driver_odd_txt"],
+                         ["tower_class_bg", "tower_mode_title_bg"],
+                         ["tower_class_txt", "tower_mode_title_txt"]]
             for f in fallbacks:
                 value = cfg.get('THEME', f[0], 'string')
                 if value == -1:
@@ -588,8 +602,6 @@ class Colors:
     def tower_time_qualification_highlight_txt():
         if Colors.general_theme > 0:
             return Colors.get_color_for_key('tower_time_qualification_highlight_txt')
-        if Colors.theme_highlight == 1:
-            return Colors.green()
         return Colors.red()
 
     @staticmethod
@@ -876,6 +888,18 @@ class Colors:
             return Colors.get_color_for_key('tower_stint_tire_txt')
         return Colors.white()
 
+    @staticmethod
+    def tower_class_bg():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_class_bg')
+        return rgb([0, 0, 0], a=0)
+
+    @staticmethod
+    def tower_class_txt():
+        if Colors.general_theme > 0:
+            return Colors.get_color_for_key('tower_class_txt')
+        return Colors.white()
+
     # --------------- Info ---------------
     @staticmethod
     def info_driver_bg():
@@ -1139,6 +1163,10 @@ class Colors:
     @staticmethod
     def black():
         return rgb([0, 0, 0], a=1)
+
+    @staticmethod
+    def blue_flag():
+        return rgb([0, 0, 200], a=1)
 
     @staticmethod
     def black_txt():
@@ -2020,6 +2048,80 @@ class lapTimeStart:
         self.lap = lap
         self.time = time
         self.lastpit = lastpit
+
+class CarClass:
+    def __init__(self, app, identifier, title, ui_row_height, offset, color):
+        self.identifier=identifier
+        self.title=title
+        self.w = 0
+        self.h = 0
+        self.lbl_title_bg = Label(app) \
+            .set(w=35, h=20,
+                 x=0, y=-ui_row_height,
+                 opacity=1)
+        self.lbl_title_txt = Label(app, title) \
+            .set(w=35, h=0,
+                 x=0, y=-ui_row_height + Font.get_font_x_offset(),
+                 font_size=12,
+                 align="center",
+                 opacity=0)
+        self.lbl_title_border = Label(app) \
+            .set(w=35, h=2,
+                 x=0, y=-2,
+                 background=color, opacity=Colors.tower_border_default_bg_opacity())
+
+        self.redraw_size(ui_row_height, offset)
+        self.partial_func = functools.partial(self.on_click_func, identifier=self.identifier)
+        ac.addOnClickedListener(self.lbl_title_bg.label, self.partial_func)
+
+    @classmethod
+    def on_click_func(*args, identifier=0):
+        Colors.cars_classes_current = identifier
+
+    def redraw_size(self,ui_row_height, offset):
+        # set y axis, colors
+        font_size = Font.get_font_size(ui_row_height + Font.get_font_offset())
+        self.lbl_title_txt.update_font()
+        self.w=len(self.title)*ui_row_height*18/36
+        self.h = ui_row_height
+        #self.w=ui_row_height * 49 / 36 + Font.get_text_dimensions(self.title, ui_row_height)
+        self.lbl_title_bg.set(w=self.w, h=ui_row_height,
+                 x=offset,
+                 background=Colors.tower_class_bg(), animated=True, init=True)
+        self.lbl_title_txt.set(w=self.w,
+                 x=offset,
+                 font_size=font_size,
+                 color=Colors.tower_class_txt(),animated=True, init=True)
+        self.lbl_title_border.set(w=self.w,
+                 x=offset, opacity=Colors.tower_border_default_bg_opacity(),
+                 animated=True)
+
+    def animate(self):
+        self.lbl_title_bg.animate()
+        self.lbl_title_txt.animate()
+        self.lbl_title_border.animate()
+
+    def show(self):
+        self.lbl_title_bg.show()
+        self.lbl_title_txt.show()
+        self.lbl_title_border.show()
+
+    def hide(self):
+        self.lbl_title_bg.hide()
+        self.lbl_title_txt.hide()
+        self.lbl_title_border.hide()
+
+    def setX(self, x):
+        self.lbl_title_bg.setX(x, animated=True)
+        self.lbl_title_txt.setX(x, animated=True)
+        self.lbl_title_border.setX(x, animated=True)
+
+    def setY(self,y):
+        self.lbl_title_bg.setY(y, animated=True)
+        self.lbl_title_txt.setY(y + Font.get_font_x_offset(), animated=True)
+        self.lbl_title_border.setY(y + self.h - 2, animated=True)
+
+
 
 
 class MyHTMLParser(HTMLParser):

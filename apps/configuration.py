@@ -21,7 +21,6 @@ class Configuration:
     theme_red = 191
     theme_green = 0
     theme_blue = 0
-    tower_highlight = 0
     carColorsBy = 0
     theme_ini = ''
 
@@ -44,7 +43,7 @@ class Configuration:
 
         y = 50
         self.spin_race_mode = ac.addSpinner(self.window.app, "Race tower mode :")
-        ac.setRange(self.spin_race_mode, 0, 6)
+        ac.setRange(self.spin_race_mode, 0, 8)
         ac.setPosition(self.spin_race_mode, 20, y)
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.addOnValueChangeListener(self.spin_race_mode, self.on_spin_race_mode_changed)
@@ -160,16 +159,6 @@ class Configuration:
         ac.setVisible(self.spin_theme_green, 0)
         ac.setVisible(self.spin_theme_blue, 0)
 
-        #y += 70
-        self.spin_tower_lap = ac.addSpinner(self.window.app, "Tower Highlight :")
-        ac.setRange(self.spin_tower_lap, 0, 1)
-        ac.setPosition(self.spin_tower_lap, 20, y)
-        ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
-        ac.addOnValueChangeListener(self.spin_tower_lap, self.on_spin_tower_lap_color_changed)
-        ac.setVisible(self.spin_tower_lap, 0)
-        self.lbl_tower_lap = Label(self.window.app, "Red").setSize(120, 26).setPos(186, y - 28).setFontSize(
-            12).setAlign("left").setVisible(0)
-
         # byClass
         y += 70
         self.spin_colors_by = ac.addSpinner(self.window.app, "Car colors by :")
@@ -246,9 +235,6 @@ class Configuration:
         self.__class__.theme_blue = self.cfg.get("SETTINGS", "blue", "int")
         if self.__class__.theme_blue == -1:
             self.__class__.theme_blue = 0
-        self.__class__.tower_highlight = self.cfg.get("SETTINGS", "tower_highlight", "int")
-        if self.__class__.tower_highlight == -1:
-            self.__class__.tower_highlight = 0
         self.__class__.carColorsBy = self.cfg.get("SETTINGS", "car_colors_by", "int")
         if self.__class__.carColorsBy == -1:
             self.__class__.carColorsBy = 0
@@ -302,7 +288,6 @@ class Configuration:
         ac.setValue(self.spin_theme_red, self.__class__.theme_red)
         ac.setValue(self.spin_theme_green, self.__class__.theme_green)
         ac.setValue(self.spin_theme_blue, self.__class__.theme_blue)
-        ac.setValue(self.spin_tower_lap, self.__class__.tower_highlight)
         ac.setValue(self.spin_colors_by, self.__class__.carColorsBy)
         ac.setValue(self.spin_font, Font.current)
         ac.setValue(self.spin_general_theme, Colors.general_theme)
@@ -323,7 +308,6 @@ class Configuration:
         self.cfg.set("SETTINGS", "red", self.__class__.theme_red)
         self.cfg.set("SETTINGS", "green", self.__class__.theme_green)
         self.cfg.set("SETTINGS", "blue", self.__class__.theme_blue)
-        self.cfg.set("SETTINGS", "tower_highlight", self.__class__.tower_highlight)
         self.cfg.set("SETTINGS", "car_colors_by", self.__class__.carColorsBy)
         self.cfg.set("SETTINGS", "font_ini", Font.font_ini)
         self.cfg.set("SETTINGS", "general_theme", Colors.general_theme)
@@ -339,7 +323,7 @@ class Configuration:
         elif self.__class__.qual_mode == 2:
             self.lbl_qual_mode.setText("Compact")
         else:
-            self.lbl_qual_mode.setText("Realtime")
+            self.lbl_qual_mode.setText("Relative")
         # Race mode
         if self.__class__.race_mode == 0:
             self.lbl_race_mode.setText("Auto")
@@ -352,14 +336,13 @@ class Configuration:
         elif self.__class__.race_mode == 4:
             self.lbl_race_mode.setText("Progress")
         elif self.__class__.race_mode == 5:
+            self.lbl_race_mode.setText("Pit Stops")
+        elif self.__class__.race_mode == 6:
+            self.lbl_race_mode.setText("Tires")
+        elif self.__class__.race_mode == 7:
             self.lbl_race_mode.setText("Off")
         else:
-            self.lbl_race_mode.setText("Realtime")
-        # Tower color
-        if self.__class__.tower_highlight == 0:
-            self.lbl_tower_lap.setText("Red")
-        else:
-            self.lbl_tower_lap.setText("Green")
+            self.lbl_race_mode.setText("Relative")
         # Color by class/brand
         if self.__class__.carColorsBy == 0:
             self.lbl_colors_by.setText("Brand")
@@ -420,10 +403,8 @@ class Configuration:
         ac.setVisible(self.spin_theme_red, 0)
         ac.setVisible(self.spin_theme_green, 0)
         ac.setVisible(self.spin_theme_blue, 0)
-        ac.setVisible(self.spin_tower_lap, 0)
         ac.setVisible(self.spin_colors_by, 0)
         ac.setVisible(self.spin_font, 0)
-        self.lbl_tower_lap.setVisible(0)
         self.lbl_colors_by.setVisible(0)
         self.lbl_font.setVisible(0)
         ac.setVisible(self.spin_general_theme, 0)
@@ -450,10 +431,8 @@ class Configuration:
         ac.setVisible(self.spin_theme_red, 1)
         ac.setVisible(self.spin_theme_green, 1)
         ac.setVisible(self.spin_theme_blue, 1)
-        ac.setVisible(self.spin_tower_lap, 0)
         ac.setVisible(self.spin_colors_by, 1)
         ac.setVisible(self.spin_font, 1)
-        self.lbl_tower_lap.setVisible(0)
         self.lbl_colors_by.setVisible(1)
         self.lbl_font.setVisible(1)
         ac.setVisible(self.spin_general_theme, 1)
@@ -529,7 +508,7 @@ class Configuration:
 
     def hotkey_pressed(self):
         if self.session.value == 2:
-            if self.__class__.race_mode >= 6:
+            if self.__class__.race_mode >= 8:
                 self.__class__.race_mode = 0
             else:
                 self.__class__.race_mode += 1
@@ -589,11 +568,6 @@ class Configuration:
     @staticmethod
     def on_blue_changed(value):
         Configuration.theme_blue = value
-        Configuration.configChanged = True
-
-    @staticmethod
-    def on_spin_tower_lap_color_changed(value):
-        Configuration.tower_highlight = value
         Configuration.configChanged = True
 
     @staticmethod
