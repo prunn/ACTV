@@ -233,6 +233,7 @@ class ACTower:
                         color = Colors.car_classes[title + "_bg"]
                     if title != "" and title + '_title' in Colors.car_classes:
                         title = Colors.car_classes[title + "_title"]
+                    title = title[:1].upper() + title[1:]
                     self.cars_classes.append(CarClass(self.window.app , i, title, Configuration.ui_row_height-2,offset,color))
                     offset += self.cars_classes[-1].w + Configuration.ui_row_height*10/36
             # place current on top of standings
@@ -241,13 +242,25 @@ class ACTower:
                 # timeout 5 sec when changed
                 self.cars_classes_timeout = self.sessionTimeLeft - 5000
                 offset = 0
+                ct = 0
                 for i, lbl in enumerate(self.cars_classes):
-                    if i <= Colors.cars_classes_current:
+                    # update active filter
+                    if i > 0:
+                        cur_class = Colors.car_classes_list[i - 1]
+                        lbl.active = False
+                        for s in self.standings:
+                            if cur_class == s[2]:
+                                lbl.active = True
+                                ct += 1
+                                break
+
+                    if lbl.active and i <= Colors.cars_classes_current:
                         offset -= lbl.w + (Configuration.ui_row_height - 2) * 10 / 36
                 for lbl in self.cars_classes:
                     lbl.setX(offset)
-                    offset+=lbl.w + (Configuration.ui_row_height - 2) * 10 / 36
-
+                    if lbl.active:
+                        offset+=lbl.w + (Configuration.ui_row_height - 2) * 10 / 36
+                Colors.multiCarsClasses = (ct > 1)
 
     def next_driver_is_shown(self, pos):
         if pos > 0:
@@ -290,6 +303,14 @@ class ACTower:
             for lbl in self.cars_classes:
                 lbl.setY(-(Configuration.ui_row_height - 2))
 
+        current_standings = self.standings
+        if Colors.cars_classes_current >= 0:
+            cur_class = Colors.car_classes_list[Colors.cars_classes_current]
+            # filter current_standings
+            current_standings = []
+            for s in self.standings:
+                if cur_class == s[2]:
+                    current_standings.append((s[0], s[1], s[2]))
         needs_tlc = True
         if Configuration.names >= 2:
             needs_tlc = False
@@ -301,14 +322,14 @@ class ACTower:
             if driver.identifier == self.currentVehicule.value:
                 driver.isCurrentVehicule.setValue(True)
                 cur_driver = driver
-                p = [i for i, v in enumerate(self.standings) if v[0] == driver.identifier]
+                p = [i for i, v in enumerate(current_standings) if v[0] == driver.identifier]
                 if len(p) > 0:
                     cur_driver_pos = p[0] + 1
             else:
                 driver.isCurrentVehicule.setValue(False)
         if cur_driver_pos >= self.max_num_cars:
             display_offset = cur_driver_pos - self.max_num_cars
-            if len(self.standings) > cur_driver_pos:  # showing next driver to user
+            if len(current_standings) > cur_driver_pos:  # showing next driver to user
                 display_offset += 1
 
         if self.qual_mode.value == 3:
@@ -389,15 +410,6 @@ class ACTower:
                 for l in self.stintLabels:
                     l.hide()
 
-            current_standings=self.standings
-            if Colors.cars_classes_current >= 0:
-                cur_class = Colors.car_classes_list[Colors.cars_classes_current]
-                #filter current_standings
-                current_standings = []
-                for s in self.standings:
-                    if cur_class == s[2]:
-                        current_standings.append((s[0], s[1], s[2]))
-
             for driver in self.drivers:
                 driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
                 p = [i for i, v in enumerate(current_standings) if v[0] == driver.identifier]
@@ -426,7 +438,7 @@ class ACTower:
             elif self.qual_mode.value == 2:
                 self.lbl_title_mode_txt.setText("Compact")
             else:
-                self.lbl_title_mode_txt.setText("Realtime")
+                self.lbl_title_mode_txt.setText("Relative")
             self.title_mode_visible_end = self.sessionTimeLeft - 6000
         if self.title_mode_visible_end != 0 and self.title_mode_visible_end < self.sessionTimeLeft:
             self.lbl_title_mode.show()

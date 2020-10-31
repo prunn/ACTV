@@ -327,12 +327,14 @@ class Colors:
     def loadCarClasses():
         Colors.dataCarsClasses = []
         Colors.car_classes_list = []
+        Colors.multiCarsClasses = False
         loaded_cars = []
         last_class=-1
         for i in range(ac.getCarsCount()):
             car_name = ac.getCarName(i)
             if car_name not in loaded_cars:
                 loaded_cars.append(car_name)
+                class_found=False
                 # check car_classes first
                 for index, c in Colors.car_classes.items():
                     if index.find("_cars") >= 0:
@@ -341,28 +343,30 @@ class Colors:
                             driver_index = index.replace("_cars", "_drivers")
                             if not driver_index in Colors.car_classes.keys():
                                 Colors.dataCarsClasses.append({"c": car_name, "t": cur_class})
-                                if last_class != -1 and last_class != cur_class.lower():
+                                if last_class != -1 and last_class != cur_class:
                                     Colors.multiCarsClasses = True
-                                last_class = cur_class.lower()
+                                last_class = cur_class
                                 if not last_class in Colors.car_classes_list:
                                     Colors.car_classes_list.append(last_class)
+                                class_found = True
                                 break
-                file_path = "content/cars/" + car_name + "/ui/ui_car.json"
-                try:
-                    if os.path.exists(file_path):
-                        with open(file_path) as data_file:
-                            d = data_file.read().replace('\r', '').replace('\n', '').replace('\t', '')
-                            data = json.loads(d)
-                            for t in data["tags"]:
-                                if t[0] == "#":
-                                    Colors.dataCarsClasses.append({"c": car_name, "t": t[1:].lower()})
-                                    if last_class != -1 and last_class != t[1:].lower():
-                                        Colors.multiCarsClasses = True
-                                    last_class = t[1:].lower()
-                                    if not last_class in Colors.car_classes_list:
-                                        Colors.car_classes_list.append(last_class)
-                except:
-                    Log.w("Error color:" + file_path)
+                if not class_found:
+                    file_path = "content/cars/" + car_name + "/ui/ui_car.json"
+                    try:
+                        if os.path.exists(file_path):
+                            with open(file_path) as data_file:
+                                d = data_file.read().replace('\r', '').replace('\n', '').replace('\t', '')
+                                data = json.loads(d)
+                                for t in data["tags"]:
+                                    if t[0] == "#":
+                                        Colors.dataCarsClasses.append({"c": car_name, "t": t[1:].lower()})
+                                        if last_class != -1 and last_class != t[1:].lower():
+                                            Colors.multiCarsClasses = True
+                                        last_class = t[1:].lower()
+                                        if not last_class in Colors.car_classes_list:
+                                            Colors.car_classes_list.append(last_class)
+                    except:
+                        Log.w("Error color:" + file_path)
         Colors.carsClassesLoaded = True
 
     @staticmethod
@@ -377,7 +381,10 @@ class Colors:
                     car_index = index.replace("_drivers", "_cars")
                     if (not car_index in Colors.car_classes.keys()) or (car_index in Colors.car_classes.keys() and car in Colors.car_classes[car_index]):
                         Colors.multiCarsClasses=True #?? how to know for sure?
-                        return index.replace("_drivers", "")
+                        cur_class = index.replace("_drivers", "")
+                        if not cur_class in Colors.car_classes_list:
+                            Colors.car_classes_list.append(cur_class)
+                        return cur_class
 
         for c in Colors.dataCarsClasses:
             if c["c"] == car:
@@ -432,29 +439,30 @@ class Colors:
             cfg = Config('apps/python/prunn/', 'car_classes.ini')
             cfg_sections = cfg.sections()
             for s in cfg_sections:
+                index=s.lower()
                 value = cfg.get(s, 'bg', 'string')
                 if value != -1 and value != "":
-                    Colors.car_classes[s + '_bg'] = Colors.txt_to_rgba(value)  # Translate value to rgba
+                    Colors.car_classes[index + '_bg'] = Colors.txt_to_rgba(value)  # Translate value to rgba
                 value = cfg.get(s, 'txt', 'string')
                 if value != -1 and value != "":
-                    Colors.car_classes[s + '_txt'] = Colors.txt_to_rgba(value)  # Translate value to rgba
+                    Colors.car_classes[index + '_txt'] = Colors.txt_to_rgba(value)  # Translate value to rgba
                 value = cfg.get(s, 'title', 'string')
                 if value != -1 and value != "":
-                    Colors.car_classes[s + '_title'] = value
+                    Colors.car_classes[index + '_title'] = value
                 value = cfg.get(s, 'cars', 'string')
                 if value != -1 and value != "":
                     if value.find(",") > 0:
                         array_values = value.split(',')
                     else:
                         array_values = [value]
-                    Colors.car_classes[s + '_cars'] = array_values
+                    Colors.car_classes[index + '_cars'] = array_values
                 value = cfg.get(s, 'drivers', 'string')
                 if value != -1 and value != "":
                     if value.find(",") > 0:
                         array_values = value.split(',')
                     else:
                         array_values = [value]
-                    Colors.car_classes[s + '_drivers'] = array_values
+                    Colors.car_classes[index + '_drivers'] = array_values
 
     @staticmethod
     def export_theme_values():
@@ -2053,6 +2061,7 @@ class CarClass:
     def __init__(self, app, identifier, title, ui_row_height, offset, color):
         self.identifier=identifier
         self.title=title
+        self.active=True
         self.w = 0
         self.h = 0
         self.lbl_title_bg = Label(app) \
@@ -2069,7 +2078,9 @@ class CarClass:
             .set(w=35, h=2,
                  x=0, y=-2,
                  background=color, opacity=Colors.tower_border_default_bg_opacity())
-
+        self.lbl_title_bg.setAnimationMode("x", "spring")
+        self.lbl_title_txt.setAnimationMode("x", "spring")
+        self.lbl_title_border.setAnimationMode("x", "spring")
         self.redraw_size(ui_row_height, offset)
         self.partial_func = functools.partial(self.on_click_func, identifier=self.identifier)
         ac.addOnClickedListener(self.lbl_title_bg.label, self.partial_func)
