@@ -54,7 +54,7 @@ class Configuration:
 
         y += 70
         self.spin_qual_mode = ac.addSpinner(self.window.app, "Qual tower mode :")
-        ac.setRange(self.spin_qual_mode, 0, 3)
+        ac.setRange(self.spin_qual_mode, 0, 4)
         ac.setPosition(self.spin_qual_mode, 20, y)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
         ac.addOnValueChangeListener(self.spin_qual_mode, self.on_spin_qual_mode_changed)
@@ -321,6 +321,8 @@ class Configuration:
         elif self.__class__.qual_mode == 1:
             self.lbl_qual_mode.setText("Times")
         elif self.__class__.qual_mode == 2:
+            self.lbl_qual_mode.setText("Sectors")
+        elif self.__class__.qual_mode == 3:
             self.lbl_qual_mode.setText("Compact")
         else:
             self.lbl_qual_mode.setText("Relative")
@@ -514,7 +516,7 @@ class Configuration:
                 self.__class__.race_mode += 1
             ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         else:
-            if self.__class__.qual_mode >= 3:
+            if self.__class__.qual_mode >= 4:
                 self.__class__.qual_mode = 0
             else:
                 self.__class__.qual_mode += 1

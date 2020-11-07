@@ -288,6 +288,8 @@ class ACTower:
             elif self.qual_mode.value == 1:
                 self.lbl_title_mode_txt.setText("Times")
             elif self.qual_mode.value == 2:
+                self.lbl_title_mode_txt.setText("Sectors")
+            elif self.qual_mode.value == 3:
                 self.lbl_title_mode_txt.setText("Compact")
             else:
                 self.lbl_title_mode_txt.setText("Relative")
@@ -317,8 +319,11 @@ class ACTower:
 
         ##########################################
         display_offset = cur_driver_pos = 0
+        fastest_driver_sectors = []
         for driver in self.drivers:
             driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
+            if len(current_standings) > 0 and driver.identifier == current_standings[0][0]:
+                fastest_driver_sectors = driver.bestLap_sectors
             if driver.identifier == self.currentVehicule.value:
                 driver.isCurrentVehicule.setValue(True)
                 cur_driver = driver
@@ -332,7 +337,7 @@ class ACTower:
             if len(current_standings) > cur_driver_pos:  # showing next driver to user
                 display_offset += 1
 
-        if self.qual_mode.value == 3:
+        if self.qual_mode.value == 4:
             # Realtime
             realtime_target = [i for i, v in enumerate(self.realtime_standings) if v[0] == self.currentVehicule.value]
             if len(realtime_target) > 0:
@@ -421,8 +426,8 @@ class ACTower:
                     if c > 0 and (driver.completedLaps.value > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value and check_pos <= self.max_num_cars:
                         if len(p) > 0 and len(current_standings) > 0 and len(current_standings[0]) > 1:
                             driver.set_position(p[0] + 1, 0, False)
-                            driver.show(needs_tlc=needs_tlc, race=False, compact=Configuration.qual_mode == 2)
-                            driver.set_time(c, current_standings[0][1], self.sessionTimeLeft, Configuration.qual_mode)
+                            driver.show(needs_tlc=needs_tlc, race=False, compact=Configuration.qual_mode == 3)
+                            driver.set_time(c, current_standings[0][1], self.sessionTimeLeft, Configuration.qual_mode, fastest_driver_sectors)
                             driver.update_pit(self.sessionTimeLeft)
                     else:
                         driver.hide()
@@ -478,7 +483,7 @@ class ACTower:
             if c > 0 and (lap_count > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value and check_pos <= self.max_num_cars:
                 if len(p) > 0 and len(self.standings) > 0 and len(self.standings[0]) > 1:
                     driver.set_position(p[0] + 1, 0, False)
-                    driver.show(needs_tlc=needs_tlc, race=False, compact=Configuration.qual_mode == 2)
+                    driver.show(needs_tlc=needs_tlc, race=False, compact=Configuration.qual_mode == 3)
                     driver.set_time(c, self.standings[0][1], self.sessionTimeLeft, self.qual_mode.value)
                     driver.update_pit(self.sessionTimeLeft)
             else:
