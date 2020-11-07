@@ -153,10 +153,4 @@ def acUpdate(deltaT):
 
 
 def acShutdown():
-    global info, infoInit
-    if infoInit:
-        try:
-            info.on_shutdown()
-        except:
-            Log.w("Error info")
     ac.console("shutting down actv")
