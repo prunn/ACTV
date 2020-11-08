@@ -215,10 +215,6 @@ class Driver:
                     self.lbl_pit.set(color=Colors.tower_pit_highlight_txt(), animated=True, init=True)
                 else:
                     self.lbl_pit.set(color=Colors.tower_pit_txt(), animated=True, init=True)
-            if self.race:
-                battles = True
-            else:
-                battles = False
             if self.position.value % 2 == 1:
                 if not self.isLapLabel:
                     if self.position.value == 1 and Colors.tower_first_position_different():
@@ -229,7 +225,7 @@ class Driver:
                         self.lbl_position.set(background=Colors.tower_position_first_bg(), animated=True, init=True)
                         self.lbl_position_txt.set(color=Colors.tower_position_first_txt(), animated=True, init=True)
                         self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
-                    elif battles and self.isCurrentVehicule.value:
+                    elif self.isCurrentVehicule.value:
                         self.lbl_name.set(background=Colors.tower_driver_highlight_odd_bg(), animated=True, init=True)
                         self.lbl_name_txt.set(color=Colors.tower_driver_highlight_odd_txt(), animated=True, init=True)
                         self.lbl_time.set(background=Colors.tower_time_highlight_odd_bg(), animated=True, init=True)
@@ -261,7 +257,7 @@ class Driver:
                     self.set_time_stint(self.time.value, self.isLapTimeValid)
             else:
                 if not self.isLapLabel:
-                    if battles and self.isCurrentVehicule.value:
+                    if self.isCurrentVehicule.value:
                         self.lbl_name.set(background=Colors.tower_driver_highlight_even_bg(), animated=True, init=True)
                         self.lbl_name_txt.set(color=Colors.tower_driver_highlight_even_txt(), animated=True, init=True)
                         self.lbl_time.set(background=Colors.tower_time_highlight_even_bg(), animated=True, init=True)
@@ -829,7 +825,7 @@ class Driver:
                         self.lbl_time.set(background=Colors.tower_time_odd_bg(), animated=True, init=True)
                         self.lbl_time_txt.set(color=Colors.tower_time_odd_txt(), animated=True, init=True)
                         self.lbl_border.set(opacity=Colors.tower_border_default_bg_opacity(), animated=True, init=True)
-                    elif battles and self.isCurrentVehicule.value:
+                    elif self.isCurrentVehicule.value:
                         self.lbl_name.set(background=Colors.tower_driver_highlight_odd_bg(), animated=True, init=True)
                         self.lbl_name_txt.set(color=Colors.tower_driver_highlight_odd_txt(), animated=True, init=True)
                         self.lbl_position.set(background=Colors.tower_position_highlight_odd_bg(), animated=True, init=True)
@@ -861,7 +857,7 @@ class Driver:
                     self.set_time_stint(self.time.value, self.isLapTimeValid)
             else:
                 if not self.isLapLabel:
-                    if battles and self.isCurrentVehicule.value:
+                    if self.isCurrentVehicule.value:
                         self.lbl_name.set(background=Colors.tower_driver_highlight_even_bg(), animated=True, init=True)
                         self.lbl_name_txt.set(color=Colors.tower_driver_highlight_even_txt(), animated=True, init=True)
                         self.lbl_position.set(background=Colors.tower_position_highlight_even_bg(), animated=True, init=True)
@@ -943,7 +939,7 @@ class Driver:
         space = name.find(" ")
         if space > 0:
             name = name[space:]
-        name = name.strip()
+        name = name.strip().upper()
         if len(name) > 9:
             return name[:10]
         return name
@@ -964,7 +960,7 @@ class Driver:
         space = name.find(" ")
         if space > 0:
             name = name[:space]
-        name = name.strip()
+        name = name.strip().upper()
         if len(name) > 9:
             return name[:10]
         return name

@@ -319,6 +319,7 @@ class ACTower:
 
         ##########################################
         display_offset = cur_driver_pos = 0
+        cur_car_shown=False
         fastest_driver_sectors = []
         for driver in self.drivers:
             driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
@@ -330,6 +331,9 @@ class ACTower:
                 p = [i for i, v in enumerate(current_standings) if v[0] == driver.identifier]
                 if len(p) > 0:
                     cur_driver_pos = p[0] + 1
+                    c = driver.get_best_lap()
+                    if c > 0 and driver.completedLaps.value > self.minLapCount:
+                        cur_car_shown=True
             else:
                 driver.isCurrentVehicule.setValue(False)
         if cur_driver_pos >= self.max_num_cars:
@@ -414,18 +418,25 @@ class ACTower:
                 self.lbl_tire_stint_txt.hide()
                 for l in self.stintLabels:
                     l.hide()
+            if not cur_car_shown:
+                display_offset=0
 
             for driver in self.drivers:
                 driver.isAlive.setValue(bool(ac.isConnected(driver.identifier)))
                 p = [i for i, v in enumerate(current_standings) if v[0] == driver.identifier]
-                if len(p) > 0:
-                    c = driver.get_best_lap()
-                    if not driver.isAlive.value:
-                        driver.bestLapServer = 0
+                #if len(p) > 0:
+                c = driver.get_best_lap()
+                if not driver.isAlive.value:
+                    driver.bestLapServer = 0
+                if len(p) > 0 and p[0] < self.max_num_cars + display_offset and (p[0] == 0 or p[0] > display_offset):
                     check_pos = p[0] + 1
-                    if c > 0 and (driver.completedLaps.value > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value and check_pos <= self.max_num_cars:
-                        if len(p) > 0 and len(current_standings) > 0 and len(current_standings[0]) > 1:
-                            driver.set_position(p[0] + 1, 0, False)
+                    if c > 0 and (driver.completedLaps.value > self.minLapCount or self.next_driver_is_shown(check_pos)) and driver.isAlive.value:# and check_pos <= self.max_num_cars:
+                        if len(current_standings) > 0 and len(current_standings[0]) > 1:
+                            if p[0] == 0:
+                                driver.set_position(p[0] + 1, 0, False)
+                            else:
+                                driver.set_position(p[0] + 1, display_offset, False)
+                            #driver.set_position(p[0] + 1, 0, True)
                             driver.show(needs_tlc=needs_tlc, race=False, compact=Configuration.qual_mode == 3)
                             driver.set_time(c, current_standings[0][1], self.sessionTimeLeft, Configuration.qual_mode, fastest_driver_sectors)
                             driver.update_pit(self.sessionTimeLeft)
