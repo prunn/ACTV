@@ -822,6 +822,7 @@ class ACInfo:
                             self.info_position_txt.hide()
 
                     elif is_in_pit:
+                        self.nameOffset = self.rowHeight * 14 / 36
                         self.driver_name_visible.setValue(Configuration.forceInfoVisible)
                         self.timing_visible.setValue(0)
                         self.lbl_split.hide()

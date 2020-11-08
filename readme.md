@@ -5,9 +5,21 @@
 * Driver info (driver change info - qualif time - fastest lap)
 * Timer (Session info - Replay)
 * Config (Configuration)
+* Delta
 
 -
 ###Changelog.
+2.5.0
+Tower: added relative timing
+configurable car classes
+Tower qualify: disable stint mode, number of laps=0
+Info: sectors calculations from ACTV CP
+Tower: added pitstops,tires,sectors(qualify) modes
+Tower: car class filters (mouse over top 2 places brings up classes, click to filter, stop moving mouse for 5 sec to hide, current filter will stay on. Not available in relative modes)
+Tower race: updated standing before start(progress)
+Tower race: removed reset on driver swap
+Tower qualify: scrolling to current driver
+
 2.1.0
 Added background texture support for themes (jpg,png,tga) ex: r,g,b,a,texture(full path from AC folder)
 Added 7 new color options to themes with fallback for older themes

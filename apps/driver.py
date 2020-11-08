@@ -689,7 +689,7 @@ class Driver:
                 str_time += " Lap"
             self.lbl_time_txt.change_font_if_needed().setText(str_time).setColor(normal_color, animated=True, init=True)
         elif identifier == -1:
-            if Configuration.race_mode < 5:
+            if (self.race and Configuration.race_mode < 5) or (not self.race and Configuration.qual_mode==4):
                 if time <= ac.getCarState(self.identifier, acsys.CS.BestLap):
                     self.lbl_time_txt.change_font_if_needed().setText(self.format_time(time)).setColor(Colors.tower_time_best_lap_txt(), animated=True, init=True)
                 else:

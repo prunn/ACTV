@@ -159,7 +159,7 @@ class ACTower:
             else:
                 border_offset = 4
             width = self.ui_row_height.value * 6.2 + border_offset
-            self.window.setSize(width, self.ui_row_height.value * 5)
+            self.window.setSize(width, self.ui_row_height.value * 2)
             self.lbl_title_stint.set(w=width, h=height - 2, y=self.ui_row_height.value * 4 - (height - 2))
             self.lbl_title_stint_txt.set(w=width, h=height - 2,
                                          y=self.ui_row_height.value * 4 - (height - 2) + Font.get_font_x_offset(),
