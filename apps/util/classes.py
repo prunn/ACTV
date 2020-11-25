@@ -1301,6 +1301,7 @@ class Colors:
 
 
 class Label:
+    refresh_rate = 50
     # INITIALIZATION
 
     def __init__(self, window, text=""):
@@ -1601,6 +1602,10 @@ class Label:
                     multiplier = round(abs(self.f_params[p].value - self.params[p].value) / spring_multi)
             else:
                 multiplier = self.multiplier[p].value
+            if self.__class__.refresh_rate < 32:
+                multiplier=multiplier*3
+            elif self.__class__.refresh_rate < 40:
+                multiplier=multiplier*2
             if abs(self.f_params[p].value - self.params[p].value) < multiplier:
                 multiplier = abs(self.f_params[p].value - self.params[p].value)
             if self.params[p].value < self.f_params[p].value:
@@ -2163,3 +2168,28 @@ class MyHTMLParser(HTMLParser):
     def handle_data(self, data):
         if self.__class__.logging_html:
             self.__class__.tmp_data = data
+
+class GameData:
+    def __init__(self):
+        self.status=-1
+        self.session=-1
+        self.sessionTimeLeft=0
+        self.flag=-1
+        self.beforeRaceStart=False
+        self.focusedCar=0
+        self.cursor_x=0
+        self.cursor_y=0
+
+    def update(self, sim_info):
+        self.session = sim_info.graphics.session
+        self.sessionTimeLeft = sim_info.graphics.sessionTimeLeft
+        if math.isinf(self.sessionTimeLeft):
+            self.sessionTimeLeft=0
+        self.status=sim_info.graphics.status
+        self.flag=sim_info.graphics.flag
+        self.focusedCar=ac.getFocusedCar()
+        self.beforeRaceStart = self.status == 2 and sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0
+        pt = POINT()
+        if ctypes.windll.user32.GetCursorPos(ctypes.byref(pt)):
+            self.cursor_x=pt.x
+            self.cursor_y=pt.y

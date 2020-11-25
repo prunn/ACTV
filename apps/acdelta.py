@@ -5,7 +5,7 @@ import os, threading, json, math
 import gzip
 #import time
 from .util.func import rgb, getFontSize
-from .util.classes import Window, Label, Value, POINT, Colors, Config, Log, Button, raceGaps
+from .util.classes import Window, Label, Value, Colors, Config, Log, Button, raceGaps
 
         
 class ACDelta:
@@ -206,9 +206,7 @@ class ACDelta:
             else:
                 return "{0}.{1}".format(int(s), int(d))             
         
-    def manage_window(self):
-        pt = POINT()
-        result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+    def manage_window(self, game_data):
         win_x = self.window.getPos().x
         win_y = self.window.getPos().y
         if win_x > 0:
@@ -218,7 +216,7 @@ class ACDelta:
             self.window.setLastPos()
             win_x = self.window.getPos().x
             win_y = self.window.getPos().y
-        if result and pt.x > win_x and pt.x < win_x + self.window.width and pt.y > win_y and pt.y < win_y + self.window.height:   
+        if win_x < game_data.cursor_x < win_x + self.window.width and win_y < game_data.cursor_y < win_y + self.window.height:
             self.cursor.setValue(True)
         else:
             self.cursor.setValue(False)
@@ -246,7 +244,7 @@ class ACDelta:
         self.referenceLapTime_session.setValue(0)
         self.performance_session.setValue(0)
                     
-    def on_update(self, sim_info):
+    def on_update(self, sim_info, game_data):
         if self.__class__.configChanged:
             self.save_cfg()
             self.__class__.configChanged = False
@@ -260,17 +258,17 @@ class ACDelta:
             self.referenceLap = []
             self.referenceLap_session = []
             self.__class__.resetPressed = False
-        self.session.setValue(sim_info.graphics.session)
-        self.manage_window()
+        self.session.setValue(game_data.session)
+        self.manage_window(game_data)
         self.lbl_delta.animate()
         self.lbl_session_delta.animate()
         self.lbl_lap.animate()
-        sim_info_status = sim_info.graphics.status
+        sim_info_status = game_data.status
         if sim_info_status == 2:  # LIVE
-            session_time_left = sim_info.graphics.sessionTimeLeft
+            session_time_left = game_data.sessionTimeLeft
             if math.isinf(session_time_left):
                 self.reset_data()
-            elif self.session.value == 2 and sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
+            elif game_data.beforeRaceStart:
                 self.reset_data()
             elif bool(ac.isCarInPitline(0)) or bool(ac.isCarInPit(0)):
                 self.reset_data()
@@ -306,7 +304,7 @@ class ACDelta:
                         thread_save.daemon = True
                         thread_save.start()
                         # make it green for 5 sec
-                        self.highlight_end = sim_info.graphics.sessionTimeLeft - 6000
+                        self.highlight_end = session_time_left - 6000
                         self.lbl_lap.setColor(Colors.green(), True)
                     elif (self.referenceLapTime.value == 0 or self.lastLapTime.value < self.referenceLapTime_session.value) and self.lastLapIsValid and self.lastLapTime.value > 0 and self.lapCount < ac.getCarState(0, acsys.CS.LapCount):
                         self.referenceLapTime_session.setValue(self.lastLapTime.value)

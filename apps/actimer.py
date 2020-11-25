@@ -4,14 +4,14 @@ import os.path
 import json
 import ctypes
 from .util.func import rgb
-from .util.classes import Window, Label, Value, POINT, Colors, Font, Log
+from .util.classes import Window, Label, Value, Colors, Font, Log
 from .configuration import Configuration
 
 
 class ACTimer:
     # INITIALIZATION
 
-    def __init__(self):
+    def __init__(self, sim_info):
         self.finish_labels = []
         self.finish_initialised = False
         self.replay_initialised = False
@@ -23,12 +23,12 @@ class ACTimer:
         self.row_height = Value(-1)
         self.font = Value(0)
         self.numberOfLaps = -1
-        self.hasExtraLap = -1
+        self.hasExtraLap = sim_info.static.hasExtraLap
         self.numberOfLapsTimedRace = -1
         self.sessionMaxTime = -1
         self.pitWindowVisibleEnd = 0
-        self.pitWindowStart = -1
-        self.pitWindowEnd = -1
+        self.pitWindowStart = sim_info.static.PitWindowStart
+        self.pitWindowEnd = sim_info.static.PitWindowEnd
         self.pitWindowActive = False
         self.numberOfLapsCompleted = Value(0)
         self.trackName = ""
@@ -231,9 +231,7 @@ class ACTimer:
             for label in self.finish_labels:
                 label.animate()
 
-    def manage_window(self):
-        pt = POINT()
-        result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+    def manage_window(self, sim_info, game_data):
         win_x = self.window.getPos().x
         win_y = self.window.getPos().y
         if win_x > 0:
@@ -243,17 +241,14 @@ class ACTimer:
             self.window.setLastPos()
             win_x = self.window.getPos().x
             win_y = self.window.getPos().y
-        if result and win_x < pt.x < win_x + self.window.width and win_y < pt.y < win_y + self.window.height:
+        if win_x < game_data.cursor_x < win_x + self.window.width and win_y < game_data.cursor_y < win_y + self.window.height:
             self.cursor.setValue(True)
         else:
             self.cursor.setValue(False)
 
         if self.session.hasChanged():
+            self.numberOfLaps = sim_info.graphics.numberOfLaps
             self.numberOfLapsTimedRace = -1
-            self.hasExtraLap = -1
-            self.numberOfLaps = -1
-            self.pitWindowStart = -1
-            self.pitWindowEnd = -1
             self.sessionMaxTime = -1
             self.pitWindowVisibleEnd = 0
             self.pitWindowActive = False
@@ -264,15 +259,15 @@ class ACTimer:
         if self.cursor.hasChanged():
             self.window.setBgOpacity(0).border(0)
 
-    def on_update(self, sim_info):
-        self.session.setValue(sim_info.graphics.session)
-        self.manage_window()
-        sim_info_status = sim_info.graphics.status
+    def on_update(self, sim_info, game_data):
+        self.session.setValue(game_data.session)
+        self.manage_window(sim_info,game_data)
+        sim_info_status = game_data.status
         self.animate()
         if sim_info_status == 2:  # LIVE
             if self.replay_initialised:
                 self.lbl_session_single_txt.setColor(Colors.timer_time_txt(), animated=True)
-            session_time_left = sim_info.graphics.sessionTimeLeft
+            session_time_left = game_data.sessionTimeLeft
             if self.session.value < 2:
                 self.lbl_pit_window.hide()
                 self.lbl_pit_window_txt.hide()
@@ -293,7 +288,7 @@ class ACTimer:
                     self.lbl_session_info.show()
                     self.lbl_session_info_txt.setText(self.time_splitting(session_time_left)).show()
                     if not self.finish_initialised:
-                        if sim_info.graphics.flag == 2:
+                        if game_data.flag == 2:
                             # Yellow Flag
                             self.lbl_session_info.set(background=Colors.timer_time_yellow_flag_bg(), animated=True)
                             self.lbl_session_info_txt.set(color=Colors.timer_time_yellow_flag_txt(), animated=True)
@@ -319,18 +314,11 @@ class ACTimer:
                     if ac.getCarState(x, acsys.CS.RaceFinished):
                         race_finished = 1
                 completed += 1
-                if self.numberOfLaps < 0:
-                    self.numberOfLaps = sim_info.graphics.numberOfLaps
-                if self.hasExtraLap < 0:
-                    self.hasExtraLap = sim_info.static.hasExtraLap
                 if self.hasExtraLap == 1 and session_time_left < 0 and self.numberOfLapsTimedRace < 0:
                     self.numberOfLapsTimedRace = completed + 1
 
                 # PitWindow
                 pit_window_remain = ""
-                if self.pitWindowStart < 0:
-                    self.pitWindowStart = sim_info.static.PitWindowStart
-                    self.pitWindowEnd = sim_info.static.PitWindowEnd
                 if self.numberOfLaps > 0:
                     self.numberOfLapsCompleted.setValue(completed)
                     if self.numberOfLapsCompleted.hasChanged():
@@ -374,7 +362,7 @@ class ACTimer:
                     self.lbl_pit_window.hide()
                     self.lbl_pit_window_txt.hide()
 
-                if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
+                if game_data.beforeRaceStart:
                     self.pitWindowVisibleEnd = 0
                     self.pitWindowActive = False
                     self.sessionMaxTime = round(session_time_left, -3)
@@ -421,7 +409,7 @@ class ACTimer:
                     else:
                         self.lbl_session_single_txt.setText("0:00" + txt_extra_lap)
                 if not self.finish_initialised:
-                    if sim_info.graphics.flag == 2:  # Yellow flag
+                    if game_data.flag == 2:  # Yellow flag
                         self.lbl_session_single.set(background=Colors.timer_time_yellow_flag_bg(), animated=True)
                         self.lbl_session_single_txt.set(color=Colors.timer_time_yellow_flag_txt(), animated=True)
                         self.lbl_session_border.set(background=Colors.timer_border_yellow_flag_bg(),

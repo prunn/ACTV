@@ -2,7 +2,7 @@ import ac
 import apps.util.win32con, ctypes, ctypes.wintypes
 import threading
 import time
-from .util.classes import Window, Button, Label, Value, POINT, Config, Log, Font, Colors
+from .util.classes import Window, Button, Label, Value, Config, Log, Font, Colors
 from .util.func import rgb
 
 
@@ -23,6 +23,7 @@ class Configuration:
     theme_blue = 0
     carColorsBy = 0
     theme_ini = ''
+    refresh_rate = 50
 
     # INITIALIZATION
     def __init__(self):
@@ -32,7 +33,7 @@ class Configuration:
         Colors.load_themes()
         Font.load_fonts()
 
-        self.window = Window(name="ACTV Config", icon=False, width=251, height=520, texture="").setBgOpacity(0)
+        self.window = Window(name="ACTV Config", icon=False, width=251, height=590, texture="").setBgOpacity(0)
 
         self.btn_tab1 = Button(self.window.app, self.on_tab1_press)\
             .setPos(0, -22).setSize(126, 22).setText("General")\
@@ -95,6 +96,14 @@ class Configuration:
             .setSize(120, 26).setPos(150, y - 28) \
             .setFontSize(12).setAlign("left") \
             .setVisible(1)
+
+        # Refresh rate
+        y += 70
+        self.spin_refresh_rate = ac.addSpinner(self.window.app, "Refresh rate / sec")
+        ac.setRange(self.spin_refresh_rate, 20, 120)
+        ac.setPosition(self.spin_refresh_rate, 20, y)
+        ac.setValue(self.spin_refresh_rate, self.__class__.refresh_rate)
+        ac.addOnValueChangeListener(self.spin_refresh_rate, self.on_spin_refresh_rate_changed)
 
         y += 52
         self.chk_invalidated = ac.addCheckBox(self.window.app, "")
@@ -225,7 +234,11 @@ class Configuration:
         self.__class__.names = self.cfg.get("SETTINGS", "names", "int")
         if self.__class__.names == -1:
             self.__class__.names = 0
-            # RGB
+        self.__class__.refresh_rate = self.cfg.get("SETTINGS", "refresh_rate", "int")
+        if self.__class__.refresh_rate == -1:
+            self.__class__.refresh_rate = 50
+        Label.refresh_rate = self.__class__.refresh_rate
+        # RGB
         self.__class__.theme_red = self.cfg.get("SETTINGS", "red", "int")
         if self.__class__.theme_red == -1:
             self.__class__.theme_red = 191
@@ -280,6 +293,7 @@ class Configuration:
         ac.setValue(self.spin_race_mode, self.__class__.race_mode)
         ac.setValue(self.spin_qual_mode, self.__class__.qual_mode)
         ac.setValue(self.spin_names, self.__class__.names)
+        ac.setValue(self.spin_refresh_rate, self.__class__.refresh_rate)
         ac.setValue(self.spin_num_cars, self.__class__.max_num_cars)
         ac.setValue(self.spin_num_laps, self.__class__.max_num_laps_stint)
         ac.setValue(self.spin_row_height, self.__class__.ui_row_height)
@@ -300,6 +314,7 @@ class Configuration:
         self.cfg.set("SETTINGS", "race_mode", self.__class__.race_mode)
         self.cfg.set("SETTINGS", "qual_mode", self.__class__.qual_mode)
         self.cfg.set("SETTINGS", "names", self.__class__.names)
+        self.cfg.set("SETTINGS", "refresh_rate", self.__class__.refresh_rate)
         self.cfg.set("SETTINGS", "lap_can_be_invalidated", self.__class__.lapCanBeInvalidated)
         self.cfg.set("SETTINGS", "force_info_visible", self.__class__.forceInfoVisible)
         self.cfg.set("SETTINGS", "num_cars_tower", self.__class__.max_num_cars)
@@ -390,6 +405,7 @@ class Configuration:
         ac.setVisible(self.spin_race_mode, 0)
         ac.setVisible(self.spin_qual_mode, 0)
         ac.setVisible(self.spin_names, 0)
+        ac.setVisible(self.spin_refresh_rate, 0)
         ac.setVisible(self.spin_num_cars, 0)
         ac.setVisible(self.spin_num_laps, 0)
         ac.setVisible(self.spin_row_height, 0)
@@ -418,6 +434,7 @@ class Configuration:
         ac.setVisible(self.spin_race_mode, 1)
         ac.setVisible(self.spin_qual_mode, 1)
         ac.setVisible(self.spin_names, 1)
+        ac.setVisible(self.spin_refresh_rate, 1)
         ac.setVisible(self.spin_num_cars, 1)
         ac.setVisible(self.spin_num_laps, 1)
         ac.setVisible(self.spin_row_height, 1)
@@ -442,11 +459,10 @@ class Configuration:
         ac.setVisible(self.spin_border_direction, 1)
         self.lbl_border_direction.setVisible(1)
 
-    def manage_window(self):
+    def manage_window(self,game_data):
         if self.session.hasChanged():
             self.visual_timeout = -1
-        pt = POINT()
-        result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+
         win_x = self.window.getPos().x
         win_y = self.window.getPos().y
         if win_x > 0:
@@ -456,7 +472,7 @@ class Configuration:
             self.window.setLastPos()
             win_x = self.window.getPos().x
             win_y = self.window.getPos().y
-        if result and win_x < pt.x < win_x + self.window.width and win_y < pt.y < win_y + self.window.height:
+        if win_x < game_data.cursor_x < win_x + self.window.width and win_y < game_data.cursor_y < win_y + self.window.height:
             self.visual_timeout = time.time() + 6
         #ac.console("visual_timeout:" + str(self.visual_timeout)+" time:" + str(time.time()))
         if self.visual_timeout != 0 and self.visual_timeout > time.time():
@@ -478,9 +494,9 @@ class Configuration:
                     self.hide_tab2()
             self.visual_timeout = 0
 
-    def on_update(self, sim_info):
-        self.session.setValue(sim_info.graphics.session)
-        self.manage_window()
+    def on_update(self, game_data):
+        self.session.setValue(game_data.session)
+        self.manage_window(game_data)
         if self.__class__.tabChanged:
             self.change_tab()
             Configuration.tabChanged = False
@@ -601,6 +617,11 @@ class Configuration:
     def on_spin_names_changed(value):
         Configuration.names = value
         Configuration.configChanged = True
+
+    @staticmethod
+    def on_spin_refresh_rate_changed(value):
+        Configuration.refresh_rate = value
+        Label.refresh_rate = value
 
     @staticmethod
     def on_tab1_press(a, b):

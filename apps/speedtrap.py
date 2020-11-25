@@ -2,7 +2,7 @@ import ac
 import acsys
 import ctypes
 import os
-from .util.classes import Window, Label, Value, POINT, Colors, Config, Font
+from .util.classes import Window, Label, Value, Colors, Config, Font
 from .configuration import Configuration
 
 
@@ -27,7 +27,7 @@ class ACSpeedTrap:
         self.userTrap = 0
         self.time_start = 0
         self.time_end = 0
-        self.carsCount = 0
+        self.carsCount = ac.getCarsCount()
         self.relyOnEveryOne = True
         self.widget_visible = Value(0)
         self.cursor = Value(False)
@@ -136,9 +136,7 @@ class ACSpeedTrap:
         self.lbl_title.hide()
         self.lbl_title_txt.hide()
 
-    def manage_window(self):
-        pt = POINT()
-        result = ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+    def manage_window(self, game_data):
         win_x = self.window.getPos().x
         win_y = self.window.getPos().y
         if win_x > 0:
@@ -148,9 +146,7 @@ class ACSpeedTrap:
             self.window.setLastPos()
             win_x = self.window.getPos().x
             win_y = self.window.getPos().y
-        # if result and pt.x > win_x and pt.x < win_x + self.window.width
-        # and pt.y > win_y and pt.y < win_y + self.window.height:
-        if result and win_x < pt.x < win_x + self.window.width and win_y < pt.y < win_y + self.window.height:
+        if win_x < game_data.cursor_x < win_x + self.window.width and win_y < game_data.cursor_y < win_y + self.window.height:
             self.cursor.setValue(True)
         else:
             self.cursor.setValue(False)
@@ -167,16 +163,14 @@ class ACSpeedTrap:
                 self.window.setBgOpacity(0).border(0)
                 self.window.showTitle(False)
 
-    def on_update(self, sim_info):
-        self.session.setValue(sim_info.graphics.session)
-        session_time_left = sim_info.graphics.sessionTimeLeft
-        sim_info_status = sim_info.graphics.status
-        if sim_info.graphics.iCurrentTime == 0 and sim_info.graphics.completedLaps == 0:
+    def on_update(self, sim_info, game_data):
+        self.session.setValue(game_data.session)
+        session_time_left = game_data.sessionTimeLeft
+        sim_info_status = game_data.status
+        if game_data.beforeRaceStart:
             self.session.setValue(-1)
-            self.session.setValue(sim_info.graphics.session)
-        self.manage_window()
-        if self.carsCount == 0:
-            self.carsCount = ac.getCarsCount()
+            self.session.setValue(game_data.session)
+        self.manage_window(game_data)
         for x in range(self.carsCount):
             c = ac.getCarState(x, acsys.CS.SpeedKMH)
             if self.useMPH:
@@ -209,7 +203,7 @@ class ACSpeedTrap:
                     self.topSpeedMPH.setValue(mph)
                 self.trap = ac.getCarState(x, acsys.CS.NormalizedSplinePosition)
 
-        self.current_vehicle.setValue(ac.getFocusedCar())
+        self.current_vehicle.setValue(game_data.focusedCar)
         self.SpeedKMH.setValue(ac.getCarState(self.current_vehicle.value, acsys.CS.SpeedKMH))
         if self.useMPH:
             self.SpeedMPH.setValue(ac.getCarState(self.current_vehicle.value, acsys.CS.SpeedMPH))
