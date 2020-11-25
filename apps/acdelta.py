@@ -266,7 +266,7 @@ class ACDelta:
         sim_info_status = game_data.status
         if sim_info_status == 2:  # LIVE
             session_time_left = game_data.sessionTimeLeft
-            if math.isinf(session_time_left):
+            if session_time_left == 0:
                 self.reset_data()
             elif game_data.beforeRaceStart:
                 self.reset_data()
@@ -322,8 +322,7 @@ class ACDelta:
                 self.currentLap.append(raceGaps(self.spline.value, self.laptime.value))
             
             # update graphics
-            if not math.isinf(session_time_left):
-                self.TimeLeftUpdate.setValue(int(session_time_left/500))
+            self.TimeLeftUpdate.setValue(int(session_time_left/500))
             if self.TimeLeftUpdate.hasChanged():    
                 if self.performance.hasChanged():
                     time_prefix = ""

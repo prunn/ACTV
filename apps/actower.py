@@ -788,8 +788,7 @@ class ACTower:
         if 0 < self.race_mode.value < 8 and not self.force_hidden:
             # Full tower
             tick_limit = 40
-            if not math.isinf(self.sessionTimeLeft) and int(
-                            self.sessionTimeLeft / 100) % 18 == 0 and self.tick_race_mode > tick_limit:
+            if self.sessionTimeLeft != 0 and int(self.sessionTimeLeft / 100) % 18 == 0 and self.tick_race_mode > tick_limit:
                 self.tick_race_mode = 0
                 for driver in self.drivers:
                     if driver.position_highlight_end == True:
@@ -930,7 +929,7 @@ class ACTower:
                 self.race_show_end > self.sessionTimeLeft or self.race_show_end == 0):
             # Battles
             self.lapsCompleted.hasChanged()
-            if not math.isinf(self.sessionTimeLeft) and int(self.sessionTimeLeft / 100) % 18 == 0 and self.tick > 20:
+            if self.sessionTimeLeft != 0 and int(self.sessionTimeLeft / 100) % 18 == 0 and self.tick > 20:
                 self.tick = 0
                 for driver in self.drivers:
                     gap = self.gap_to_driver(driver, cur_driver, cur_sector)
@@ -1173,7 +1172,7 @@ class ACTower:
                     spline = ac.getCarState(driver.identifier, acsys.CS.NormalizedSplinePosition)
                     driver.raceProgress = spline
 
-                if not math.isinf(self.sessionTimeLeft):
+                if self.sessionTimeLeft != 0:
                     if not self.imported and self.drivers_inited:
                         thread_standings = threading.Thread(target=self.get_standings_from_server)
                         thread_standings.daemon = True

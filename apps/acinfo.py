@@ -71,10 +71,9 @@ class ACInfo:
                  align="left",
                  opacity=0)
         self.driver_name_visible = Value()
-        self.driver_name_visible_fin = Value(0)
         self.driver_name_text = Value("")
         self.position_visible = Value(0)
-        self.timing_text = Value()
+        self.timing_text = Value("")
         self.race_fastest_lap = Value(0)
         self.race_fastest_lap_driver = Value()
 
@@ -362,7 +361,6 @@ class ACInfo:
         self.lbl_fl_driver_name.hide()
         self.lbl_driver_name_text.hide()
         self.lbl_border.hide()
-        self.driver_name_visible_fin.setValue(0)
         self.lbl_timing.hide()
         self.lbl_timing_text.hide()
         self.timing_visible.setValue(0)
@@ -424,91 +422,72 @@ class ACInfo:
     def visibility_qualif(self):
         self.lbl_fastest_split.hide()
         self.lbl_fl_driver_name.hide()
-        #if self.driver_name_visible.value == 1 and self.lbl_driver_name.isVisible.value == 0:
-        #    self.driver_name_visible.changed = True
-
-        self.driver_name_visible_fin.setValue(self.driver_name_visible.value)
-        if self.timing_visible.value == 0:
-            self.lbl_timing.hide()
-            self.lbl_timing_text.hide()
-        else:
-            self.lbl_timing.show()
-            self.lbl_timing_text.show()
         if self.driver_name_visible.value == 1:
+            if self.timing_visible.value == 0:
+                self.lbl_timing.hide()
+                self.lbl_timing_text.hide()
+            else:
+                self.lbl_timing.show()
+                self.lbl_timing_text.setText(self.timing_text.value).show()
             if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
                 self.lbl_border.show()
-        if self.driver_name_visible_fin.hasChanged():
-            if self.driver_name_visible_fin.value == 0:
-                self.lbl_driver_name.hide()
-                self.lbl_driver_name_text.hide()
+            self.lbl_driver_name.set(background=Colors.info_driver_bg()).show()
+            self.lbl_driver_name_text.set(color=Colors.info_driver_txt()).show()
+            if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
-                #if self.timing_visible.value == 1:
-                self.lbl_driver_name.set(background=Colors.info_driver_bg()).show()
-                self.lbl_driver_name_text.set(color=Colors.info_driver_txt()).show()
-                #else: never happening
-                #    self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg()).show()
-                #    self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt()).show()
-                if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
-                    self.lbl_border.hide()
-                else:
-                    self.lbl_border.show()
-        if Colors.border_direction == 1 and self.info_position.isVisible.value == 1:
-            self.nameOffset += 4
-        self.lbl_driver_name_text.set(x=self.nameOffset, animated=True)
-        if self.driver_name_text.hasChanged():
-            self.set_width_and_name()
-        self.set_driver_name_width()
-        if self.timing_text.hasChanged():
-            self.lbl_timing_text.setText(self.timing_text.value)
+                self.lbl_border.show()
+            if Colors.border_direction == 1 and self.info_position.isVisible.value == 1:
+                self.nameOffset += 4
+            self.lbl_driver_name_text.set(x=self.nameOffset, animated=True)
+            if self.driver_name_text.hasChanged():
+                self.set_width_and_name()
+            self.set_driver_name_width()
+        else:
+            self.lbl_driver_name.hide()
+            self.lbl_driver_name_text.hide()
+            self.lbl_border.hide()
 
     def visibility_race(self):
-        if self.timing_visible.value == 0:
-            self.lbl_timing.hide()
-            self.lbl_timing_text.hide()
-        else:
-            self.lbl_timing.show()
-            self.lbl_timing_text.show()
-
         if self.driver_name_visible.value == 1:
             if self.timing_visible.value == 1:
+                self.lbl_timing.show()
+                self.lbl_timing_text.setText(self.timing_text.value).show()
                 #self.lbl_driver_name.set(background=Colors.info_driver_bg())
                 self.lbl_driver_name_text.set(color=Colors.info_driver_txt())
             else:
+                self.lbl_timing.hide()
+                self.lbl_timing_text.hide()
                 self.lbl_driver_name.setBgColor(Colors.info_driver_single_bg())
                 self.lbl_driver_name_text.setColor(Colors.info_driver_single_txt())
+            self.lbl_driver_name_text.set(x=self.nameOffset, animated=True).show()
+            if self.fastestLapBorderActive and not self.driver_in_pit_active:
+                self.lbl_fl_driver_name.show()
+                self.lbl_driver_name.hide()
+                #elif self.driver_in_pit_active:
+                #self.lbl_driver_name.show()
+            else:
+                if self.driver_in_pit_active:
+                    ac.console("in pit...")
+                self.lbl_driver_name.show()
+                self.lbl_fl_driver_name.hide()
             if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
                 self.lbl_border.hide()
             else:
                 self.lbl_border.show()
-
-        if self.driver_name_visible.value == 0:
+            if self.driver_name_text.hasChanged():
+                self.set_width_and_name()
+            if not self.fastestLapBorderActive:
+                self.set_driver_name_width()
+        else:
             self.lbl_driver_name.hide()
             self.lbl_fl_driver_name.hide()
             self.lbl_driver_name_text.hide()
             self.lbl_border.hide()
-        else:
-            if self.fastestLapBorderActive:
-                self.lbl_fl_driver_name.show()
-                self.lbl_driver_name.hide()
-            else:
-                self.lbl_driver_name.show()
-                self.lbl_fl_driver_name.hide()
-            self.lbl_driver_name_text.show()
-            if Colors.border_direction == 1 and self.info_position.isVisible.value == 0:
-                self.lbl_border.hide()
-            else:
-                self.lbl_border.show()
-
-        self.lbl_driver_name_text.set(x=self.nameOffset, animated=True)
-        if self.driver_name_text.hasChanged():
-            self.set_width_and_name()
-        if not self.fastestLapBorderActive:
-            self.set_driver_name_width()
-        if self.timing_text.hasChanged():
-            self.lbl_timing_text.setText(self.timing_text.value, hidden=bool(self.timing_visible.value == 0))
+            self.lbl_timing.hide()
+            self.lbl_timing_text.hide()
 
     def get_class_id(self, identifier):
         if self.standings is not None and len(self.standings):
@@ -598,8 +577,6 @@ class ACInfo:
 
         if sim_info_status == 2:
             # LIVE
-            #str_offset = "  "
-            # self.nameOffset=14
             if self.session.value != 2:
                 # NOT RACE
                 # qtime
@@ -618,9 +595,9 @@ class ACInfo:
                         if self.drivers_sector[i].hasChanged():
                             self.last_sector_start[i] = session_time_left
 
-                        if self.last_lap_start[i] == -1 and not math.isinf(session_time_left) and session_time_left != 0:
+                        if self.last_lap_start[i] == -1 and not session_time_left != 0 and session_time_left != 0:
                             self.last_lap_start[i] = self.last_sector_start[i] = session_time_left
-                        if self.drivers_lap_count[i].hasChanged() and not math.isinf(session_time_left):
+                        if self.drivers_lap_count[i].hasChanged() and session_time_left != 0:
                             self.last_lap_start[i] = self.last_sector_start[i] = session_time_left
                             # if PB save delta
                             if ac.getCarState(i, acsys.CS.LastLap) <= ac.getCarState(i, acsys.CS.BestLap):
@@ -763,6 +740,9 @@ class ACInfo:
                                 self.lbl_split.hide()
                                 self.info_position_lead.hide()
                                 self.info_position_lead_txt.hide()
+                            #keep old best lap sectors for lap en compare
+                            if len(self.drivers_best_lap_splits[fastest_lap_driver_id]) > 0:
+                                self.driver_old_fastest_sectors = self.drivers_best_lap_splits[fastest_lap_driver_id]
                     self.fastestLap.changed = False
                 else:
                     bestlap = ac.getCarState(self.currentVehicle.value, acsys.CS.BestLap)
@@ -889,14 +869,15 @@ class ACInfo:
                     self.lbl_fastest_split.setText(self.time_splitting(self.race_fastest_lap.value, "yes")).show()
                 elif current_vehicle_changed or (self.forceViewAlways and not self.fastestLapBorderActive) or is_in_pit:
                     # driver info
-                    if is_in_pit and not ac.getCarState(self.currentVehicle.value, acsys.CS.RaceFinished) and not math.isinf(session_time_left):
+                    if is_in_pit and not ac.getCarState(self.currentVehicle.value, acsys.CS.RaceFinished) and session_time_left != 0:
                         self.driver_in_pit_active = True
                         self.timing_text.setValue("Pit Lane")
                         self.timing_visible.setValue(1)
                         pit_lane_time = self.drivers_pit_lane_start_time[self.currentVehicle.value] - session_time_left
                         self.lbl_fastest_split.setText(self.time_splitting(pit_lane_time)).show()
-                    elif session_time_left < self.visible_end or self.visible_end == 0:
+                    elif session_time_left < self.visible_end or self.visible_end == 0 or current_vehicle_changed:
                         self.lbl_fastest_split.hide()
+                        self.timing_visible.setValue(0)
 
                     if not self.forceViewAlways or is_in_pit:
                         self.visible_end = session_time_left - 8000
@@ -937,8 +918,6 @@ class ACInfo:
                         self.info_position_txt.set(color=Colors.info_position_first_txt(), animated=True, init=True)
                     self.info_position.show()
                     self.info_position_txt.setText(str(pos)).show()
-                    self.timing_visible.setValue(0)
-                    self.lbl_fastest_split.hide()
                 elif self.visible_end == 0 or session_time_left < self.visible_end or game_data.beforeRaceStart:
                     self.driver_name_visible.setValue(0)
                     self.info_position.hide()
