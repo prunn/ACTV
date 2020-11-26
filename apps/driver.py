@@ -7,7 +7,7 @@ from .configuration import Configuration
 
 
 class Driver:
-    def __init__(self, app, identifier, name, pos, is_lap_label=False, is_results=False,is_touristenfahrten=False):
+    def __init__(self, app, identifier, name, is_lap_label=False,is_touristenfahrten=False):
         self.identifier = identifier
         self.is_multiplayer = ac.getServerIP() != ''
         self.last_ping=-1
@@ -36,7 +36,6 @@ class Driver:
         self.isDisplayed = False
         self.firstDraw = False
         self.isAlive = Value(False)
-        self.is_results = is_results
         self.movingUp = False
         self.isCurrentVehicule = Value(False)
         self.isLapLabel = is_lap_label
@@ -92,37 +91,6 @@ class Driver:
                      font_size=fontSize,
                      align="left",
                      opacity=0)
-        elif self.is_results:
-            self.lbl_name = Label(app) \
-                .set(w=self.rowHeight * 5, h=self.rowHeight,
-                     x=self.rowHeight, y=0,
-                     opacity=0)
-            self.lbl_name_txt = Label(app, str_offset + self.format_name_tlc(name)) \
-                .set(w=self.rowHeight * 5, h=self.rowHeight,
-                     x=self.rowHeight, y=0,
-                     font_size=fontSize,
-                     align="left",
-                     opacity=0)
-            self.lbl_position = Label(app) \
-                .set(w=self.rowHeight, h=self.rowHeight,
-                     x=0, y=0,
-                     opacity=0)
-            self.lbl_position_txt = Label(app, str(pos + 1)) \
-                .set(w=self.rowHeight, h=self.rowHeight,
-                     x=0, y=0,
-                     font_size=fontSize,
-                     align="center",
-                     opacity=0)
-            self.lbl_pit = Label(app, "P") \
-                .set(w=self.rowHeight * 0.6, h=self.rowHeight - 2,
-                     x=self.rowHeight * 6, y=self.final_y + 2,
-                     font_size=fontSize - 3,
-                     align="center",
-                     opacity=0)
-            self.lbl_pit.setAnimationSpeed("rgb", 0.08)
-            self.lbl_position.setAnimationMode("y", "spring")
-            self.lbl_position_txt.setAnimationMode("y", "spring")
-            self.lbl_pit.setAnimationMode("y", "spring")
         else:
             self.lbl_name = Label(app) \
                 .set(w=self.rowHeight * 5, h=self.rowHeight,
@@ -140,7 +108,7 @@ class Driver:
                 .set(w=self.rowHeight, h=self.rowHeight,
                      x=0, y=0,
                      opacity=0)
-            self.lbl_position_txt = Label(app, str(pos + 1)) \
+            self.lbl_position_txt = Label(app, str(identifier + 1)) \
                 .set(w=self.rowHeight, h=self.rowHeight,
                      x=0, y=0,
                      font_size=fontSize,

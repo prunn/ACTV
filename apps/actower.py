@@ -26,7 +26,7 @@ class ACTower:
         self.realtime_standings = []
         self.standings_start_race = []
         self.standings_replay = []
-        self.numCars = Value()
+        self.cars_count = ac.getCarsCount()
         self.session = Value(-1)
         self.sessionTimeLeft = 0
         self.imported = False
@@ -42,7 +42,6 @@ class ACTower:
         self.driver_shown = 0
         self.ping_updater = None
         self.ping_updater_active = False
-        self.drivers_inited = False
         self.force_hidden = False
         self.raceStarted = False
         self.leader_time = 0
@@ -113,6 +112,7 @@ class ACTower:
             self.is_touristenfahrten = True
         elif track.find("drag1000") >= 0 or track.find("drag400") >= 0:
             self.minLapCount = 0
+        self.init_drivers(sim_info)
         self.load_cfg()
 
     def __del__(self):
@@ -208,12 +208,9 @@ class ACTower:
         return name
 
     def init_drivers(self, sim_info):
-        if self.numCars.value > self.numCars.old:
-            # init difference
-            for i in range(self.numCars.old, self.numCars.value):
-                self.drivers.append(Driver(self.window.app, i, ac.getDriverName(i), i, self.is_touristenfahrten))
-            self.drivers_inited = True
-            self.load_drivers_info(sim_info)
+        for i in range(self.cars_count):
+            self.drivers.append(Driver(self.window.app, i, ac.getDriverName(i), is_touristenfahrten=self.is_touristenfahrten))
+        self.load_drivers_info(sim_info)
 
     def init_car_classes(self):
         if Colors.multiCarsClasses:
@@ -389,8 +386,7 @@ class ACTower:
                     if len(self.curDriverLaps) > len(self.stintLabels):
                         for i in range(len(self.stintLabels), len(self.curDriverLaps)):
                             self.stintLabels.append(
-                                Driver(self.window.app, 0, "Lap " + str(i + 1), i + 2,
-                                       True))
+                                Driver(self.window.app, 0, "Lap " + str(i + 1),True))
                     i = 0
                     j = 0
                     # for lbl in self.stintLabels:
@@ -586,7 +582,7 @@ class ACTower:
     def generate_standings_pos_before_race(self):
         # Generate standings from -0.5 to 0.5 for the start of race
         standings = []
-        for i in range(self.numCars.value):
+        for i in range(self.cars_count):
             bl = ac.getCarLeaderboardPosition(i)
             standings.append((i, bl))
         self.standings_start_race = sorted(standings, key=lambda student: student[1], reverse=False)
@@ -1141,13 +1137,7 @@ class ACTower:
             self.session.setValue(-1)
             self.session.setValue(game_data.session)
         self.manage_window(game_data)
-        self.numCars.setValue(ac.getCarsCount())
-        if self.numCars.hasChanged():
-            self.init_drivers(sim_info)
         self.init_car_classes()
-
-
-
         self.sessionTimeLeft = game_data.sessionTimeLeft
         if sim_info_status != 3:
             self.animate()
@@ -1173,7 +1163,7 @@ class ACTower:
                     driver.raceProgress = spline
 
                 if self.sessionTimeLeft != 0:
-                    if not self.imported and self.drivers_inited:
+                    if not self.imported and self.is_multiplayer:
                         thread_standings = threading.Thread(target=self.get_standings_from_server)
                         thread_standings.daemon = True
                         thread_standings.start()
@@ -1206,7 +1196,7 @@ class ACTower:
                         standings = []
                         realtime_standings = []
                         self.fastestLap = 0
-                        for i in range(self.numCars.value):
+                        for i in range(self.cars_count):
                             self.drivers[i].bestLap = ac.getCarState(i, acsys.CS.BestLap)
                             bl = self.drivers[i].get_best_lap()
                             self.drivers[i].bestLap_value.setValue(bl)
@@ -1215,7 +1205,7 @@ class ACTower:
                             if bl > 0 and self.drivers[i].isAlive.value:  # and self.drivers[i].completedLaps.value > self.minLapCount
                                 standings.append((i, bl, self.drivers[i].car_class_name))
                             elif self.is_touristenfahrten and (self.drivers[i].isAlive.value or (not self.drivers[i].isAlive.value and bl > 0)):
-                                pro = 3600000 - (self.numCars.value - self.drivers[i].identifier)
+                                pro = 3600000 - (self.cars_count - self.drivers[i].identifier)
                                 standings.append((i, pro, self.drivers[i].car_class_name))
                             elif self.drivers[i].isAlive.value or (not self.drivers[i].isAlive.value and bl > 0):
                                 pro = 3600000 - self.drivers[i].completedLaps.value * 100
@@ -1274,7 +1264,7 @@ class ACTower:
                             if driver.finished.hasChanged() and driver.finished.value:
                                 # or (self.numCarsToFinish > 0 and driver.completedLapsChanged)):
                                 driver.race_standings_sector.setValue(
-                                    driver.completedLaps.value + (self.numCars.value - self.numCarsToFinish) / 1000)
+                                    driver.completedLaps.value + (self.cars_count - self.numCarsToFinish) / 1000)
                                 self.numCarsToFinish += 1
                                 # driver.finished=True
                             elif not driver.finished.value:
@@ -1301,7 +1291,7 @@ class ACTower:
                     # backup standings
                     completed = 0
                     standings2 = []
-                    for i in range(self.numCars.value):
+                    for i in range(self.cars_count):
                         c = ac.getCarState(i, acsys.CS.LapCount)
                         # driver[i].completedLaps.setValue(c)
                         # driver[i].completedLapsChanged=driver[i].completedLaps.hasChanged()
@@ -1362,7 +1352,7 @@ class ACTower:
         elif sim_info_status == 1:  # Replay
             if self.session.value < 2:  # Qual
                 standings = []
-                for i in range(self.numCars.value):
+                for i in range(self.cars_count):
                     bl = ac.getCarState(i, acsys.CS.BestLap)
                     if bl > 0:
                         standings.append((i, bl, self.drivers[i].car_class_name))
@@ -1371,7 +1361,7 @@ class ACTower:
             elif self.session.value == 2:  # Race
                 #completed = 0
                 standings = []
-                for i in range(self.numCars.value):
+                for i in range(self.cars_count):
                     #c = ac.getCarState(i, acsys.CS.LapCount)
                     # driver[i].completedLaps.setValue(c)
                     # driver[i].completedLapsChanged=driver[i].completedLaps.hasChanged()
