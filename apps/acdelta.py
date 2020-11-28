@@ -113,7 +113,7 @@ class ACDelta:
                 .setFontSize(font_size2)
         
     def get_delta_file_path(self):
-        track_file_path = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa", "plugins", "actv_deltas", "default")
+        track_file_path = Config.get_user_documents_path() + "plugins/actv_deltas/default"
         if not os.path.exists(track_file_path):
             os.makedirs(track_file_path)
         track_file_path += "/" + ac.getTrackName(0)

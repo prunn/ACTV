@@ -692,6 +692,7 @@ class ACInfo:
                             self.timing_text = self.time_splitting(cur_lap_time)
                             self.info_position.hide()
                             self.info_position_txt.hide()
+                            self.fastest_lap_old = self.fastestLap.value
                             # self.lbl_split.setText(self.time_splitting(self.fastestLap,"yes") + str_offset).setVisible(1)
                         elif self.lastLapInvalidated != lap_count - 1 and ((self.drivers_last_lap_pit[self.currentVehicle.value] != self.drivers_lap_count[self.currentVehicle.value].value - 1 and sector == 0) or (self.minLapCount == 0)) and cur_lap_time <= self.sector_delay and last_lap > 0:
                             #elif self.lastLapInvalidated != lap_count - 1 and ((self.lastLapInPit != lap_count - 1 and sector == 0) or (self.minLapCount == 0)) and cur_lap_time <= self.sector_delay and last_lap > 0:
@@ -735,6 +736,7 @@ class ACInfo:
                             #keep old best lap sectors for lap en compare
                             if len(self.drivers_best_lap_splits[fastest_lap_driver_id]) > 0:
                                 self.driver_old_fastest_sectors = self.drivers_best_lap_splits[fastest_lap_driver_id]
+                                self.fastest_lap_old = self.fastestLap.value
                     self.fastestLap.changed = False
                 else:
                     bestlap = ac.getCarState(self.currentVehicle.value, acsys.CS.BestLap)

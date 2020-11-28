@@ -991,8 +991,7 @@ class ACTower:
         # Offline only
         if ac.getServerIP() == '':
             # Open race.ini
-            file_path = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa", "cfg") + "/"
-            conf = Config(file_path, "race.ini")
+            conf = Config(Config.get_user_documents_path() + "cfg/", "race.ini")
 
             # loop config CAR_0 get
             for driver in self.drivers:

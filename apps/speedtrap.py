@@ -109,15 +109,15 @@ class ACSpeedTrap:
 
     def check_mph(self):
         cfg_path = None
-        user_path = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa", "cfg")
-        if os.path.exists(user_path + "/gameplay.ini"):
+        user_path = Config.get_user_documents_path() + "cfg/"
+        if os.path.exists(user_path + "gameplay.ini"):
             cfg_path = user_path
         else:
-            user_path = "cfg"
-            if os.path.exists(user_path + "/gameplay.ini"):
+            user_path = "cfg/"
+            if os.path.exists(user_path + "gameplay.ini"):
                 cfg_path = user_path
         if cfg_path is not None:
-            conf = Config(cfg_path, "/gameplay.ini")
+            conf = Config(cfg_path, "gameplay.ini")
             opt_mph = conf.get("OPTIONS", "USE_MPH", type="int")
             if opt_mph == 1:
                 self.useMPH = True

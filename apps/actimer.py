@@ -24,6 +24,7 @@ class ACTimer:
         self.font = Value(0)
         self.numberOfLaps = -1
         self.hasExtraLap = sim_info.static.hasExtraLap
+        self.cars_count = ac.getCarsCount()
         self.numberOfLapsTimedRace = -1
         self.sessionMaxTime = -1
         self.pitWindowVisibleEnd = 0
@@ -307,7 +308,7 @@ class ACTimer:
                 # Race
                 completed = 0
                 race_finished = 0
-                for x in range(ac.getCarsCount()):
+                for x in range(self.cars_count):
                     c = ac.getCarState(x, acsys.CS.LapCount)
                     if c > completed:
                         completed = c

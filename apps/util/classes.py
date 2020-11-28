@@ -8,6 +8,7 @@ import json
 import functools
 from apps.util.func import rgb
 from html.parser import HTMLParser
+import winreg
 
 
 class Window:
@@ -1775,6 +1776,7 @@ class Log:
 
 
 class Config:
+    user_documents_path=None
     # INITIALIZATION
 
     def __init__(self, path, filename):
@@ -1790,6 +1792,32 @@ class Config:
         self._read()
 
     # LOCAL METHODS
+
+    @staticmethod
+    def get_user_documents_path():
+        if Config.user_documents_path is None:
+            '''
+            # Solution 1
+            file_path = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa", "cfg") + "/"
+            if not os.path.exists(file_path + 'race.ini'):
+                file_path = os.path.join(os.path.expandvars("%OneDrive%"), "Documents", "Assetto Corsa", "cfg") + "/"
+            if not os.path.exists(file_path + 'race.ini'):
+                file_path = 'cfg/'
+                
+            # Solution 2
+            dll = ctypes.windll.shell32
+            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH + 1)
+            if dll.SHGetSpecialFolderPathW(None, buf, 0x0005, False):
+                Config.user_documents_path = buf.value
+            else:
+                ac.log("Failure!")
+            '''
+            # Solution 3
+            k = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+            v = winreg.QueryValueEx(k, "Personal")
+            Config.user_documents_path = os.path.join(v[0], "Assetto Corsa") + "/"
+
+        return Config.user_documents_path
 
     def _read(self):
         self.parser.read(self.file, encoding='utf-8')
